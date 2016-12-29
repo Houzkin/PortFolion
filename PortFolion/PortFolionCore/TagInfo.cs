@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PortFolionCore
-{
-    public class Class1
-    {
-    }
+namespace PortFolion.Core {
+	public class TagInfo {
+
+	}
 }
