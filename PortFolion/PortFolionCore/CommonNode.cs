@@ -135,9 +135,8 @@ namespace PortFolion.Core {
 
 		public DateTime CurrentDate { get; set; }
 	}
-	
-	/// <summary>金融商品</summary>
-	public class FinancialProduct : CommonNode {
+
+	public class FinancialValue : CommonNode {
 		protected override bool CanAddChild(CommonNode child) => false;
 
 		long _amount;
@@ -149,6 +148,10 @@ namespace PortFolion.Core {
 		public override long Amount {
 			get { return _amount; }
 		}
+
+	}
+	/// <summary>金融商品</summary>
+	public class FinancialProduct : FinancialValue {
 
 		long _quantity;
 		public void SetQuantity(long quantity) {
