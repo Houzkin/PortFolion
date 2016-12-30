@@ -16,6 +16,10 @@ namespace PortFolion.Core {
 			var arg = new PropertyChangedEventArgs(name);
 			PropertyChanged?.Invoke(this, arg);
 		}
+		protected override bool CanAddChild(CommonNode child) {
+			if (this.ChildNodes.Any(a => a.Name == child.Name)) return false;
+			return base.CanAddChild(child);
+		}
 		string _name;
 		public string Name {
 			get { return _name; }
@@ -94,14 +98,6 @@ namespace PortFolion.Core {
 	}
 	/// <summary>アカウント</summary>
 	public class AccountNode : FinancialBasket {
-		public override void SetInvestmentReturnValue(long value) {
-			base.SetInvestmentReturnValue(value);
-			// substruct cashe
-		}
-		public override void SetInvestmentValue(long value) {
-			base.SetInvestmentValue(value);
-			// add cashe
-		}
 	}
 	/// <summary>リスクファンド</summary>
 	public class RiskFundNode: FinancialBasket {
@@ -148,6 +144,9 @@ namespace PortFolion.Core {
 		public override long Amount {
 			get { return _amount; }
 		}
+	}
+	public sealed class CashValue : FinancialValue {
+
 
 	}
 	/// <summary>金融商品</summary>
