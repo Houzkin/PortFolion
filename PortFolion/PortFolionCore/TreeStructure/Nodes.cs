@@ -6,15 +6,25 @@ using System.Threading.Tasks;
 using Houzkin.Tree;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using PortFolion.IO;
 
 namespace PortFolion.Core {
 	public abstract class CommonNode : ObservableTreeNode<CommonNode>, INotifyPropertyChanged {
-		
+		internal CommonNode() { }
+		internal CommonNode(CushionNode cushion) {
+			_name = cushion.Name;
+			_tag = TagInfo.GetWithAdd(cushion.Tag);
+			_investmentValue = cushion.InvestmentValue;
+			_investmentReturnValue = cushion.InvestmentReturnValue;
+		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		protected void RaisePropertyChanged([CallerMemberName] string name=null) {
 			if (string.IsNullOrEmpty(name)) return;
 			var arg = new PropertyChangedEventArgs(name);
 			PropertyChanged?.Invoke(this, arg);
+		}
+		public NodePath<string> Path {
+			get { return this.NodePath(a => a.Name); }
 		}
 		protected override bool CanAddChild(CommonNode child) {
 			if (this.ChildNodes.Any(a => a.Name == child.Name)) return false;
@@ -23,20 +33,32 @@ namespace PortFolion.Core {
 		string _name;
 		public string Name {
 			get { return _name; }
-			set {
+			internal set {
 				if (_name == value) return;
 				_name = value;
 				RaisePropertyChanged();
 			}
 		}
+		public bool CanChangeName(string name) {
+			return RootCollection.CanChangeNodeName(this.Path, name);
+		}
+		public void ChangeName(string name) {
+			RootCollection.ChangeNodeName(Path, name);
+		}
 		TagInfo _tag;
 		public TagInfo Tag {
-			get { return _tag; }
-			set {
+			get { return _tag ?? TagInfo.GetDefault(); }
+			internal set {
 				if (_tag == value) return;
 				_tag = value;
 				RaisePropertyChanged();
 			}
+		}
+		public void SetTag(string tagName) {
+			RootCollection.ChangeNodeTag(Path, tagName);
+		}
+		public void RemoveTag() {
+			RootCollection.RemoveNodeTag(Path);
 		}
 		/// <summary>投資対象となるかどうか</summary>
 		public virtual bool IsInvestmentTarget { get { return true; } }
@@ -66,10 +88,31 @@ namespace PortFolion.Core {
 		}
 		
 		public abstract long Amount { get; }
+
+		protected virtual CommonNode Clone(CommonNode node){
+			node._name = _name;
+			node._tag = _tag;
+			return node;
+		}
+		public abstract CommonNode Clone();
+		internal virtual CushionNode ToSerialCushion() {
+			return new CushionNode() {
+				Name = _name,
+				Tag = Tag.TagName,
+				InvestmentValue = _investmentValue,
+				InvestmentReturnValue = _investmentReturnValue,
+			};
+		}
 	}
 	/// <summary>User,ブローカーまたはアカウントのベースクラス</summary>
 	public abstract class FinancialBasket : CommonNode {
-		protected FinancialBasket() {
+
+		internal FinancialBasket() { init(); }
+		internal FinancialBasket(CushionNode cushion) : base(cushion) {
+			init();
+			_amount = cushion.Amount;
+		}
+		void init() {
 			this.StructureChanged += (s, e) => {
 				if (!e.DescendantsChanged) return;
 				var ds = e.DescendantInfo;
@@ -95,12 +138,42 @@ namespace PortFolion.Core {
 		public override long Amount {
 			get { return _amount; }
 		}
+		protected override CommonNode Clone(CommonNode node) {
+			(node as FinancialBasket)._amount = _amount;
+			return base.Clone(node);
+		}
+	}
+	public enum AccountClass {
+		None,
+		General,
+		Credit,
+		FX,
 	}
 	/// <summary>アカウント</summary>
 	public class AccountNode : FinancialBasket {
+		internal AccountNode() { }
+		internal AccountNode(CushionNode cushion) : base(cushion) {
+			Account = cushion.Account;
+		}
+		public AccountClass Account { get; set; } = AccountClass.General;
+		protected override CommonNode Clone(CommonNode nd) {
+			(nd as AccountNode).Account = Account;
+			return base.Clone(nd);
+		}
+		public override CommonNode Clone() {
+			return this.Clone(new AccountNode());
+		}
+		internal override CushionNode ToSerialCushion() {
+			var obj = base.ToSerialCushion();
+			obj.Account = Account;
+			return obj;
+		}
 	}
 	/// <summary>リスクファンド</summary>
-	public class RiskFundNode: FinancialBasket {
+	public class BrokerNode: FinancialBasket {
+		internal BrokerNode() { }
+		internal BrokerNode(CushionNode cushion) : base(cushion) { }
+
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			base.ChildrenPropertyChanged(sender, e);
 			if (e.PropertyName == nameof(InvestmentValue))
@@ -123,43 +196,43 @@ namespace PortFolion.Core {
 		public override long InvestmentReturnValue {
 			get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
 		}
+
+		public override CommonNode Clone() {
+			return Clone(new BrokerNode());
+		}
+
 	}
-	/// <summary>ブローカー</summary>
-	public class BrokerNode : RiskFundNode { }
 	/// <summary>ルートとなる総リスクファンド</summary>
-	public class TotalRiskFundNode : RiskFundNode {
-
-		public DateTime CurrentDate { get; set; }
-	}
-
-	public class FinancialValue : CommonNode {
-		protected override bool CanAddChild(CommonNode child) => false;
-
-		long _amount;
-		public void SetAmount(long amount) {
-			if (_amount == amount) return;
-			_amount = amount;
-			RaisePropertyChanged(nameof(Amount));
+	public class TotalRiskFundNode : BrokerNode {
+		internal TotalRiskFundNode() { }
+		internal TotalRiskFundNode(CushionNode cushion):base(cushion) {
+			CurrentDate = cushion.Date;
 		}
-		public override long Amount {
-			get { return _amount; }
+		public override CommonNode Clone() {
+			return Clone(new TotalRiskFundNode());
 		}
-	}
-	public sealed class CashValue : FinancialValue {
-
-
-	}
-	/// <summary>金融商品</summary>
-	public class FinancialProduct : FinancialValue {
-
-		long _quantity;
-		public void SetQuantity(long quantity) {
-			if (_quantity == quantity) return;
-			_quantity = quantity;
-			RaisePropertyChanged(nameof(Quantity));
+		internal RootCollection MainList { get; set; }
+		DateTime _currentDate;
+		public DateTime CurrentDate {
+			get { return _currentDate; }
+			set {
+				TrySetCurrentDate(value);
+			}
 		}
-		public long Quantity {
-			get { return _quantity; }
+		public bool TrySetCurrentDate(DateTime date) {
+			DateTime dt = new DateTime(date.Year, date.Month, date.Day);
+			if (MainList != null && MainList.ContainsKey(dt)) return false;
+			if(dt != _currentDate) {
+				_currentDate = dt;
+				RaisePropertyChanged(nameof(CurrentDate));
+				if (MainList != null) MainList.DateTimeChange(_currentDate);
+			}
+			return true;
+		}
+		internal override CushionNode ToSerialCushion() {
+			var obj = base.ToSerialCushion();
+			obj.Date = _currentDate;
+			return obj;
 		}
 	}
 
