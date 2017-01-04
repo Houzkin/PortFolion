@@ -21,19 +21,26 @@ namespace PortFolion.Core {
 		public IEnumerable<DateTime> TimeAxis { get; private set; }
 		public IEnumerable<IEnumerable<long>> Elements { get; private set; }
 		void setElements() {
-			//Func<CommonNode, string> keys = c => Divide == DividePattern.Tag ? c.Tag.TagName : c.Name;
-			//int curLv = CurrentNode.NodeIndex().CurrentDepth + TargetLevel;
-			//var nd = CurrentNode.Levelorder()
-			//	.Where(a => a.NodeIndex().CurrentDepth == curLv);
-			var ns = RootCollection.GetNodeLine(CurrentNode.Path);
-			foreach(var n in ns) {
+			Func<CommonNode, string> keys = c => Divide == DividePattern.Tag ? c.Tag.TagName : c.Name;
+			int curLv = CurrentNode.NodeIndex().CurrentDepth + TargetLevel;
+			//対象ノードの子孫且つ、指定した階層のノードを取得する
+			Func<CommonNode, int, IEnumerable<CommonNode>> dics =
+				(cn,lv) => cn.Levelorder().Where(a => a.NodeIndex().CurrentDepth == lv);
 
-			}
+			var ns = RootCollection.GetNodeLine(CurrentNode.Path)
+				.Select(a => dics(a, curLv))
+				.SelectMany(a => a)
+				.GroupBy(a => a.Name);
 
-			foreach(var sc in TimeAxis) {
+			Func<DateTime, NodePath<string>, int, IEnumerable<CommonNode>> fn =
+				(dt, pt, lv) => {
+					if (!RootCollection.Instance.ContainsKey(dt)) return Enumerable.Empty<CommonNode>();
+					return dics(RootCollection.GetNodeLine(pt).First(c=>(c as TotalRiskFundNode).CurrentDate == dt, lv));
+				};
+			//Func<DateTime, IEnumerable<CommonNode>, Func<IEnumerable<CommonNode>, CommonNode>> ff =
+				//(dt, lst, f) => {
 
-			}
-			
+				//};
 		}
 
 		public void Refresh() {
