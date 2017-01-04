@@ -19,6 +19,11 @@ namespace PortFolion.Core {
 				Instance.Add(new TotalRiskFundNode() { CurrentDate = date });
 			return Instance[date];
 		}
+		/// <summary>指定した時間において、指定した位置に存在するノードを取得する</summary>
+		public static CommonNode GetNode(NodePath<string> path, DateTime date) {
+			var nn = GetNodeLine(path).ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate);
+			return nn.LastOrDefault(a => a.Key <= date).Value;
+		}
 		public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path) {
 			return Instance.Values
 				.SelectMany(
@@ -27,6 +32,7 @@ namespace PortFolion.Core {
 						(c, d) => c.Concat(d)))
 				.Where(e => e.Path.SequenceEqual(path));
 		}
+		/// <summary>指定した時間を含む指定位置の一連のノードを取得する</summary>
 		public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
 			
 			var lne = GetNodeLine(path)

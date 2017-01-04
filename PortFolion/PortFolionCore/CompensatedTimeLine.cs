@@ -32,10 +32,12 @@ namespace PortFolion.Core {
 				.SelectMany(a => a)
 				.GroupBy(a => a.Name);
 
-			Func<DateTime, NodePath<string>, int, IEnumerable<CommonNode>> fn =
+			Func<DateTime, NodePath<string>, int, CommonNode> fn =
 				(dt, pt, lv) => {
-					if (!RootCollection.Instance.ContainsKey(dt)) return Enumerable.Empty<CommonNode>();
-					return dics(RootCollection.GetNodeLine(pt).First(c=>(c as TotalRiskFundNode).CurrentDate == dt, lv));
+					if (!RootCollection.Instance.ContainsKey(dt)) return null;
+					return dics(RootCollection.Instance[dt],
+					//if (!RootCollection.Instance.ContainsKey(dt)) return Enumerable.Empty<CommonNode>();
+					//return dics(RootCollection.GetNodeLine(pt).First(c=>(c as TotalRiskFundNode).CurrentDate == dt, lv));
 				};
 			//Func<DateTime, IEnumerable<CommonNode>, Func<IEnumerable<CommonNode>, CommonNode>> ff =
 				//(dt, lst, f) => {
