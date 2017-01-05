@@ -19,30 +19,53 @@ namespace PortFolion.Core {
 
 		public CommonNode CurrentNode { get; set; }
 		public IEnumerable<DateTime> TimeAxis { get; private set; }
-		public IEnumerable<IEnumerable<long>> Elements { get; private set; }
-		void setElements() {
-			Func<CommonNode, string> keys = c => Divide == DividePattern.Tag ? c.Tag.TagName : c.Name;
+		public IEnumerable<KeyValuePair<DateTime,IEnumerable<long>>> ElementsValue { get; private set; }
+		/// <summary>一次元にセグメント、二次元に時系列</summary>
+		public Dictionary<string,Dictionary<DateTime,CommonNode>> SegmElm {
+			get {
+				return _nodes
+					.ToLookup(a => a.Name)
+					.ToDictionary(
+						a => a.Key,
+						b => b.ToDictionary(c => c.Time, d => d.Node));
+			}
+		}
+		public Dictionary<DateTime,Dictionary<string,CommonNode>> TimeElm {
+			get {
+				return _nodes
+					.ToLookup(a => a.Time)
+					.ToDictionary(
+						a => a.Key,
+						b => b.ToDictionary(c => c.Name, d => d.Node));
+			}
+		}
+		private IEnumerable<tempSection> _nodes;
+		class tempSection {
+			public DateTime Time { get; set; }
+			public TagInfo Tag { get; set; }
+			public CommonNode Node { get; set; }
+			public string Name { get { return Node.Name; } }
+		}
+		void setNodes() { 
 			int curLv = CurrentNode.NodeIndex().CurrentDepth + TargetLevel;
-			//対象ノードの子孫且つ、指定した階層のノードを取得する
-			Func<CommonNode, int, IEnumerable<CommonNode>> dics =
-				(cn,lv) => cn.Levelorder().Where(a => a.NodeIndex().CurrentDepth == lv);
+			Func<CommonNode, int, Dictionary<string, CommonNode>> tbl =
+				(cn, lv) => cn.Levelorder()
+					.Where(a => a.NodeIndex().CurrentDepth == lv)
+					.ToDictionary(k => k.Name);
+			//TimeElm
+			var d = RootCollection.GetNodeLine(CurrentNode.Path)
+				.ToDictionary(
+					k => (k.Root() as TotalRiskFundNode).CurrentDate,
+					v => tbl(v,curLv));
+			var nodes = from tx in d
+						from sx in tx.Value
+						select new tempSection() {
+							Time = tx.Key,
+							Tag = sx.Value.Tag,
+							Node = sx.Value
+						};
+			_nodes = nodes.ToArray();
 
-			var ns = RootCollection.GetNodeLine(CurrentNode.Path)
-				.Select(a => dics(a, curLv))
-				.SelectMany(a => a)
-				.GroupBy(a => a.Name);
-
-			Func<DateTime, NodePath<string>, int, CommonNode> fn =
-				(dt, pt, lv) => {
-					if (!RootCollection.Instance.ContainsKey(dt)) return null;
-					return dics(RootCollection.Instance[dt],
-					//if (!RootCollection.Instance.ContainsKey(dt)) return Enumerable.Empty<CommonNode>();
-					//return dics(RootCollection.GetNodeLine(pt).First(c=>(c as TotalRiskFundNode).CurrentDate == dt, lv));
-				};
-			//Func<DateTime, IEnumerable<CommonNode>, Func<IEnumerable<CommonNode>, CommonNode>> ff =
-				//(dt, lst, f) => {
-
-				//};
 		}
 
 		public void Refresh() {
