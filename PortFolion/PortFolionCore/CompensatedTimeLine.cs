@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 using Houzkin.Tree;
 
 namespace PortFolion.Core {
+	public class NodeMap {
+		public DateTime Time { get; set; }
+		public TagInfo Tag { get { return Node.Tag; } }
+		public CommonNode Node { get; set; }
+		public string Name { get { return Node.Name; } }
+	}
 	/// <summary>表示用に補正された時系列を管理する</summary>
 	public class CompensatedTimeLine : INotifyPropertyChanged {
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -19,63 +25,63 @@ namespace PortFolion.Core {
 
 		public CommonNode CurrentNode { get; set; }
 		public IEnumerable<DateTime> TimeAxis { get; private set; }
-		public IEnumerable<KeyValuePair<DateTime,IEnumerable<long>>> ElementsValue { get; private set; }
+
+		
+
 		/// <summary>一次元にセグメント、二次元に時系列</summary>
-		public Dictionary<string,Dictionary<DateTime,CommonNode>> SegmElm {
+		public Dictionary<string,Dictionary<DateTime,CommonNode>> RowSegmentElement {
 			get {
-				return _nodes
+				return CurrentMap
 					.ToLookup(a => a.Name)
 					.ToDictionary(
 						a => a.Key,
 						b => b.ToDictionary(c => c.Time, d => d.Node));
 			}
 		}
-		public Dictionary<DateTime,Dictionary<string,CommonNode>> TimeElm {
+		/// <summary>一次元に時系列、二次元にセグメント</summary>
+		public Dictionary<DateTime,Dictionary<string,CommonNode>> RowTimeElement {
 			get {
-				return _nodes
+				return CurrentMap
 					.ToLookup(a => a.Time)
 					.ToDictionary(
 						a => a.Key,
 						b => b.ToDictionary(c => c.Name, d => d.Node));
 			}
 		}
-		private IEnumerable<tempSection> _nodes;
-		class tempSection {
-			public DateTime Time { get; set; }
-			public TagInfo Tag { get; set; }
-			public CommonNode Node { get; set; }
-			public string Name { get { return Node.Name; } }
-		}
-		void setNodes() { 
-			int curLv = CurrentNode.NodeIndex().CurrentDepth + TargetLevel;
-			Func<CommonNode, int, Dictionary<string, CommonNode>> tbl =
-				(cn, lv) => cn.Levelorder()
-					.Where(a => a.NodeIndex().CurrentDepth == lv)
-					.ToDictionary(k => k.Name);
+		public IEnumerable<NodeMap> CurrentMap { get; private set; }
+		
+		void refresh() {
 			//TimeElm
 			var d = RootCollection.GetNodeLine(CurrentNode.Path)
 				.ToDictionary(
 					k => (k.Root() as TotalRiskFundNode).CurrentDate,
-					v => tbl(v,curLv));
+					v => mapping(v, TargetLevel));//tbl(v,curLv));
 			var nodes = from tx in d
 						from sx in tx.Value
-						select new tempSection() {
+						select new NodeMap() {
 							Time = tx.Key,
-							Tag = sx.Value.Tag,
-							Node = sx.Value
+							Node = sx.Value,
 						};
-			_nodes = nodes.ToArray();
-
+			CurrentMap = nodes.ToArray();
+			TimeAxis = GetTimeAxis().ToArray();
 		}
 
-		public void Refresh() {
-
+		public Dictionary<string,IEnumerable<long>> SegmentElement {
+			get {
+				var t = CurrentMap
+					.ToLookup(a => a.Name)
+					.ToDictionary(a => a.Key, b => marge(b.GroupBy(c => c.Time)));
+				return t;
+			}
 		}
+
 		private IEnumerable<DateTime> GetTimeAxis() {
-			var keys = RootCollection.Instance.Keys;
-			if (!keys.Any()) return keys;
-			DateTime ls = keys.Last();
-			DateTime fs = keys.First();
+			var nds = RootCollection
+				.GetNodeLine(CurrentNode.Path)
+				.Select(a => (a as TotalRiskFundNode).CurrentDate);
+			if (!nds.Any()) return nds;
+			DateTime ls = nds.Last();
+			DateTime fs = nds.First();
 			switch (TimePeriod) {
 			case Period.Weekly:
 				return weeklyAxis(fs, ls);
@@ -89,7 +95,37 @@ namespace PortFolion.Core {
 				return Enumerable.Empty<DateTime>();
 			}
 		}
-		IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {
+		//private IEnumerable<Dictionary<DateTime,long>> timeMarge(IEnumerable<IGrouping<DateTime,NodeMap>> src) {
+			
+		//	foreach(var g in src) {
+
+		//	}
+		//}
+		private IEnumerable<long> marge(IEnumerable<IGrouping<DateTime,NodeMap>> src) {
+			IEnumerable<long> tmp = Enumerable.Empty<long>();
+			var s = src;
+			foreach(var ax in TimeAxis) {
+				var tpl = Split(s, ax);
+				var r = tpl.Item1.LastOrDefault()?.LastOrDefault()?.Node.Amount;
+				yield return r ?? 0;
+				s = tpl.Item2;
+			}
+		}
+		
+		private static Dictionary<string,CommonNode> mapping(CommonNode node, int targetLevel) {
+			targetLevel = node.NodeIndex().CurrentDepth + targetLevel;
+			return node.Levelorder()
+				.Where(a => a.NodeIndex().CurrentDepth == targetLevel)
+				.ToDictionary(k => k.Name);
+		}
+		private static Tuple<IEnumerable<IGrouping<DateTime,NodeMap>>,IEnumerable<IGrouping<DateTime,NodeMap>>> Split(IEnumerable<IGrouping<DateTime,NodeMap>> self, DateTime split) {
+			return Tuple.Create(
+				self.TakeWhile(a => a.Key <= split), 
+				self.SkipWhile(a => a.Key <= split));
+		}
+		#region static method
+		/// <summary>週末日</summary>
+		static IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {
 			DateTime cur = start.DayOfWeek == DayOfWeek.Sunday ? start : start.AddDays(7 - (int)start.DayOfWeek);
 			yield return cur;
 			while(cur<= end) {
@@ -97,8 +133,8 @@ namespace PortFolion.Core {
 				yield return cur;
 			}
 		}
-		/// <summary>月終わり</summary>
-		IEnumerable<DateTime> monthlyAxis(DateTime start, DateTime end) {
+		/// <summary>月末日</summary>
+		static IEnumerable<DateTime> monthlyAxis(DateTime start, DateTime end) {
 			var c = EndOfMonth(start);
 			yield return c;
 			while(c<=end) {
@@ -106,8 +142,8 @@ namespace PortFolion.Core {
 				yield return c;
 			} 
 		}
-		/// <summary>四半期終わり</summary>
-		IEnumerable<DateTime> quarterlyAxis(DateTime start, DateTime end) {
+		/// <summary>四半期末日</summary>
+		static IEnumerable<DateTime> quarterlyAxis(DateTime start, DateTime end) {
 			int q = start.Month / 3;
 			var c = EndOfMonth(new DateTime(start.Year, (q + 1) * 3, 1));
 			yield return c;
@@ -116,7 +152,8 @@ namespace PortFolion.Core {
 				yield return c;
 			} 
 		}
-		IEnumerable<DateTime> yearlyAxis(DateTime start, DateTime end) {
+		/// <summary>年末日</summary>
+		static IEnumerable<DateTime> yearlyAxis(DateTime start, DateTime end) {
 			var c = new DateTime(start.Year, 12, 31);
 			yield return c;
 			while(c<=end) {
@@ -134,5 +171,6 @@ namespace PortFolion.Core {
 			var d = new DateTime(dt.Year, dt.Month, 1).AddMonths(month);
 			return EndOfMonth(d);
 		}
+		#endregion
 	}
 }
