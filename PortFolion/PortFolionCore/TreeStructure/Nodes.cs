@@ -166,6 +166,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Account = Account;
+			obj.Node = NodeType.Account;
 			return obj;
 		}
 	}
@@ -200,7 +201,11 @@ namespace PortFolion.Core {
 		public override CommonNode Clone() {
 			return Clone(new BrokerNode());
 		}
-
+		internal override CushionNode ToSerialCushion() {
+			var obj =  base.ToSerialCushion();
+			obj.Node = NodeType.Broker;
+			return obj;
+		}
 	}
 	/// <summary>ルートとなる総リスクファンド</summary>
 	public class TotalRiskFundNode : BrokerNode {
@@ -232,6 +237,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Date = _currentDate;
+			obj.Node = NodeType.Total;
 			return obj;
 		}
 	}

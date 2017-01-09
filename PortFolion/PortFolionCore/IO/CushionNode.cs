@@ -16,15 +16,13 @@ namespace PortFolion.IO {
 		Account,
 		Cash,
 		Stock,
+		Forex,
 		OtherProduct,
 	}
 	public class CushionNode : TreeNode<CushionNode> {
 		/// <summary>デシリアライズ時に呼び出されるコンストラクタ</summary>
 		public CushionNode() { }
-		/// <summary>シリアライズ時に呼び出されるコンストラクタ</summary>
-		/// <param name="common">ノード</param>
-		public CushionNode(CommonNode common) {
-		}
+		
 		public NodeType Node { get; set; }
 		public string Name { get; set; }
 		public string Code { get; set; }
@@ -35,8 +33,42 @@ namespace PortFolion.IO {
 		public long InvestmentReturnValue { get; set; }
 		public AccountClass Account { get; set; }
 		public DateTime Date { get; set; }
+
+		public CommonNode ToInstance() {
+			return Convert(this);
+		}
+		static CommonNode Convert(CushionNode cushion) {
+			CommonNode cn;
+			switch (cushion.Node) {
+			case NodeType.Total:
+				cn = new TotalRiskFundNode(cushion);
+				break;
+			case NodeType.Broker:
+				cn = new BrokerNode(cushion);
+				break;
+			case NodeType.Account:
+				cn = new AccountNode(cushion);
+				break;
+			case NodeType.Cash:
+				cn = new FinancialValue(cushion);
+				break;
+			case NodeType.Stock:
+				cn = new StockValue(cushion);
+				break;
+			case NodeType.Forex:
+				cn = new ForexValue(cushion);
+				break;
+			case NodeType.OtherProduct:
+				cn = new FinancialProduct(cushion);
+				break;
+			default:
+				cn = null;
+				break;
+			}
+			return cn;
+		}
 	}
-	public class IONodeConverter {
+	public class CushionConverter {
 
 		//public static CushionNode ToSeri(CommonNode node) {
 		//	foreach(var f in Convs) {

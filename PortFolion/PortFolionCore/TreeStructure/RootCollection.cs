@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Houzkin.Tree;
+using PortFolion.IO;
 
 namespace PortFolion.Core {
 	public class RootCollection : ObservableCollection<TotalRiskFundNode> ,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
 
-		private RootCollection() { }
+		private RootCollection() : base(LocalIO.ReadRoots().OrderBy(a=>a.CurrentDate)) { }
 
 		public static RootCollection Instance { get; } = new RootCollection();
 

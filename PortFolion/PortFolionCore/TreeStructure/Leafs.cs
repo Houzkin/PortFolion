@@ -38,6 +38,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Amount = _amount;
+			obj.Node = NodeType.Cash;
 			return obj;
 		}
 	}
@@ -66,6 +67,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Quantity = _quantity;
+			obj.Node = NodeType.OtherProduct;
 			return obj;
 		}
 	}
@@ -94,6 +96,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Code = _code.ToString();
+			obj.Node = NodeType.Stock;
 			return obj;
 		}
 	}
@@ -121,6 +124,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Code = Pair;
+			obj.Node = NodeType.Forex;
 			return obj;
 		}
 	}
