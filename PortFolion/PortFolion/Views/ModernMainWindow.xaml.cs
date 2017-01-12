@@ -1,5 +1,4 @@
-﻿using FirstFloor.ModernUI.Windows.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +17,7 @@ namespace PortFolion.Views {
 	/// <summary>
 	/// Interaction logic for ModernMainWindow.xaml
 	/// </summary>
-	public partial class ModernMainWindow : ModernWindow {
+	public partial class ModernMainWindow : MahApps.Metro.Controls.MetroWindow {
 		public ModernMainWindow() {
 			InitializeComponent();
 		}
