@@ -37,33 +37,31 @@
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
 
     </i:Interaction.Triggers>
-    <Window.Resources>
-        <ItemsControl x:Key="EditMenus" x:Shared="false">
-            <MenuItem Header="foo"/>
-            <MenuItem Header="bar" />
-            <MenuItem Header="baz"/>
-        </ItemsControl>
-    </Window.Resources>
 
-    <DockPanel LastChildFill="False">
-        <Menu DockPanel.Dock="Top" Background="{x:Null}" >
-            <Menu.Foreground>
-                <SolidColorBrush Color="Black"/>
-            </Menu.Foreground>
-            <MenuItem Header="編集" ItemsSource="{Binding Source={StaticResource EditMenus}, Path=Items}"/>
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="7*" />
+        </Grid.ColumnDefinitions>
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="ファイル(_F)" />
+            <MenuItem Header="編集(_E)" />
+            <MenuItem Header="オプション(_O)">
+                <MenuItem IsCheckable="True" Header="オプション1" />
+                <MenuItem IsCheckable="True" Header="オプション2" />
+                <MenuItem IsCheckable="True" Header="オプション3" />
+            </MenuItem>
         </Menu>
-        <!--<ListView>
-            <ContextMenuService.ContextMenu>
-                <ContextMenu ItemsSource="{Binding Source={StaticResource EditMenus}, Path=Items}"/>
-            </ContextMenuService.ContextMenu>
-            <Ellipse Width="100" Height="100" Fill="Red"/>
-        </ListView>-->
-        <StatusBar Height="23" Margin="0,0,0,0" Name="StatusBar1" Background="#FF2CCCF0" VerticalAlignment="Bottom" HorizontalContentAlignment="Stretch" >
-            
-            <StatusBarItem DockPanel.Dock="Left" Width="150" HorizontalContentAlignment="Stretch">Item1</StatusBarItem>
-
-            <StatusBarItem HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">パネル１</StatusBarItem>
-        </StatusBar>
-
-    </DockPanel>
+        <GridSplitter 
+        Grid.Row="1" Grid.Column="1" 
+        HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="4" >
+            <GridSplitter.Background>
+                <SolidColorBrush Color="#FFF0F0F0" Opacity="0.495"/>
+            </GridSplitter.Background>
+        </GridSplitter>
+    </Grid>
 </Controls:MetroWindow>
