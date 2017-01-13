@@ -9,9 +9,11 @@
         xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
         xmlns:v="clr-namespace:PortFolion.Views"
         xmlns:vm="clr-namespace:PortFolion.ViewModels"
-                  mc:Ignorable="d" 
+                  mc:Ignorable="d" SaveWindowPosition="True"
+                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
                   d:DesignHeight="200" d:DesignWidth="500"
                   TitleCaps="False"
+                  Icon="/Portfolion;component/PortFolion.ico"
                   Title="PortFolion" >
 
     <Window.DataContext>
@@ -37,41 +39,57 @@
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
 
     </i:Interaction.Triggers>
-
-    <Grid ShowGridLines="False">
-        <Grid.Resources>
-                
-                
-        </Grid.Resources>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Content="settings"/>
+            <Button Content="options" />
+            <Button Content="lisence"/>
+            <Button Content="help"/>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="7*" />
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Menu Grid.Row="0" Grid.ColumnSpan="2" ItemsSource="{Binding Menues}">
-            <Menu.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Header}"/>
-                </HierarchicalDataTemplate>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+        </Grid.Resources>
+        <!--<Menu Grid.Row="0" Grid.ColumnSpan="3">
+            <MenuItem Header="設定" />
+        </Menu>-->
+        <Expander Grid.Row="0" Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+            <Expander.Header>
+                <TextBlock Text="History" TextAlignment="Right">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
+        </Expander>
+        <Expander Grid.Row="0" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+            <Expander.Header>
+                <TextBlock Text="Location" TextAlignment="Right">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
+        </Expander>
+        <TabControl x:Name="MainTabControl" Grid.Row="0" Grid.Column="2" Controls:TabControlHelper.IsUnderlined="True" >
+            <Controls:MetroTabItem Header="_Graph">
+                <!--<exampleViews:ButtonsExample DataContext="{Binding}" />-->
+            </Controls:MetroTabItem>
+            <Controls:MetroTabItem Header="_List">
                 
-            </Menu.ItemTemplate>
-            <!--<MenuItem Header="ファイル(_F)" />
-            <MenuItem Header="編集(_E)" />
-            <MenuItem Header="オプション(_O)">
-                <MenuItem IsCheckable="True" Header="オプション1" />
-                <MenuItem IsCheckable="True" Header="オプション2" />
-                <MenuItem IsCheckable="True" Header="オプション3" />
-            </MenuItem>-->
-        </Menu>
-        <GridSplitter 
-        Grid.Row="1" Grid.Column="1" 
-        HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="4" >
-            <GridSplitter.Background>
-                <SolidColorBrush Color="#FFF0F0F0" Opacity="0.495"/>
-            </GridSplitter.Background>
-        </GridSplitter>
+            </Controls:MetroTabItem>
+            
+        </TabControl>
     </Grid>
+   
 </Controls:MetroWindow>
