@@ -39,6 +39,10 @@
     </i:Interaction.Triggers>
 
     <Grid ShowGridLines="False">
+        <Grid.Resources>
+                
+                
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*"/>
@@ -47,14 +51,20 @@
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="7*" />
         </Grid.ColumnDefinitions>
-        <Menu Grid.Row="0" Grid.ColumnSpan="2">
-            <MenuItem Header="ファイル(_F)" />
+        <Menu Grid.Row="0" Grid.ColumnSpan="2" ItemsSource="{Binding Menues}">
+            <Menu.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Header}"/>
+                </HierarchicalDataTemplate>
+                
+            </Menu.ItemTemplate>
+            <!--<MenuItem Header="ファイル(_F)" />
             <MenuItem Header="編集(_E)" />
             <MenuItem Header="オプション(_O)">
                 <MenuItem IsCheckable="True" Header="オプション1" />
                 <MenuItem IsCheckable="True" Header="オプション2" />
                 <MenuItem IsCheckable="True" Header="オプション3" />
-            </MenuItem>
+            </MenuItem>-->
         </Menu>
         <GridSplitter 
         Grid.Row="1" Grid.Column="1" 

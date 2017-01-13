@@ -12,6 +12,7 @@ using Livet.EventListeners;
 using Livet.Messaging.Windows;
 
 using PortFolion.Models;
+using System.Collections.ObjectModel;
 
 namespace PortFolion.ViewModels {
 	public class MainWindowViewModel : ViewModel {
@@ -58,6 +59,12 @@ namespace PortFolion.ViewModels {
          */
 
 		public void Initialize() {
+		}
+		MenuViewModel _menu = MenuViewModel.Create();
+		public ObservableCollection<MenuViewModel> Menues {
+			get {
+				return _menu.Children;
+			}
 		}
 	}
 }

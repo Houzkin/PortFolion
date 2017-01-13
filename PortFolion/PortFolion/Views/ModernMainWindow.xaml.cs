@@ -21,5 +21,6 @@ namespace PortFolion.Views {
 		public ModernMainWindow() {
 			InitializeComponent();
 		}
+
 	}
 }
