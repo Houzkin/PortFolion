@@ -93,6 +93,12 @@
     <Compile Include="Views\GraphTab.xaml.cs">
       <DependentUpon>GraphTab.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ListContents.xaml.cs">
+      <DependentUpon>ListContents.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ListTab.xaml.cs">
+      <DependentUpon>ListTab.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>
     </Compile>
@@ -101,6 +107,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\GraphTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ListContents.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ListTab.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

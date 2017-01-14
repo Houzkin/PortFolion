@@ -50,7 +50,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
+            <!--<ColumnDefinition Width="auto"/>-->
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -63,7 +63,7 @@
         <!--<Menu Grid.Row="0" Grid.ColumnSpan="3">
             <MenuItem Header="設定" />
         </Menu>-->
-        <Expander Grid.Row="0" Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+       <Expander Grid.Row="0" Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="History" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
@@ -72,7 +72,7 @@
                 </TextBlock>
             </Expander.Header>
         </Expander>
-        <Expander Grid.Row="0" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+         <!--<Expander Grid.Row="0" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Location" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
@@ -80,16 +80,14 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-        </Expander>
-        <TabControl x:Name="MainTabControl" Grid.Row="0" Grid.Column="2" Controls:TabControlHelper.IsUnderlined="True" >
+        </Expander>-->
+        <TabControl x:Name="MainTabControl" Grid.Row="0" Grid.Column="1" Controls:TabControlHelper.IsUnderlined="True" >
             <Controls:MetroTabItem Header="_Graph">
-                <!--<exampleViews:ButtonsExample DataContext="{Binding}" />-->
+                <v:GraphTab/>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="_List">
-                
+                <v:ListTab/>
             </Controls:MetroTabItem>
-            
         </TabControl>
     </Grid>
-   
 </Controls:MetroWindow>
