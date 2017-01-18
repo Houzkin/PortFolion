@@ -60,11 +60,5 @@ namespace PortFolion.ViewModels {
 
 		public void Initialize() {
 		}
-		MenuViewModel _menu = MenuViewModel.Create();
-		public ObservableCollection<MenuViewModel> Menues {
-			get {
-				return _menu.Children;
-			}
-		}
 	}
 }
