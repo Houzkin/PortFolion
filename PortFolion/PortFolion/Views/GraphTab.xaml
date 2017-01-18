@@ -13,7 +13,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
-        <Expander Grid.Column="0" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+        <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Location" TextAlignment="Right">
                     <TextBlock.LayoutTransform>

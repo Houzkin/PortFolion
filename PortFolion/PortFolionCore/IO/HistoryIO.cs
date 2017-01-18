@@ -12,7 +12,7 @@ using System.IO;
 using Houzkin;
 
 namespace PortFolion.IO {
-	public static class LocalIO {
+	public static class HistoryIO {
 		public static void SaveRoots() {
 			saveRoots(RootCollection.Instance.Values);
 		}
@@ -22,7 +22,7 @@ namespace PortFolion.IO {
 		public static void SaveRoots(DateTime since,DateTime until) {
 			saveRoots(RootCollection.Instance.Values.Where(a => since <= a.CurrentDate && a.CurrentDate <= until));
 		}
-		static readonly string _path = AppDomain.CurrentDomain.BaseDirectory + "User" + Path.PathSeparator;
+		static readonly string _path = AppDomain.CurrentDomain.BaseDirectory + "今まで書き込んだデータ" + Path.PathSeparator;
 		static void saveRoots(IEnumerable<TotalRiskFundNode> list) {
 			if (!list.Any()) return;
 			var serializer = new XmlSerializer(typeof(SerializableNodeMap<CushionNode>));

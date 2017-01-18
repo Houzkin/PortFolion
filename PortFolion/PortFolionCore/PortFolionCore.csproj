@@ -52,7 +52,7 @@
     <Compile Include="GraphModel\Ratios.cs" />
     <Compile Include="GraphModel\Utility.cs" />
     <Compile Include="GraphModel\TransitionData.cs" />
-    <Compile Include="IO\InputOutput.cs" />
+    <Compile Include="IO\HistoryIO.cs" />
     <Compile Include="IO\CushionNode.cs" />
     <Compile Include="TreeStructure\Leafs.cs" />
     <Compile Include="TreeStructure\Nodes.cs" />
@@ -64,7 +64,10 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Log\" />
+    <Folder Include="Web\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
