@@ -65,9 +65,9 @@
         </Menu>-->
        <Expander Grid.Row="0" Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="History" TextAlignment="Right">
+                <TextBlock Text="History" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="-90"/>
+                        <RotateTransform Angle="90"/>
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>

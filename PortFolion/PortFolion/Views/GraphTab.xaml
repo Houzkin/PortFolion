@@ -15,9 +15,9 @@
         
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="Location" TextAlignment="Right">
+                <TextBlock Text="Location" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="-90"/>
+                        <RotateTransform Angle="90"/>
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
