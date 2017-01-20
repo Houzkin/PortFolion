@@ -44,19 +44,9 @@ namespace PortFolion.IO {
 		public static FileInfo GetFileInfo(params string[] path) {
 			return new FileInfo(checkPath(path));
 		}
-		static ISet<string> _cl = new HashSet<string>();
-
-		public static void AddClearList(params string[] path) {
-			_cl.Add(checkPath(path));
-		}
 
 		public static void Clear() {
-			foreach(var p in _cl) {
-				if (!File.Exists(p)) continue;
-				File.Delete(p);
-			}
-			Directory.Delete(_path);
-			_cl.Clear();
+			Directory.Delete(_path, true);
 		}
 	}
 }
