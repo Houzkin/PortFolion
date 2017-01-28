@@ -23,8 +23,14 @@ namespace PortFolion.ViewModels {
 			get { return isExpand; }
 			set { this.SetProperty(ref isExpand, value); }
 		}
+		ICommand editTagCmd;
+		public ICommand EditTagCmd
+			=> editTagCmd = editTagCmd ?? new ViewModelCommand(() => { });
+
 		ObservableCollection<MenuItemVm> menuList = new ObservableCollection<MenuItemVm>();
 		public ObservableCollection<MenuItemVm> MenuList => menuList;
+		#region static methods
+		#endregion
 	}
 	public class MenuItemVm {
 		public string Header { get; set; }
@@ -57,10 +63,13 @@ namespace PortFolion.ViewModels {
 	public class BrokerNodeVM : CommonNodeVM {
 		public BrokerNodeVM(AccountNode model) : base(model) {
 			var addItem = new MenuItemVm() { Header = "追加" };
-
+			addItem.Children.Add(new MenuItemVm(AddGeneralAccount) { Header = "一般" });
+			addItem.Children.Add(new MenuItemVm(AddCreditAccount) { Header = "信用" });
+			addItem.Children.Add(new MenuItemVm(AddFXAccount) { Header = "為替" });
 			MenuList.Add(addItem);
 			MenuList.Add(new MenuItemVm(RenameCmd) { Header = "ブローカー名の変更" });
-			MenuList.Add(new MenuItemVm(DeleteNodeCmd) { Header = "削除" });
+			MenuList.Add(new MenuItemVm(DeleteNodeCmd) { Header = "ブローカーを除外" });
+			MenuList.Add(new MenuItemVm(EditTagCmd) { Header = "タグの編集" });
 		}
 		
 		ICommand addGeneralAccount;
@@ -69,7 +78,10 @@ namespace PortFolion.ViewModels {
 		ICommand addCreditAccount;
 		public ICommand AddCreditAccount
 			=> addCreditAccount = addCreditAccount ?? new ViewModelCommand(() => { });
-		// fx
+		ICommand addFXAccount;
+		public ICommand AddFXAccount
+			=> addFXAccount = addFXAccount ?? new ViewModelCommand(() => { });
+
 		ICommand rename;
 		public ICommand RenameCmd
 			=> rename = rename ?? new ViewModelCommand(() => { });
@@ -81,13 +93,30 @@ namespace PortFolion.ViewModels {
 	}
 	public class AccountNodeVM : CommonNodeVM {
 		public AccountNodeVM(AccountNode model) : base(model) {
-			var addItem = new MenuItemVm() { Header = "追加" };
-
-			//
+			MenuItemVm addItem;
+			switch (model.Account) {
+			case AccountClass.General:
+				addItem = new MenuItemVm(() => { }) { Header = "新規買付" };
+				break;
+			case AccountClass.Credit:
+				addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };
+				break;
+			case AccountClass.FX:
+				addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };
+				break;
+			default:
+				addItem = new MenuItemVm(() => { });
+				break;
+			}
 			MenuList.Add(addItem);
-			MenuList.Add(new MenuItemVm(RenameCmd) { Header = "アカウント名の変更" });
 			MenuList.Add(new MenuItemVm(InvestOrReturnCmd) { Header = "InvestOrRetrun" });
+			MenuList.Add(new MenuItemVm(RenameCmd) { Header = "アカウント名の変更" });
+			MenuList.Add(new MenuItemVm(DeleteNodeCmd) { Header = "アカウントを除外" });
+			MenuList.Add(new MenuItemVm(EditTagCmd) { Header = "タグの編集" });
 		}
+		ICommand deleteNode;
+		public ICommand DeleteNodeCmd
+			=> deleteNode = deleteNode ?? new ViewModelCommand(() => { });
 		ICommand rename;
 		public ICommand RenameCmd
 			=> rename = rename ?? new ViewModelCommand(() => { });
