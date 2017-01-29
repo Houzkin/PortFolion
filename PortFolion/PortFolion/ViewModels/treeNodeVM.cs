@@ -99,7 +99,7 @@ namespace PortFolion.ViewModels {
 				addItem = new MenuItemVm(() => { }) { Header = "新規買付" };
 				break;
 			case AccountClass.Credit:
-				addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };
+				addItem = new MenuItemVm(() => { }) { Header = "新規建玉" };
 				break;
 			case AccountClass.FX:
 				addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };

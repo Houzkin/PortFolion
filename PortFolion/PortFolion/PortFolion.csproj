@@ -94,6 +94,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\EditNode.cs" />
     <Compile Include="ViewModels\TreeLeafVM.cs" />
     <Compile Include="ViewModels\TreeNodeVM.cs" />
     <Compile Include="Views\GraphContents.xaml.cs">

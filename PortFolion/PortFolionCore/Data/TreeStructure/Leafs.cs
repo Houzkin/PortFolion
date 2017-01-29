@@ -13,7 +13,7 @@ using Houzkin;
 namespace PortFolion.Core {
 
 	public class FinancialValue : CommonNode {
-		internal FinancialValue() { }
+		public FinancialValue() { }
 		internal FinancialValue(CushionNode cushion) : base(cushion) {
 			_amount = cushion.Amount;
 		}

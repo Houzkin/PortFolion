@@ -33,7 +33,7 @@ namespace PortFolion.Core {
 		string _name;
 		public string Name {
 			get { return _name; }
-			internal set {
+			set {
 				if (_name == value) return;
 				_name = value;
 				RaisePropertyChanged();
@@ -70,19 +70,19 @@ namespace PortFolion.Core {
 			_investmentValue = value;
 			RaisePropertyChanged(nameof(InvestmentValue));
 		}
-		/// <summary>投資額</summary>
+		/// <summary>投資(入金)額</summary>
 		public virtual long InvestmentValue {
 			get { return _investmentValue; }
 		}
 
 		long _investmentReturnValue;
-		/// <summary>回収</summary>
+		/// <summary>回収額</summary>
 		public virtual void SetInvestmentReturnValue(long value) {
 			if (_investmentReturnValue == value) return;
 			_investmentReturnValue = value;
 			RaisePropertyChanged(nameof(InvestmentReturnValue));
 		}
-		/// <summary>回収額</summary>
+		/// <summary>回収(出金)額</summary>
 		public virtual long InvestmentReturnValue {
 			get { return _investmentReturnValue; }
 		}
@@ -151,7 +151,7 @@ namespace PortFolion.Core {
 	}
 	/// <summary>アカウント</summary>
 	public class AccountNode : FinancialBasket {
-		internal AccountNode() { }
+		public AccountNode() { }
 		internal AccountNode(CushionNode cushion) : base(cushion) {
 			Account = cushion.Account;
 		}
@@ -172,7 +172,7 @@ namespace PortFolion.Core {
 	}
 	/// <summary>リスクファンド</summary>
 	public class BrokerNode: FinancialBasket {
-		internal BrokerNode() { }
+		public BrokerNode() { }
 		internal BrokerNode(CushionNode cushion) : base(cushion) { }
 
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -192,10 +192,10 @@ namespace PortFolion.Core {
 			get { return ChildNodes.Sum(a => a.InvestmentValue); }
 		}
 		public override void SetInvestmentReturnValue(long value) {
-			throw new NotSupportedException();
+			base.SetInvestmentReturnValue(value);
 		}
 		public override long InvestmentReturnValue {
-			get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
+			get { return ChildNodes.Any() ? ChildNodes.Sum(a => a.InvestmentReturnValue) : base.InvestmentReturnValue; }
 		}
 
 		public override CommonNode Clone() {
