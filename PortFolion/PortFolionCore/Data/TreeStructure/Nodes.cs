@@ -195,7 +195,8 @@ namespace PortFolion.Core {
 			base.SetInvestmentReturnValue(value);
 		}
 		public override long InvestmentReturnValue {
-			get { return ChildNodes.Any() ? ChildNodes.Sum(a => a.InvestmentReturnValue) : base.InvestmentReturnValue; }
+			get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
+			//get { return ChildNodes.Any() ? ChildNodes.Sum(a => a.InvestmentReturnValue) : base.InvestmentReturnValue; }
 		}
 
 		public override CommonNode Clone() {
@@ -216,6 +217,7 @@ namespace PortFolion.Core {
 		public override CommonNode Clone() {
 			return Clone(new TotalRiskFundNode());
 		}
+		/// <summary>ルートコレクションに属している間、nullでない</summary>
 		internal RootCollection MainList { get; set; }
 		DateTime _currentDate;
 		public DateTime CurrentDate {

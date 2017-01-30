@@ -23,6 +23,17 @@ namespace PortFolion.Core {
 				self.TakeWhile(a => a.Key <= split),
 				self.SkipWhile(a => a.Key <= split));
 		}
+		internal static IEnumerable<IEnumerable<T>> Separate<T>(this IEnumerable<T> src, Func<T, bool> predicate) {
+			List<T> list = new List<T>();
+			foreach (var e in src) {
+				list.Add(e);
+				if (predicate(e)) {
+					yield return list;
+					list.Clear();
+				}
+			}
+			if (list.Any()) yield return list;
+		}
 		#region static method
 		/// <summary>週末日</summary>
 		internal static IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {

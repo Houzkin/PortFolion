@@ -16,8 +16,18 @@ namespace PortFolion.Core {
 
 		public static TotalRiskFundNode GetOrCreate(DateTime date) {
 			date = new DateTime(date.Year, date.Month, date.Day);
-			if (!Instance.Keys.Contains(date)) 
-				Instance.Add(new TotalRiskFundNode() { CurrentDate = date });
+			if (!Instance.Keys.Contains(date)) {
+				var ins = Instance.Keys.Where(a => a < date);
+				if (!ins.Any()) {
+					Instance.Add(new TotalRiskFundNode() { CurrentDate = date });
+				}else {
+					var d = ins.Max();
+					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
+					trfn.RemoveDescendant(a => a.Amount == 0 && a.GetType() != typeof(FinancialValue));
+					trfn.CurrentDate = date;
+					Instance.Add(trfn);
+				}
+			}
 			return Instance[date];
 		}
 		/// <summary>指定した時間において、指定した位置に存在するノードを取得する</summary>
@@ -33,32 +43,44 @@ namespace PortFolion.Core {
 						(c, d) => c.Concat(d)))
 				.Where(e => e.Path.SequenceEqual(path));
 		}
-		/// <summary>指定した時間を含む指定位置の一連のノードを取得する</summary>
-		public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
+		//public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
 			
-			var lne = GetNodeLine(path)
-				.ToDictionary(a => ((TotalRiskFundNode)a.Root()).CurrentDate);
-			var ttl = Instance
-				.Keys.ToArray();
+		//	var lne = GetNodeLine(path)
+		//		.ToDictionary(a => ((TotalRiskFundNode)a.Root()).CurrentDate);
+		//	var ttl = Instance
+		//		.Keys.ToArray();
 
-			var aft = lne.Keys.Where(a => currentTenure <= a);
-			var aftSel = ttl.Where(a => currentTenure <= a);
+		//	var aft = lne.Keys.Where(a => currentTenure <= a);
+		//	var aftSel = ttl.Where(a => currentTenure <= a);
 
-			var bef = lne.Keys.Where(a => a < currentTenure);
-			var befSel = ttl.Where(a => a < currentTenure);
+		//	var bef = lne.Keys.Where(a => a < currentTenure);
+		//	var befSel = ttl.Where(a => a < currentTenure);
 
-			var lst = aft.Zip(aftSel, (a, b) => new { Aft = a, AftSel = b })
-				.LastOrDefault(a => a.Aft == a.AftSel);
+		//	var lst = aft.Zip(aftSel, (a, b) => new { Aft = a, AftSel = b })
+		//		.LastOrDefault(a => a.Aft == a.AftSel);
 
-			var fst = bef.Reverse()
-				.Zip(befSel.Reverse(), (a, b) => new { Bef = a, BefSel = b })
-				.LastOrDefault(a => a.Bef == a.BefSel);
+		//	var fst = bef.Reverse()
+		//		.Zip(befSel.Reverse(), (a, b) => new { Bef = a, BefSel = b })
+		//		.LastOrDefault(a => a.Bef == a.BefSel);
 
-			var result = lne.AsEnumerable();
-			if (fst != null) result = result.SkipWhile(a => a.Key < fst.Bef);
-			if (lst != null) result = result.TakeWhile(a => lst.Aft <= a.Key);
+		//	var result = lne.AsEnumerable();
+		//	if (fst != null) result = result.SkipWhile(a => a.Key < fst.Bef);
+		//	if (lst != null) result = result.TakeWhile(a => lst.Aft <= a.Key);
 
-			return result.Select(a => a.Value);
+		//	return result.Select(a => a.Value);
+		//}
+		
+		/// <summary>指定した時間を含む指定位置のポジション単位のノードを取得する</summary>
+		public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
+			var lne = GetNodeLine(path).ToDictionary(a => ((TotalRiskFundNode)a.Root()).CurrentDate);
+			//指定した日付を含んだノードを取得
+			var curNd = lne.LastOrDefault(a => currentTenure <= a.Key);
+			if (curNd.Value == null) return Enumerable.Empty<CommonNode>();
+			
+			var bef = lne.TakeWhile(a => a.Value != curNd.Value).Reverse().TakeWhile(a => a.Value.Amount != 0);
+			var aft = lne.SkipWhile(a => a.Value != curNd.Value).Separate(a => a.Value.Amount == 0).First();
+
+			return bef.Concat(aft).OrderBy(a => a.Key).Select(a => a.Value);
 		}
 		internal static bool CanChangeNodeName(NodePath<string> path,string name) {
 			return GetNodeLine(path)

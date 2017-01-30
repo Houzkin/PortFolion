@@ -16,21 +16,72 @@ namespace PortFolion.ViewModels {
 		}
 
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
-			throw new NotImplementedException();
+			var mcn = modelChildNode.GetType();
+			if(mcn == typeof(TotalRiskFundNode)) {
+
+			}else if(mcn == typeof(BrokerNode)){
+
+			}else if(mcn == typeof(AccountNode)) {
+
+			}else if(mcn == typeof(StockValue)) {
+			}else if(mcn == typeof(ForexValue)) {
+
+			}else if(mcn == typeof(FinancialProduct)) {
+
+			}else if(mcn == typeof(FinancialValue)) {
+
+			}
+			return null;
 		}
 		bool isExpand;
 		public bool IsExpand {
 			get { return isExpand; }
 			set { this.SetProperty(ref isExpand, value); }
 		}
-		ICommand editTagCmd;
-		public ICommand EditTagCmd
-			=> editTagCmd = editTagCmd ?? new ViewModelCommand(() => { });
+		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
+		public void RaiseReftesh() {
+			foreach (var n in this.Upstream()) n.Refresh();
+		}
+		protected virtual void Refresh() {
 
-		ObservableCollection<MenuItemVm> menuList = new ObservableCollection<MenuItemVm>();
-		public ObservableCollection<MenuItemVm> MenuList => menuList;
-		#region static methods
+		}
+		Dictionary<DateTime, CommonNode> _nodeLine;
+		Dictionary<DateTime,CommonNode> nodeLine {
+			get {
+				if (_nodeLine != null) return _nodeLine;
+				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
+				_nodeLine = RootCollection
+					.GetNodeLine(Model.Path, d).ToDictionary(a=>a.Root() as TotalRiskFundNode).CurrentDate)
+			}
+		}
+		#region DataViewColumn
+		//amount
+		//quantity
+		//investment
+		//investmentReturn
+		//investmentTotal
+		//investmentReturnTotal
+		//profitLoss
+		//profitLossRatio
+		//currentPrice
+		public long InvestmentTotal {
+			get { 
+				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
+				return RootCollection
+					.GetNodeLine(Model.Path, d)
+					.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate)
+					.Where(a => a.Key <= d)
+					.Sum(a => a.Value.InvestmentValue);
+			}
+		}
+		public long InvestmentReturnTotal {
+			get {
+				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
+				return 
+			}
+		}
 		#endregion
+
 	}
 	public class MenuItemVm {
 		public string Header { get; set; }
@@ -52,44 +103,20 @@ namespace PortFolion.ViewModels {
 	}
 	public class TotalRiskFundNodeVM : CommonNodeVM {
 		public TotalRiskFundNodeVM(TotalRiskFundNode model) : base(model) {
-			MenuList.Add(new MenuItemVm(AddBrokerCmd) { Header = "ブローカーを追加" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを追加" });
 		}
-		ICommand addBrokerCommand;
-		public ICommand AddBrokerCmd 
-			=> addBrokerCommand = addBrokerCommand ?? new ViewModelCommand(() => { });
-
-
 	}
 	public class BrokerNodeVM : CommonNodeVM {
 		public BrokerNodeVM(AccountNode model) : base(model) {
 			var addItem = new MenuItemVm() { Header = "追加" };
-			addItem.Children.Add(new MenuItemVm(AddGeneralAccount) { Header = "一般" });
-			addItem.Children.Add(new MenuItemVm(AddCreditAccount) { Header = "信用" });
-			addItem.Children.Add(new MenuItemVm(AddFXAccount) { Header = "為替" });
+			addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "一般" });
+			addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "信用" });
+			addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "為替" });
 			MenuList.Add(addItem);
-			MenuList.Add(new MenuItemVm(RenameCmd) { Header = "ブローカー名の変更" });
-			MenuList.Add(new MenuItemVm(DeleteNodeCmd) { Header = "ブローカーを除外" });
-			MenuList.Add(new MenuItemVm(EditTagCmd) { Header = "タグの編集" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカー名の変更" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを除外" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
 		}
-		
-		ICommand addGeneralAccount;
-		public ICommand AddGeneralAccount
-			=> addGeneralAccount = addGeneralAccount ?? new ViewModelCommand(() => { });
-		ICommand addCreditAccount;
-		public ICommand AddCreditAccount
-			=> addCreditAccount = addCreditAccount ?? new ViewModelCommand(() => { });
-		ICommand addFXAccount;
-		public ICommand AddFXAccount
-			=> addFXAccount = addFXAccount ?? new ViewModelCommand(() => { });
-
-		ICommand rename;
-		public ICommand RenameCmd
-			=> rename = rename ?? new ViewModelCommand(() => { });
-
-		ICommand deleteNode;
-		public ICommand DeleteNodeCmd
-			=> deleteNode = deleteNode ?? new ViewModelCommand(() => { });
-
 	}
 	public class AccountNodeVM : CommonNodeVM {
 		public AccountNodeVM(AccountNode model) : base(model) {
@@ -109,20 +136,11 @@ namespace PortFolion.ViewModels {
 				break;
 			}
 			MenuList.Add(addItem);
-			MenuList.Add(new MenuItemVm(InvestOrReturnCmd) { Header = "InvestOrRetrun" });
-			MenuList.Add(new MenuItemVm(RenameCmd) { Header = "アカウント名の変更" });
-			MenuList.Add(new MenuItemVm(DeleteNodeCmd) { Header = "アカウントを除外" });
-			MenuList.Add(new MenuItemVm(EditTagCmd) { Header = "タグの編集" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "InvestOrRetrun" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウント名の変更" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウントを除外" });
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
 		}
-		ICommand deleteNode;
-		public ICommand DeleteNodeCmd
-			=> deleteNode = deleteNode ?? new ViewModelCommand(() => { });
-		ICommand rename;
-		public ICommand RenameCmd
-			=> rename = rename ?? new ViewModelCommand(() => { });
-
-		ICommand investOrReturnCmd;
-		public ICommand InvestOrReturnCmd
-			=> investOrReturnCmd = investOrReturnCmd ?? new ViewModelCommand(() => { });
+		
 	}
 }
