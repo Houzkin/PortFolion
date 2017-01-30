@@ -51,7 +51,11 @@ namespace PortFolion.ViewModels {
 				if (_nodeLine != null) return _nodeLine;
 				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
 				_nodeLine = RootCollection
-					.GetNodeLine(Model.Path, d).ToDictionary(a=>a.Root() as TotalRiskFundNode).CurrentDate)
+					.GetNodeLine(Model.Path, d)
+					.Select(value => new { (value.Root() as TotalRiskFundNode).CurrentDate, value })
+					.Where(a => a.CurrentDate <= d)
+					.ToDictionary(a => a.CurrentDate, a => a.value);
+				return _nodeLine;
 			}
 		}
 		#region DataViewColumn
@@ -66,18 +70,13 @@ namespace PortFolion.ViewModels {
 		//currentPrice
 		public long InvestmentTotal {
 			get { 
-				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
-				return RootCollection
-					.GetNodeLine(Model.Path, d)
-					.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate)
-					.Where(a => a.Key <= d)
+				return nodeLine
 					.Sum(a => a.Value.InvestmentValue);
 			}
 		}
 		public long InvestmentReturnTotal {
 			get {
-				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
-				return 
+				return nodeLine.Sum(a => a.Value.InvestmentReturnValue);
 			}
 		}
 		#endregion

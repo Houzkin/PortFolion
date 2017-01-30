@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\StockInfo.cs" />
+    <Compile Include="Data\TreeStructure\TradingInfo.cs" />
     <Compile Include="GraphModel\Breakdown.cs" />
     <Compile Include="GraphModel\Ratios.cs" />
     <Compile Include="GraphModel\Utility.cs" />
