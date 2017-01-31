@@ -9,10 +9,12 @@ using Houzkin.Architecture;
 using PortFolion.Core;
 using System.Collections.ObjectModel;
 using Livet.Commands;
+using Houzkin;
 
 namespace PortFolion.ViewModels {
 	public abstract class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		internal CommonNodeVM(CommonNode model) : base(model) {
+			Refresh();
 		}
 
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
@@ -43,7 +45,10 @@ namespace PortFolion.ViewModels {
 			foreach (var n in this.Upstream()) n.Refresh();
 		}
 		protected virtual void Refresh() {
-
+			_nodeLine = null;
+			InvestmentTotal = nodeLine.Sum(a => a.Value.InvestmentValue);
+			InvestmentReturnTotal = nodeLine.Sum(a => a.Value.InvestmentReturnValue);
+			
 		}
 		Dictionary<DateTime, CommonNode> _nodeLine;
 		Dictionary<DateTime,CommonNode> nodeLine {
@@ -65,22 +70,58 @@ namespace PortFolion.ViewModels {
 		//investmentReturn
 		//investmentTotal
 		//investmentReturnTotal
+		//perPrice
 		//profitLoss
 		//profitLossRatio
-		//currentPrice
-		public long InvestmentTotal {
-			get { 
-				return nodeLine
-					.Sum(a => a.Value.InvestmentValue);
+		public long InvestmentTotal { get; private set; }
+		public long InvestmentReturnTotal { get; private set; }
+		/// <summary>平均取引コスト</summary>
+		public double PerPriceAverage {
+			get {
+				return MaybeModelAs<FinancialProduct>().TrueOrNot(
+					o => ((InvestmentTotal-InvestmentReturnTotal) / o.Quantity),
+					x => 0);
 			}
 		}
-		public long InvestmentReturnTotal {
+		public long UnrealizedProfitLoss {
 			get {
-				return nodeLine.Sum(a => a.Value.InvestmentReturnValue);
+				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
+			}
+		}
+		public double? UnrealizedProfitLossRate {
+			get {
+				var b = (InvestmentTotal - InvestmentReturnTotal);
+				if (b == 0) return null;
+				return UnrealizedProfitLoss / b * 100;
+			}
+		}
+		public double CurrentPerPrice {
+			get {
+				return MaybeModelAs<FinancialProduct>().TrueOrNot(
+					o => o.Amount / o.Quantity,
+					x => 0);
+			}
+			set {
+				var fp = Model as FinancialProduct;
+				if (fp == null) return;
+				fp.SetAmount((long)(fp.Quantity * value));
+			}
+		}
+		[ReflectReferenceValue]
+		public long Quantity {
+			get {
+				return MaybeModelAs<FinancialProduct>().TrueOrNot(
+					o => o.Quantity,
+					x => 0);
+			}
+			set {
+				var fp = Model as FinancialProduct;
+				if (fp == null || this.CurrentPerPrice == 0 || value == 0) return;
+				fp.SetQuantity(value);
+				fp.SetAmount((long)(value * CurrentPerPrice));
 			}
 		}
 		#endregion
-
 	}
 	public class MenuItemVm {
 		public string Header { get; set; }

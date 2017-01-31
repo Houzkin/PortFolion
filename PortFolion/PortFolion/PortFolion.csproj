@@ -39,6 +39,10 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Houzkin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Houzkin.1.0.7\lib\Houzkin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Houzkin.Architecture, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Houzkin.Architecture.1.0.5\lib\Houzkin.Architecture.dll</HintPath>
       <Private>True</Private>
@@ -189,7 +193,9 @@
       <Name>PortFolionCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

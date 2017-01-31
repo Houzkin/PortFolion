@@ -92,6 +92,8 @@ namespace PortFolion.Core {
 		protected virtual CommonNode Clone(CommonNode node){
 			node._name = _name;
 			node._tag = _tag;
+			//node._investmentReturnValue = _investmentReturnValue;
+			//node._investmentValue = _investmentValue;
 			return node;
 		}
 		public abstract CommonNode Clone();
