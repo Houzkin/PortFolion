@@ -144,6 +144,7 @@ namespace PortFolion.Core {
 			(node as FinancialBasket)._amount = _amount;
 			return base.Clone(node);
 		}
+
 	}
 	public enum AccountClass {
 		None,
@@ -153,17 +154,53 @@ namespace PortFolion.Core {
 	}
 	/// <summary>アカウント</summary>
 	public class AccountNode : FinancialBasket {
-		public AccountNode() { }
+		public AccountNode(AccountClass type) { Account = type; }
 		internal AccountNode(CushionNode cushion) : base(cushion) {
 			Account = cushion.Account;
 		}
-		public AccountClass Account { get; set; } = AccountClass.General;
+		public AccountClass Account { get; private set; } 
 		protected override CommonNode Clone(CommonNode nd) {
 			(nd as AccountNode).Account = Account;
 			return base.Clone(nd);
 		}
+		FinancialValue setOrCreateNuetral() {
+			var nd = ChildNodes.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
+			if (nd != null) return nd;
+			string name;
+			switch (Account) {
+			case AccountClass.General:
+				name = "現金";
+				break;
+			case AccountClass.Credit:
+				name = "保証金現金";
+				break;
+			case AccountClass.FX:
+				name = "有効証拠金";
+				break;
+			default:
+				name = "その他現金";
+				break;
+			}
+			var n = new FinancialValue() { Name = name };
+			this.AddChild(n);
+			return n;
+		}
+		public override bool IsInvestmentTarget => true;
+		public override long InvestmentValue 
+			=> setOrCreateNuetral().InvestmentValue;
+		public override void SetInvestmentValue(long value) {
+			var ntr = setOrCreateNuetral();
+			ntr.SetInvestmentValue(value);
+		}
+
+		public override long InvestmentReturnValue 
+			=> setOrCreateNuetral().InvestmentReturnValue;
+		public override void SetInvestmentReturnValue(long value) {
+			var ntr = setOrCreateNuetral();
+			ntr.SetInvestmentReturnValue(value);
+		}
 		public override CommonNode Clone() {
-			return this.Clone(new AccountNode());
+			return this.Clone(new AccountNode(Account));
 		}
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
@@ -194,13 +231,13 @@ namespace PortFolion.Core {
 			get { return ChildNodes.Sum(a => a.InvestmentValue); }
 		}
 		public override void SetInvestmentReturnValue(long value) {
-			base.SetInvestmentReturnValue(value);
+			throw new NotSupportedException();
+			//base.SetInvestmentReturnValue(value);
 		}
 		public override long InvestmentReturnValue {
 			get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
 			//get { return ChildNodes.Any() ? ChildNodes.Sum(a => a.InvestmentReturnValue) : base.InvestmentReturnValue; }
 		}
-
 		public override CommonNode Clone() {
 			return Clone(new BrokerNode());
 		}

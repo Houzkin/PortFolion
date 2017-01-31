@@ -61,32 +61,32 @@ namespace PortFolion.ViewModels {
 	}
 	
 	public class AddAccountVM : AddBrokerVM {
-		public AddAccountVM(CommonNode parent,AccountClass type):base(parent, new AccountNode()) {
+		public AddAccountVM(CommonNode parent,AccountClass type):base(parent, new AccountNode(type)) {
 			this.AccountType = type;
-			Neutral= new FinancialValue();
-			Model.AddChild(Neutral);
-			setNeutralValueName();
+			//Neutral= new FinancialValue();
+			//Model.AddChild(Neutral);
+			setDefaultName();
 		}
-		public FinancialValue Neutral { get; private set; }
-		AccountClass type;
+		//public FinancialValue Neutral { get; private set; }
+		//AccountClass type;
 		public AccountClass AccountType { get; private set; }
-		void setNeutralValueName() {
+		void setDefaultName() {
 			string ac;
 			switch (AccountType) {
 			case AccountClass.General:
-				Neutral.Name = "現金";
+				//Neutral.Name = "現金";
 				ac = "総合口座";
 				break;
 			case AccountClass.Credit:
-				Neutral.Name = "買付余力";
+				//Neutral.Name = "買付余力";
 				ac = "信用口座";
 				break;
 			case AccountClass.FX:
-				Neutral.Name = "有効証拠金";
+				//Neutral.Name = "有効証拠金";
 				ac = "FX口座";
 				break;
 			default:
-				Neutral.Name = "その他";
+				//Neutral.Name = "その他";
 				ac = "口座";
 				break;
 			}
