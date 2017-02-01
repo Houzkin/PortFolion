@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using PortFolion.Core;
 using System.Windows.Input;
 using Houzkin.Architecture;
+using System.ComponentModel;
 
 namespace PortFolion.ViewModels {
 	public class FinancialValueVM : CommonNodeVM {
@@ -23,6 +24,14 @@ namespace PortFolion.ViewModels {
 			OnPropertyChanged(nameof(UnrealizedProfitLossRate));
 			OnPropertyChanged(nameof(CurrentPerPrice));
 		}
+		#region 試
+		Dictionary<string, IEnumerable<string>> propRaiseChain = new Dictionary<string, IEnumerable<string>>();
+		void propCng(object sender, PropertyChangedEventArgs e) {
+			foreach(var prc in propRaiseChain) {
+				
+			}
+		}
+		#endregion
 		/// <summary>平均取引コスト</summary>
 		public double PerPriceAverage {
 			get {
@@ -31,11 +40,13 @@ namespace PortFolion.ViewModels {
 					x => 0);
 			}
 		}
+		/// <summary>含み</summary>
 		public long UnrealizedProfitLoss {
 			get {
 				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
 			}
 		}
+		/// <summary>含み率</summary>
 		public double? UnrealizedProfitLossRate {
 			get {
 				var b = (InvestmentTotal - InvestmentReturnTotal);
@@ -43,6 +54,7 @@ namespace PortFolion.ViewModels {
 				return UnrealizedProfitLoss / b * 100;
 			}
 		}
+		/// <summary>現在単価</summary>
 		public double CurrentPerPrice {
 			get {
 				return MaybeModelAs<FinancialProduct>().TrueOrNot(

@@ -10,13 +10,14 @@ using PortFolion.Core;
 using System.Collections.ObjectModel;
 using Livet.Commands;
 using Houzkin;
+using System.ComponentModel;
+using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		internal CommonNodeVM(CommonNode model) : base(model) {
 			Refresh();
 		}
-
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			var mcn = modelChildNode.GetType();
 			if(mcn == typeof(TotalRiskFundNode)) {
@@ -54,6 +55,12 @@ namespace PortFolion.ViewModels {
 			OnPropertyChanged(nameof(InvestmentTotal));
 			OnPropertyChanged(nameof(InvestmentReturnTotal));
 		}
+		//void inveCng(object sender,PropertyChangedEventArgs e) {
+		//	if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.InvestmentReturnValue)) {
+		//		OnPropertyChanged(nameof(InvestmentTotal));
+		//		OnPropertyChanged(nameof(InvestmentReturnTotal));
+		//	}
+		//}
 		Dictionary<DateTime, CommonNode> _currentPositionLine;
 		Dictionary<DateTime,CommonNode> CurrentPositionLine {
 			get {
@@ -79,7 +86,10 @@ namespace PortFolion.ViewModels {
 		//profitLossRatio
 		public long InvestmentTotal { get; private set; }
 		public long InvestmentReturnTotal { get; private set; }
-		
+		//protected override void Dispose(bool disposing) {
+		//	if (disposing) this.pcwel?.Dispose();
+		//	base.Dispose(disposing);
+		//}
 		#endregion
 	}
 	public class MenuItemVm {
