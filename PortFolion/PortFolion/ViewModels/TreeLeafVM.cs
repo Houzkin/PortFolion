@@ -7,31 +7,37 @@ using PortFolion.Core;
 using System.Windows.Input;
 using Houzkin.Architecture;
 using System.ComponentModel;
+using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
 	public class FinancialValueVM : CommonNodeVM {
 		public FinancialValueVM(FinancialValue model) : base(model) {
+			
 		}
-		
+
 	}
 	public class FinancialProductVM : FinancialValueVM {
-		public FinancialProductVM(FinancialValue model) : base(model) {
+		public FinancialProductVM(FinancialProduct model) : base(model) {
 		}
 		protected override void Refresh() {
 			base.Refresh();
 			OnPropertyChanged(nameof(PerPriceAverage));
-			OnPropertyChanged(nameof(UnrealizedProfitLoss));
-			OnPropertyChanged(nameof(UnrealizedProfitLossRate));
 			OnPropertyChanged(nameof(CurrentPerPrice));
 		}
-		#region 試
-		Dictionary<string, IEnumerable<string>> propRaiseChain = new Dictionary<string, IEnumerable<string>>();
-		void propCng(object sender, PropertyChangedEventArgs e) {
-			foreach(var prc in propRaiseChain) {
-				
-			}
+		protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			base.ModelPropertyChanged(sender, e);
+			MaybeModelAs<FinancialProduct>().TrueOrNot(
+				o => {
+					switch (e.PropertyName) {
+					case nameof(o.Quantity):
+						OnPropertyChanged(nameof(PerPriceAverage));
+						goto case nameof(o.Amount);
+					case nameof(o.Amount):
+						OnPropertyChanged(nameof(CurrentPerPrice));
+						break;
+					}
+				});
 		}
-		#endregion
 		/// <summary>平均取引コスト</summary>
 		public double PerPriceAverage {
 			get {
@@ -40,20 +46,7 @@ namespace PortFolion.ViewModels {
 					x => 0);
 			}
 		}
-		/// <summary>含み</summary>
-		public long UnrealizedProfitLoss {
-			get {
-				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
-			}
-		}
-		/// <summary>含み率</summary>
-		public double? UnrealizedProfitLossRate {
-			get {
-				var b = (InvestmentTotal - InvestmentReturnTotal);
-				if (b == 0) return null;
-				return UnrealizedProfitLoss / b * 100;
-			}
-		}
+		
 		/// <summary>現在単価</summary>
 		public double CurrentPerPrice {
 			get {
@@ -61,26 +54,26 @@ namespace PortFolion.ViewModels {
 					o => o.Amount / o.Quantity,
 					x => 0);
 			}
-			set {
-				var fp = Model as FinancialProduct;
-				if (fp == null) return;
-				fp.SetAmount((long)(fp.Quantity * value));
-			}
+			//set {
+			//	var fp = Model as FinancialProduct;
+			//	if (fp == null) return;
+			//	fp.SetAmount((long)(fp.Quantity * value));
+			//}
 		}
-		[ReflectReferenceValue]
-		public long Quantity {
-			get {
-				return MaybeModelAs<FinancialProduct>().TrueOrNot(
-					o => o.Quantity,
-					x => 0);
-			}
-			set {
-				var fp = Model as FinancialProduct;
-				if (fp == null || this.CurrentPerPrice == 0 || value == 0) return;
-				if(!IsBlocking(nameof(Quantity)))
-					fp.SetQuantity(value);
-				fp.SetAmount((long)(value * CurrentPerPrice));
-			}
-		}
+		//[ReflectReferenceValue]
+		//public long Quantity {
+		//	get {
+		//		return MaybeModelAs<FinancialProduct>().TrueOrNot(
+		//			o => o.Quantity,
+		//			x => 0);
+		//	}
+		//	set {
+		//		var fp = Model as FinancialProduct;
+		//		if (fp == null || this.CurrentPerPrice == 0 || value == 0) return;
+		//		if(!IsBlocking(nameof(Quantity)))
+		//			fp.SetQuantity(value);
+		//		fp.SetAmount((long)(value * CurrentPerPrice));
+		//	}
+		//}
 	}
 }

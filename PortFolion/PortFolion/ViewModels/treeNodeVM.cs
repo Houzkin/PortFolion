@@ -16,8 +16,10 @@ using Livet.EventListeners.WeakEvents;
 namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		internal CommonNodeVM(CommonNode model) : base(model) {
+			listener = new PropertyChangedWeakEventListener(model, ModelPropertyChanged);
 			Refresh();
 		}
+		IDisposable listener;
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			var mcn = modelChildNode.GetType();
 			if(mcn == typeof(TotalRiskFundNode)) {
@@ -46,7 +48,7 @@ namespace PortFolion.ViewModels {
 		}
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		public void RaiseReftesh() {
-			foreach (var n in this.Upstream()) n.Refresh();
+			foreach (var n in this.Root().Levelorder().Reverse()) n.Refresh();
 		}
 		protected virtual void Refresh() {
 			_currentPositionLine = null;
@@ -54,15 +56,13 @@ namespace PortFolion.ViewModels {
 			InvestmentReturnTotal = CurrentPositionLine.Sum(a => a.Value.InvestmentReturnValue);
 			OnPropertyChanged(nameof(InvestmentTotal));
 			OnPropertyChanged(nameof(InvestmentReturnTotal));
+
+			OnPropertyChanged(nameof(UnrealizedProfitLoss));
+			//OnPropertyChanged(nameof(UnrealizedProfitLossRate));
 		}
-		//void inveCng(object sender,PropertyChangedEventArgs e) {
-		//	if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.InvestmentReturnValue)) {
-		//		OnPropertyChanged(nameof(InvestmentTotal));
-		//		OnPropertyChanged(nameof(InvestmentReturnTotal));
-		//	}
-		//}
+
 		Dictionary<DateTime, CommonNode> _currentPositionLine;
-		Dictionary<DateTime,CommonNode> CurrentPositionLine {
+		protected Dictionary<DateTime,CommonNode> CurrentPositionLine {
 			get {
 				if (_currentPositionLine != null) return _currentPositionLine;
 				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
@@ -74,23 +74,36 @@ namespace PortFolion.ViewModels {
 				return _currentPositionLine;
 			}
 		}
+		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			if(e.PropertyName == nameof(Model.Amount)) {
+				OnPropertyChanged(nameof(UnrealizedProfitLoss));
+				//OnPropertyChanged(nameof(UnrealizedProfitLossRate));
+			}
+		}
+		
 		#region DataViewColumn
-		//amount
-		//quantity
-		//investment
-		//investmentReturn
-		//investmentTotal
-		//investmentReturnTotal
-		//perPrice
-		//profitLoss
-		//profitLossRatio
 		public long InvestmentTotal { get; private set; }
 		public long InvestmentReturnTotal { get; private set; }
-		//protected override void Dispose(bool disposing) {
-		//	if (disposing) this.pcwel?.Dispose();
-		//	base.Dispose(disposing);
+
+		/// <summary>含み</summary>
+		public long UnrealizedProfitLoss {
+			get {
+				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
+			}
+		}
+		///// <summary>含み率</summary>
+		//public double? UnrealizedProfitLossRate {
+		//	get {
+		//		var b = (InvestmentTotal - InvestmentReturnTotal);
+		//		if (b <= 0) return null;
+		//		return UnrealizedProfitLoss / b * 100;
+		//	}
 		//}
 		#endregion
+		protected override void Dispose(bool disposing) {
+			if (disposing) listener?.Dispose();
+			base.Dispose(disposing);
+		}
 	}
 	public class MenuItemVm {
 		public string Header { get; set; }
