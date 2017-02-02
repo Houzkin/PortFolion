@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace PortFolion.ViewModels {
 	public class EditNodeNameVM : DynamicViewModel<CommonNode> {
@@ -53,7 +54,10 @@ namespace PortFolion.ViewModels {
 				
 				var his = RootCollection.GetNodeLine(Parent.Path).ToDictionary(a=>(a.Root() as TotalRiskFundNode).CurrentDate,b=>b);
 				Func<KeyValuePair<DateTime, CommonNode>, bool> fun = a
-					=> a.Value.Children.Where(b => b.Name != Model.Name).Any(c => c.Name == newName);
+					=> a.Value.Children
+						.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
+						.Any(c => c.Name == newName);
+
 				if (his.Any(fun)) {
 					DateTime since = his.First(fun).Key;
 					DateTime until = his.Last(fun).Key;
@@ -70,13 +74,20 @@ namespace PortFolion.ViewModels {
 				Model.Name = _name;
 				Parent.AddChild(Model);
 			}else {
+				var his = RootCollection.GetNodeLine(Parent.Path);
+				if(his.Any(a=>a.Children.Any(b=>b.Name == this.Name))) {
+					string msg = "[" + this.Name + "] は別の時系列に既に存在します。\n["
+						+Model.Name+ "] は変更後、既存の ["+this.Name+"] と同一のものとして扱われます。\nこの操作は不可逆です。";
+					var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+					if (r == MessageBoxResult.Cancel) return;
+				}
 				foreach(var n in RootCollection.GetNodeLine(Model.Path)) {
 					n.Name = _name;
 				}
 			}
 		}
 		protected virtual bool CanExecuteFunc() {
-			return !HasErrors && !string.IsNullOrEmpty(this.Name) && !string.IsNullOrWhiteSpace(this.Name);
+			return !HasErrors && Model.Name != this.Name && !string.IsNullOrEmpty(this.Name) && !string.IsNullOrWhiteSpace(this.Name);
 		}
 		ViewModelCommand execute;
 		public ViewModelCommand ExecuteCmd
@@ -84,6 +95,9 @@ namespace PortFolion.ViewModels {
 	}
 	
 	public class AddAccountVM : AddBrokerVM {
+		public AddAccountVM(CommonNode parent, CommonNode child,AccountClass type) : base(parent, child) {
+			AccountType = type;
+		}
 		public AddAccountVM(CommonNode parent,AccountClass type):base(parent, new AccountNode(type)) {
 			this.AccountType = type;
 			//Neutral= new FinancialValue();
