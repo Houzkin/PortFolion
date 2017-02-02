@@ -209,7 +209,7 @@ namespace PortFolion.Core {
 			return obj;
 		}
 	}
-	/// <summary>リスクファンド</summary>
+	/// <summary>ブローカー</summary>
 	public class BrokerNode: FinancialBasket {
 		public BrokerNode() { }
 		internal BrokerNode(CushionNode cushion) : base(cushion) { }

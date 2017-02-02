@@ -1,4 +1,5 @@
 ﻿using Houzkin.Architecture;
+using Houzkin.Tree;
 using Livet.Commands;
 using PortFolion.Core;
 using System;
@@ -31,29 +32,51 @@ namespace PortFolion.ViewModels {
 	}
 	public class AddBrokerVM : DynamicViewModel<CommonNode> {
 
-		public AddBrokerVM(CommonNode parent) : this(parent,new BrokerNode()) { } 
+		public AddBrokerVM(CommonNode riskFundNode) : this(riskFundNode,new BrokerNode()) { } 
 		protected AddBrokerVM(CommonNode parent,CommonNode model) : base(model) {
 			Parent = parent;
+			this.Name = model.Name;
 		}
 		public CommonNode Parent { get; private set; }
+		string _name;
 		public string Name {
-			get { return Model.Name; }
+			get { return _name; }
 			set {
-				Model.Name = value;
-				OnPropertyChanged();
-				ValidateProperty(Model.Name, NameValidate);
+				SetProperty(ref _name, value, NameValidate);
 				execute.RaiseCanExecuteChanged();
 			}
 		}
 		protected virtual string NameValidate(string newName) {
-			if (Parent.Children.Any(a => a.Name == Name)) return "名前が重複するため追加できません";
+			if (Parent != Model.Parent && Parent.Children.Any(a => a.Name == newName)) return "名前が重複するため追加できません";
+			if(Parent == Model.Parent) {
+				if (Parent.Children.Where(a => a != Model).Any(a => a.Name == newName)) return "名前が重複するため変更できません";
+				
+				var his = RootCollection.GetNodeLine(Parent.Path).ToDictionary(a=>(a.Root() as TotalRiskFundNode).CurrentDate,b=>b);
+				Func<KeyValuePair<DateTime, CommonNode>, bool> fun = a
+					=> a.Value.Children.Where(b => b.Name != Model.Name).Any(c => c.Name == newName);
+				if (his.Any(fun)) {
+					DateTime since = his.First(fun).Key;
+					DateTime until = his.Last(fun).Key;
+					if (since == until)
+						return since.ToString("yyyy/MM/dd") + " において名前が重複するため変更できません";
+					else
+						return since.ToString("yyyy/MM/dd") + " から " + until.ToString("yyyy/MM/dd") + " の期間において名前が重複するため変更できません";
+				}
+			}
 			return null;
 		}
 		protected virtual void ExecuteFunc() {
-			Parent.AddChild(Model);
+			if(Parent != Model.Parent) {
+				Model.Name = _name;
+				Parent.AddChild(Model);
+			}else {
+				foreach(var n in RootCollection.GetNodeLine(Model.Path)) {
+					n.Name = _name;
+				}
+			}
 		}
 		protected virtual bool CanExecuteFunc() {
-			return !HasErrors && !string.IsNullOrEmpty(Model.Name) && !string.IsNullOrWhiteSpace(Model.Name);
+			return !HasErrors && !string.IsNullOrEmpty(this.Name) && !string.IsNullOrWhiteSpace(this.Name);
 		}
 		ViewModelCommand execute;
 		public ViewModelCommand ExecuteCmd
@@ -87,7 +110,7 @@ namespace PortFolion.ViewModels {
 				break;
 			default:
 				//Neutral.Name = "その他";
-				ac = "口座";
+				ac = "その他";
 				break;
 			}
 			this.Name = ac;

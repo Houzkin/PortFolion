@@ -71,16 +71,16 @@ namespace PortFolion.Core {
 		//}
 		
 		/// <summary>指定した時間を含む指定位置のポジション単位のノードを取得する</summary>
-		public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
+		public static Dictionary<DateTime,CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
 			var lne = GetNodeLine(path).ToDictionary(a => ((TotalRiskFundNode)a.Root()).CurrentDate);
 			//指定した日付を含んだノードを取得
 			var curNd = lne.LastOrDefault(a => currentTenure <= a.Key);
-			if (curNd.Value == null) return Enumerable.Empty<CommonNode>();
+			if (curNd.Value == null) return new Dictionary<DateTime, CommonNode>();
 			
 			var bef = lne.TakeWhile(a => a.Value != curNd.Value).Reverse().TakeWhile(a => a.Value.Amount != 0);
 			var aft = lne.SkipWhile(a => a.Value != curNd.Value).Separate(a => a.Value.Amount == 0).First();
 
-			return bef.Concat(aft).OrderBy(a => a.Key).Select(a => a.Value);
+			return bef.Concat(aft).OrderBy(a => a.Key).ToDictionary(a => a.Key, b => b.Value);
 		}
 		internal static bool CanChangeNodeName(NodePath<string> path,string name) {
 			return GetNodeLine(path)
@@ -99,13 +99,13 @@ namespace PortFolion.Core {
 		}
 		internal static void ChangeNodeTag(NodePath<string> path,string newTag,DateTime current) {
 			var tg = TagInfo.GetWithAdd(newTag);
-			foreach (var t in GetNodeLine(path, current)) t.Tag = tg;
+			foreach (var t in GetNodeLine(path, current).Values) t.Tag = tg;
 		}
 		internal static void RemoveNodeTag(NodePath<string> path) {
 			foreach (var t in GetNodeLine(path)) t.Tag = null;
 		}
 		internal static void RemoveNodeTag(NodePath<string> path,DateTime current) {
-			foreach (var t in GetNodeLine(path, current)) t.Tag = null;
+			foreach (var t in GetNodeLine(path, current).Values) t.Tag = null;
 		}
 
 		#region インスタンス

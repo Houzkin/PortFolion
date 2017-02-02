@@ -10,33 +10,21 @@ using System.ComponentModel;
 using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
-	public class FinancialValueVM : CommonNodeVM {
-		public FinancialValueVM(FinancialValue model) : base(model) {
-			
-		}
 
-	}
-	public class FinancialProductVM : FinancialValueVM {
+	public class FinancialProductVM : CommonNodeVM {
 		public FinancialProductVM(FinancialProduct model) : base(model) {
-		}
-		protected override void Refresh() {
-			base.Refresh();
-			OnPropertyChanged(nameof(PerPriceAverage));
-			OnPropertyChanged(nameof(CurrentPerPrice));
 		}
 		protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			base.ModelPropertyChanged(sender, e);
 			MaybeModelAs<FinancialProduct>().TrueOrNot(
 				o => {
-					switch (e.PropertyName) {
-					case nameof(o.Quantity):
-						OnPropertyChanged(nameof(PerPriceAverage));
-						goto case nameof(o.Amount);
-					case nameof(o.Amount):
-						OnPropertyChanged(nameof(CurrentPerPrice));
-						break;
-					}
+					if (e.PropertyName == nameof(o.Quantity) || e.PropertyName == nameof(o.Amount)) ReCalc();
 				});
+		}
+		protected override void ReCalc() {
+			base.ReCalc();
+			OnPropertyChanged(nameof(PerPriceAverage));
+			OnPropertyChanged(nameof(PerPrice));
 		}
 		/// <summary>平均取引コスト</summary>
 		public double PerPriceAverage {
@@ -48,7 +36,7 @@ namespace PortFolion.ViewModels {
 		}
 		
 		/// <summary>現在単価</summary>
-		public double CurrentPerPrice {
+		public double PerPrice {
 			get {
 				return MaybeModelAs<FinancialProduct>().TrueOrNot(
 					o => o.Amount / o.Quantity,

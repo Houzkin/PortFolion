@@ -16,30 +16,19 @@ using Livet.EventListeners.WeakEvents;
 namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		internal CommonNodeVM(CommonNode model) : base(model) {
+			
 			listener = new PropertyChangedWeakEventListener(model, ModelPropertyChanged);
-			Refresh();
+			ReCalc();
 		}
 		IDisposable listener;
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			var mcn = modelChildNode.GetType();
-			if(mcn == typeof(TotalRiskFundNode)) {
-
-			}else if(mcn == typeof(BrokerNode)){
-
-			}else if(mcn == typeof(AccountNode)) {
-
-			}else if(mcn == typeof(StockValue)) {
-
-			}else if(mcn == typeof(ForexValue)) {
-
-			}else if(mcn == typeof(FinancialProduct)) {
-
-			}else if(mcn == typeof(FinancialValue)) {
-
+			if (typeof(FinancialProduct).IsAssignableFrom(mcn)) {
+				return new FinancialProductVM(modelChildNode as FinancialProduct);
 			}else {
-				return new CommonNodeVM(modelChildNode);
+				return new FinancialBacketVM(modelChildNode);
 			}
-			return null;
+			
 		}
 		bool isExpand;
 		public bool IsExpand {
@@ -47,10 +36,19 @@ namespace PortFolion.ViewModels {
 			set { this.SetProperty(ref isExpand, value); }
 		}
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
-		public void RaiseReftesh() {
-			foreach (var n in this.Root().Levelorder().Reverse()) n.Refresh();
+		/// <summary>再計算</summary>
+		public void ReCalcurate() {
+			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
 		}
-		protected virtual void Refresh() {
+		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			if (e.PropertyName == nameof(Model.Amount) 
+				|| e.PropertyName == nameof(Model.InvestmentValue) 
+				|| e.PropertyName == nameof(Model.InvestmentReturnValue)) {
+				ReCalc();
+			}
+		}
+		/// <summary>再計算内容</summary>
+		protected virtual void ReCalc() {
 			_currentPositionLine = null;
 			InvestmentTotal = CurrentPositionLine.Sum(a => a.Value.InvestmentValue);
 			InvestmentReturnTotal = CurrentPositionLine.Sum(a => a.Value.InvestmentReturnValue);
@@ -58,7 +56,6 @@ namespace PortFolion.ViewModels {
 			OnPropertyChanged(nameof(InvestmentReturnTotal));
 
 			OnPropertyChanged(nameof(UnrealizedProfitLoss));
-			//OnPropertyChanged(nameof(UnrealizedProfitLossRate));
 		}
 
 		Dictionary<DateTime, CommonNode> _currentPositionLine;
@@ -68,16 +65,11 @@ namespace PortFolion.ViewModels {
 				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
 				_currentPositionLine = RootCollection
 					.GetNodeLine(Model.Path, d)
+					.Values
 					.Select(value => new { (value.Root() as TotalRiskFundNode).CurrentDate, value })
 					.Where(a => a.CurrentDate <= d)
 					.ToDictionary(a => a.CurrentDate, a => a.value);
 				return _currentPositionLine;
-			}
-		}
-		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			if(e.PropertyName == nameof(Model.Amount)) {
-				OnPropertyChanged(nameof(UnrealizedProfitLoss));
-				//OnPropertyChanged(nameof(UnrealizedProfitLossRate));
 			}
 		}
 		
@@ -91,14 +83,6 @@ namespace PortFolion.ViewModels {
 				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
 			}
 		}
-		///// <summary>含み率</summary>
-		//public double? UnrealizedProfitLossRate {
-		//	get {
-		//		var b = (InvestmentTotal - InvestmentReturnTotal);
-		//		if (b <= 0) return null;
-		//		return UnrealizedProfitLoss / b * 100;
-		//	}
-		//}
 		#endregion
 		protected override void Dispose(bool disposing) {
 			if (disposing) listener?.Dispose();
@@ -121,48 +105,64 @@ namespace PortFolion.ViewModels {
 
 		public ObservableCollection<MenuItemVm> Children 
 			=> children = children ?? new ObservableCollection<MenuItemVm>();
-		
 	}
-	public class TotalRiskFundNodeVM : CommonNodeVM {
-		public TotalRiskFundNodeVM(TotalRiskFundNode model) : base(model) {
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを追加" });
+	public class FinancialBacketVM : CommonNodeVM {
+		public FinancialBacketVM(CommonNode model) : base(model){
+			init();
 		}
-	}
-	public class BrokerNodeVM : CommonNodeVM {
-		public BrokerNodeVM(AccountNode model) : base(model) {
-			var addItem = new MenuItemVm() { Header = "追加" };
-			addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "一般" });
-			addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "信用" });
-			addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "為替" });
-			MenuList.Add(addItem);
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカー名の変更" });
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを除外" });
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
-		}
-	}
-	public class AccountNodeVM : CommonNodeVM {
-		public AccountNodeVM(AccountNode model) : base(model) {
-			MenuItemVm addItem;
-			switch (model.Account) {
-			case AccountClass.General:
-				addItem = new MenuItemVm(() => { }) { Header = "新規買付" };
-				break;
-			case AccountClass.Credit:
-				addItem = new MenuItemVm(() => { }) { Header = "新規建玉" };
-				break;
-			case AccountClass.FX:
-				addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };
-				break;
-			default:
-				addItem = new MenuItemVm(() => { });
-				break;
+		private void init() {
+			var type = Model.GetType();
+			if(type == typeof(TotalRiskFundNode)) {
+
+			}else if(type == typeof(BrokerNode)) {
+
+			}else if(type == typeof(AccountNode)) {
+
+			}else if(typeof(FinancialValue).IsAssignableFrom(type)) {
+
 			}
-			MenuList.Add(addItem);
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "InvestOrRetrun" });
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウント名の変更" });
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウントを除外" });
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
 		}
-		
 	}
+	//public class TotalRiskFundNodeVM : CommonNodeVM {
+	//	public TotalRiskFundNodeVM(TotalRiskFundNode model) : base(model) {
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを追加" });
+	//	}
+	//}
+	//public class BrokerNodeVM : CommonNodeVM {
+	//	public BrokerNodeVM(AccountNode model) : base(model) {
+	//		var addItem = new MenuItemVm() { Header = "追加" };
+	//		addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "一般" });
+	//		addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "信用" });
+	//		addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "為替" });
+	//		MenuList.Add(addItem);
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカー名の変更" });
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを除外" });
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
+	//	}
+	//}
+	//public class AccountNodeVM : CommonNodeVM {
+	//	public AccountNodeVM(AccountNode model) : base(model) {
+	//		MenuItemVm addItem;
+	//		switch (model.Account) {
+	//		case AccountClass.General:
+	//			addItem = new MenuItemVm(() => { }) { Header = "新規買付" };
+	//			break;
+	//		case AccountClass.Credit:
+	//			addItem = new MenuItemVm(() => { }) { Header = "新規建玉" };
+	//			break;
+	//		case AccountClass.FX:
+	//			addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };
+	//			break;
+	//		default:
+	//			addItem = new MenuItemVm(() => { });
+	//			break;
+	//		}
+	//		MenuList.Add(addItem);
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "InvestOrRetrun" });
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウント名の変更" });
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウントを除外" });
+	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
+	//	}
+		
+	//}
 }
