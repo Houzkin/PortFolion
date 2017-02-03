@@ -110,7 +110,7 @@ namespace PortFolion.Core {
 		#region contents
 		internal IEnumerable<NodeMap> CurrentMap { get; private set; }
 
-		CommonNode _currentNode = RootCollection.Instance.Values.LastOrDefault() ?? new TotalRiskFundNode() { CurrentDate = DateTime.Today };
+		CommonNode _currentNode = RootCollection.Instance.LastOrDefault() ?? new TotalRiskFundNode() { CurrentDate = DateTime.Today };
 		internal CommonNode CurrentNode {
 			get {
 				//if (_currentNode == null) _currentNode = new TotalRiskFundNode();

@@ -8,7 +8,7 @@ using Houzkin.Tree;
 using PortFolion.IO;
 
 namespace PortFolion.Core {
-	public class RootCollection : ObservableCollection<TotalRiskFundNode> ,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
+	public class RootCollection : ObservableCollection<TotalRiskFundNode> {//,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
 
 		private RootCollection() : base(HistoryIO.ReadRoots().OrderBy(a=>a.CurrentDate)) { }
 
@@ -36,7 +36,7 @@ namespace PortFolion.Core {
 			return nn.LastOrDefault(a => a.Key <= date).Value;
 		}
 		public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path) {
-			return Instance.Values
+			return Instance//.Values
 				.SelectMany(
 					a => a.Evolve(
 						b => b.Path.Except(path).Any() ? null : b.Children,
@@ -152,9 +152,9 @@ namespace PortFolion.Core {
 			get { return Items.Select(a => a.CurrentDate); }
 		}
 
-		public IEnumerable<TotalRiskFundNode> Values {
-			get { return Items; }
-		}
+		//public IEnumerable<TotalRiskFundNode> Values {
+		//	get { return Items; }
+		//}
 
 		public bool ContainsKey(DateTime key) {
 			key = new DateTime(key.Year, key.Month, key.Day);
@@ -171,9 +171,10 @@ namespace PortFolion.Core {
 				return false;
 			}
 		}
-		IEnumerator<KeyValuePair<DateTime, TotalRiskFundNode>> IEnumerable<KeyValuePair<DateTime, TotalRiskFundNode>>.GetEnumerator() {
-			return Items.Select(a => new KeyValuePair<DateTime, TotalRiskFundNode>(a.CurrentDate, a)).GetEnumerator();
-		}
+		
+		//IEnumerator<KeyValuePair<DateTime, TotalRiskFundNode>> IEnumerable<KeyValuePair<DateTime, TotalRiskFundNode>>.GetEnumerator() {
+		//	return Items.Select(a => new KeyValuePair<DateTime, TotalRiskFundNode>(a.CurrentDate, a)).GetEnumerator();
+		//}
 		#endregion
 	}
 }
