@@ -15,19 +15,15 @@ using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
-		internal CommonNodeVM(CommonNode model) : base(model) {
+		protected CommonNodeVM(CommonNode model) : base(model) {
 			
 			listener = new PropertyChangedWeakEventListener(model, ModelPropertyChanged);
 			ReCalc();
 		}
 		IDisposable listener;
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
-			var mcn = modelChildNode.GetType();
-			if (typeof(FinancialProduct).IsAssignableFrom(mcn)) {
-				return new FinancialProductVM(modelChildNode as FinancialProduct);
-			}else {
-				return new FinancialBacketVM(modelChildNode);
-			}
+			return CommonNodeVM.Create(modelChildNode);
+			
 			
 		}
 		bool isExpand;
@@ -35,6 +31,7 @@ namespace PortFolion.ViewModels {
 			get { return isExpand; }
 			set { this.SetProperty(ref isExpand, value); }
 		}
+		public NodePath<string> Path => Model.Path;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
@@ -87,6 +84,15 @@ namespace PortFolion.ViewModels {
 		protected override void Dispose(bool disposing) {
 			if (disposing) listener?.Dispose();
 			base.Dispose(disposing);
+		}
+		public static CommonNodeVM Create(CommonNode node) {
+			if (node == null) return null;
+			var mcn = node.GetType();
+			if (typeof(FinancialProduct).IsAssignableFrom(mcn)) {
+				return new FinancialProductVM(node as FinancialProduct);
+			}else {
+				return new FinancialBacketVM(node);
+			}
 		}
 	}
 	public class MenuItemVm {

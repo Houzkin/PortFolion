@@ -10,31 +10,9 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace PortFolion.ViewModels {
-		//public class EditNodeNameVM : DynamicViewModel<CommonNode> {
-		//	public EditNodeNameVM(CommonNode model) : base(model) {
-		//		_editName = model.Name;
-		//	}
-		//	public string Name { get { return Model.Name; } }
-		//	string _editName;
-		//	public string EditName {
-		//		get { return _editName; }
-		//		set {
-		//			SetProperty(ref _editName, value, nameValidation);
-		//			execute.RaiseCanExecuteChanged();
-		//		}
-		//	}
-		//	string nameValidation(string name) {
-		//		if (Name == name) return "";
-		//		return this.Model.CanChangeName(name) ? "" : "現在または過去の入力データにおいて名前が重複するため変更できません";
-		//	}
-		//	ViewModelCommand execute;
-		//	public ViewModelCommand ExecuteCmd
-		//		=> execute = execute ?? new ViewModelCommand(() => Model.ChangeName(EditName), () => !this.HasErrors　&& Name != EditName);
-		//}
+		
 	public class NodeNameEditerVM : DynamicViewModel<CommonNode> {
-		///// <summary>新規追加用ViewModel</summary>
-		///// <param name="parent">親となるノード</param>
-		//public NodeNameEditerVM(CommonNode parent) : this(parent,new BrokerNode()) { } 
+		
 		/// <summary>新規追加または編集用ViewModel</summary>
 		/// <param name="parent">親ノード</param>
 		/// <param name="model">編集対象となる子ノード</param>
@@ -106,7 +84,28 @@ namespace PortFolion.ViewModels {
 		public ViewModelCommand ExecuteCmd
 			=> execute = execute ?? new ViewModelCommand(ExecuteFunc, CanExecuteFunc);
 	}
-	
+
+	public class NodeTagEditerVM : DynamicViewModel<CommonNode> {
+		public NodeTagEditerVM(CommonNode model) : base(model) {
+			TagList = RootCollection.Instance.SelectMany(a => a.Levelorder()).Select(a => a.Tag.TagName).Distinct();
+		}
+		public IEnumerable<string> TagList { get; private set; }
+	}
+	public class TagVM : DynamicViewModel<TagInfo> {
+		public TagVM(TagInfo tag) : base(tag) {
+
+		}
+		string name;
+		public string Name {
+			get { return name; }
+			set { name = value;
+				this.OnPropertyChanged();
+			}
+		}
+		public void ExecuteChange() {
+
+		}
+	}
 	//public class AccountEditer : NodeNameEditerVM {
 	//	/// <summary>編集用ViewModel</summary>
 	//	/// <param name="parent">親ノード</param>
