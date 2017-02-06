@@ -63,7 +63,7 @@
         <!--<Menu Grid.Row="0" Grid.ColumnSpan="3">
             <MenuItem Header="設定" />
         </Menu>-->
-       <Expander Grid.Row="0" Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+       <!--<Expander Grid.Row="0" Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="History" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
@@ -71,7 +71,7 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-        </Expander>
+        </Expander>-->
          <!--<Expander Grid.Row="0" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Location" TextAlignment="Right">
@@ -85,7 +85,7 @@
             <Controls:MetroTabItem Header="_Graph">
                 <v:GraphTab/>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="_List">
+            <Controls:MetroTabItem Header="_List" DataContext="{Binding ListContents}">
                 <v:ListTab/>
             </Controls:MetroTabItem>
         </TabControl>

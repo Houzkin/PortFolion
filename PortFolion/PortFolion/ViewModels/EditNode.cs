@@ -106,52 +106,5 @@ namespace PortFolion.ViewModels {
 
 		}
 	}
-	//public class AccountEditer : NodeNameEditerVM {
-	//	/// <summary>編集用ViewModel</summary>
-	//	/// <param name="parent">親ノード</param>
-	//	/// <param name="child">編集対象となる子ノード</param>
-	//	public AccountEditer(CommonNode parent, CommonNode child) : base(parent, child) {
-	//		MaybeModelAs<AccountNode>()
-	//			.TrueOrNot(o => this.AccountType = o.Account);
-	//	}
-	//	/// <summary>新規追加用ViewModel</summary>
-	//	/// <param name="parent">親となるノード</param>
-	//	/// <param name="type">追加するアカウントタイプ</param>
-	//	public AccountEditer(CommonNode parent,AccountClass type):base(parent, new AccountNode(type)) {
-	//		this.AccountType = type;
-	//		setDefaultName();
-	//	}
-	//	public AccountClass AccountType { get; private set; }
-	//	void setDefaultName() {
-	//		string ac;
-	//		switch (AccountType) {
-	//		case AccountClass.General:
-	//			//Neutral.Name = "現金";
-	//			ac = "総合口座";
-	//			break;
-	//		case AccountClass.Credit:
-	//			//Neutral.Name = "買付余力";
-	//			ac = "信用口座";
-	//			break;
-	//		case AccountClass.FX:
-	//			//Neutral.Name = "有効証拠金";
-	//			ac = "FX口座";
-	//			break;
-	//		default:
-	//			//Neutral.Name = "その他";
-	//			ac = "その他";
-	//			break;
-	//		}
-	//		this.Name = ac;
-	//		int number = 1;
-	//		while (HasErrors && number <= 10) {
-	//			this.Name = ac + number.ToString();
-	//			number++;
-	//		}
-	//		if (HasErrors) this.Name = "";
-	//	}
-	//}
-	//public class FinancialValueNameEditer : BrokerEditer {
-	//	public FinancialValueNameEditer(CommonNode model) : base(model.Parent, model) { }
-	//}
+	
 }
