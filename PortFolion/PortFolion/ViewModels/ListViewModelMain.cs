@@ -4,10 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Livet;
+using Livet.Commands;
 using PortFolion.Core;
 using Houzkin.Tree;
+using Houzkin.Architecture;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Windows.Data;
+using System.Windows.Input;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
@@ -54,6 +58,7 @@ namespace PortFolion.ViewModels {
 		public CommonNodeVM Root => root;
 
 		public IEnumerable<string> Path { get; private set; }
+
 		public IEnumerable<CommonNodeVM> History
 			=> RootCollection.GetNodeLine(new NodePath<string>(Path)).Select(a => CommonNodeVM.Create(a));
 		
@@ -76,11 +81,7 @@ namespace PortFolion.ViewModels {
 				ExpandCurrentNode();
 				return;
 			}
-			Path = totalRiskFund.Levelorder()
-				.Select(a => a.Path.Zip(this.Path, (b, d) => new { b, d })
-					.TakeWhile(e => e.b == e.d)
-					.Select(f => f.b))
-				.LastOrDefault() ?? Enumerable.Empty<string>();
+			Path = totalRiskFund.SearchNodeOf(this.Path)?.Path ?? Enumerable.Empty<string>();
 			Refresh();
 		}
 		public void SetPath(IEnumerable<string> path) {
@@ -99,6 +100,12 @@ namespace PortFolion.ViewModels {
 			RaisePropertyChanged(nameof(this.CurrentDate));
 			ExpandCurrentNode();
 		}
+		#region date
+		ListenerCommand<DateTime> addNewRootCommand = new ListenerCommand<DateTime>(d => { });
+		public ICommand AddNewRootCommand => addNewRootCommand;
+
+		#endregion
+
 		#region tree
 		public void ExpandCurrentNode() {
 			if (!this.Path.Any()) return;

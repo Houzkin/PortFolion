@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PortFolion.Views"
+             xmlns:converter="clr-namespace:PortFolion.Views.Converter"
              xmlns:tree="clr-namespace:System.Windows.Controls;assembly=TreeListView"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
@@ -14,8 +15,11 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <converter:PathToStringConverter x:Key="PathToString"/>
+        </Grid.Resources>
       
-        <Expander Grid.Column="0" IsExpanded="False" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+        <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Date" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
@@ -40,7 +44,7 @@
                         Controls:TextBoxHelper.Watermark="Select a date" />
                     <Button Content="新規追加" HorizontalAlignment="Center"
                             Margin="5,10"
-                            Command="{Binding AddNewRoot}"
+                            Command="{Binding AddNewRootCommand}"
                             CommandParameter="{Binding ElementName=PickedDate, Path=SelectedDate}"/>
                 </StackPanel>
             </Grid>
@@ -49,8 +53,8 @@
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <TextBlock x:Name="Date" Text="{Binding CurrentDate}"/>
             <ToolBar>
-                <Button Content="全開"/>
-                <Button Content="全閉"/>
+                <Button Content="開"/>
+                <Button Content="閉"/>
             </ToolBar>
             <tree:TreeListView x:Name="LocationTree">
                 <!-- Style="{StaticResource VirtualisedMetroTreeView}"-->
@@ -94,9 +98,10 @@
             </tree:TreeListView>
             <Grid x:Name="PortFolioResult"></Grid>
         </StackPanel>
+        <GridSplitter Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5"/>
         <StackPanel Orientation="Vertical" Grid.Column="2">
-            <TextBlock Text="{Binding Path}"/>
-            <DataGrid x:Name="History" ></DataGrid>
+            <TextBlock Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
+            <DataGrid x:Name="History" Margin="5" ></DataGrid>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -275,6 +275,15 @@ namespace PortFolion.Core {
 			}
 			return true;
 		}
+		public CommonNode SearchNodeOf(IEnumerable<string> path) {
+			var p = this.Levelorder()
+				.Select(a => a.Path.Zip(this.Path, (b, d) => new { b, d })
+					.TakeWhile(e => e.b == e.d)
+					.Select(f => f.b))
+				.LastOrDefault();
+			return this.Levelorder()
+				.FirstOrDefault(a => a.Path.SequenceEqual(p));
+		}
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Date = _currentDate;
