@@ -47,6 +47,7 @@ namespace PortFolion.Core {
 		internal FinancialProduct() { }
 		internal FinancialProduct(CushionNode cushion) : base(cushion) {
 			_quantity = cushion.Quantity;
+			_tradeQuantity = cushion.TradeQuantity;
 		}
 		long _quantity;
 		public void SetQuantity(long quantity) {
@@ -57,8 +58,16 @@ namespace PortFolion.Core {
 		public long Quantity {
 			get { return _quantity; }
 		}
+		long _tradeQuantity;
+		public void SetTradeQuantity(long tradeQuantity) {
+			if (_tradeQuantity == tradeQuantity) return;
+			_tradeQuantity = tradeQuantity;
+			RaisePropertyChanged(nameof(TradeQuantity));
+		}
+		public long TradeQuantity => _tradeQuantity;
 		protected override CommonNode Clone(CommonNode node) {
-			(node as FinancialProduct)._quantity = Quantity;
+			var n = node as FinancialProduct;
+			n._quantity = Quantity;
 			return base.Clone(node);
 		}
 		public override CommonNode Clone() {
@@ -67,6 +76,7 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Quantity = _quantity;
+			obj.TradeQuantity = _tradeQuantity;
 			obj.Node = NodeType.OtherProduct;
 			return obj;
 		}

@@ -157,11 +157,17 @@ namespace PortFolion.Core {
 		public AccountNode(AccountClass type) { Account = type; }
 		internal AccountNode(CushionNode cushion) : base(cushion) {
 			Account = cushion.Account;
+			levarage = cushion.Levarage;
 		}
-		public AccountClass Account { get; private set; } 
-		protected override CommonNode Clone(CommonNode nd) {
-			(nd as AccountNode).Account = Account;
-			return base.Clone(nd);
+		public AccountClass Account { get; private set; }
+		int levarage = 1;
+		public int Levarage {
+			get { return levarage; }
+			set {
+				if (levarage == value) return;
+				levarage = value;
+				RaisePropertyChanged();
+			}
 		}
 		FinancialValue setOrCreateNuetral() {
 			var nd = ChildNodes.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
@@ -199,6 +205,12 @@ namespace PortFolion.Core {
 			var ntr = setOrCreateNuetral();
 			ntr.SetInvestmentReturnValue(value);
 		}
+		protected override CommonNode Clone(CommonNode nd) {
+			var n = nd as AccountNode;
+			n.Account = Account;
+			n.Levarage = Levarage;
+			return base.Clone(nd);
+		}
 		public override CommonNode Clone() {
 			return this.Clone(new AccountNode(Account));
 		}
@@ -206,6 +218,7 @@ namespace PortFolion.Core {
 			var obj = base.ToSerialCushion();
 			obj.Account = Account;
 			obj.Node = NodeType.Account;
+			obj.Levarage = Levarage;
 			return obj;
 		}
 	}

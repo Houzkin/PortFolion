@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Windows.Input;
+using PortFolion.Models;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
@@ -19,6 +20,7 @@ namespace PortFolion.ViewModels {
 		public ListviewModel() {
 			Model = RootCollection.Instance;
 			Model.CollectionChanged += CollectionChanged;
+			this.dtr.DateTimeSelected += selectedDateList;
 			totalRiskFund = RootCollection.Instance.LastOrDefault();
 			if (totalRiskFund != null) {
 				CurrentDate = totalRiskFund.CurrentDate;
@@ -64,6 +66,7 @@ namespace PortFolion.ViewModels {
 		
 		public void SetCurrentDate(DateTime date) {
 			date = date.Date;
+			if (CurrentDate == date) return;
 			var c = RootCollection.Instance.LastOrDefault(a => date <= a.CurrentDate) ?? RootCollection.Instance.LastOrDefault();
 			if (c == null) {
 				if (totalRiskFund == null) {
@@ -74,6 +77,7 @@ namespace PortFolion.ViewModels {
 			}
 			totalRiskFund = c;//notify
 			CurrentDate = totalRiskFund.CurrentDate;//notify
+			selectDateListItem(CurrentDate);
 			
 			if (Path.Any() && totalRiskFund.Levelorder().Any(a => a.Path.SequenceEqual(Path))) {
 				RaisePropertyChanged(nameof(Root));
@@ -103,7 +107,14 @@ namespace PortFolion.ViewModels {
 		#region date
 		ListenerCommand<DateTime> addNewRootCommand = new ListenerCommand<DateTime>(d => { });
 		public ICommand AddNewRootCommand => addNewRootCommand;
-
+		DateTreeRoot dtr = new DateTreeRoot(RootCollection.Instance);
+		public IEnumerable<DateTree> DateList => dtr.Children;
+		void selectedDateList(DateTime date) {
+			this.SetCurrentDate(date);
+		}
+		void selectDateListItem(DateTime date) {
+			dtr.SelectAt(date);
+		}
 		#endregion
 
 		#region tree

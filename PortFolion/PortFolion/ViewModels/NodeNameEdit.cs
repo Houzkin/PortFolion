@@ -85,26 +85,26 @@ namespace PortFolion.ViewModels {
 			=> execute = execute ?? new ViewModelCommand(ExecuteFunc, CanExecuteFunc);
 	}
 
-	public class NodeTagEditerVM : DynamicViewModel<CommonNode> {
-		public NodeTagEditerVM(CommonNode model) : base(model) {
-			TagList = RootCollection.Instance.SelectMany(a => a.Levelorder()).Select(a => a.Tag.TagName).Distinct();
-		}
-		public IEnumerable<string> TagList { get; private set; }
-	}
-	public class TagVM : DynamicViewModel<TagInfo> {
-		public TagVM(TagInfo tag) : base(tag) {
+	//public class NodeTagEditerVM : DynamicViewModel<CommonNode> {
+	//	public NodeTagEditerVM(CommonNode model) : base(model) {
+	//		TagList = RootCollection.Instance.SelectMany(a => a.Levelorder()).Select(a => a.Tag.TagName).Distinct();
+	//	}
+	//	public IEnumerable<string> TagList { get; private set; }
+	//}
+	//public class TagVM : DynamicViewModel<TagInfo> {
+	//	public TagVM(TagInfo tag) : base(tag) {
 
-		}
-		string name;
-		public string Name {
-			get { return name; }
-			set { name = value;
-				this.OnPropertyChanged();
-			}
-		}
-		public void ExecuteChange() {
+	//	}
+	//	string name;
+	//	public string Name {
+	//		get { return name; }
+	//		set { name = value;
+	//			this.OnPropertyChanged();
+	//		}
+	//	}
+	//	public void ExecuteChange() {
 
-		}
-	}
+	//	}
+	//}
 	
 }

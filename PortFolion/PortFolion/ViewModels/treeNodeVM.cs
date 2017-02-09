@@ -69,6 +69,7 @@ namespace PortFolion.ViewModels {
 				return _currentPositionLine;
 			}
 		}
+		public DateTime? CurrentDate => (Model.Root() as TotalRiskFundNode)?.CurrentDate;
 		
 		#region DataViewColumn
 		public long InvestmentTotal { get; private set; }
