@@ -31,8 +31,12 @@ namespace PortFolion.ViewModels {
 			get {
 				var m = this.CurrentPositionLine.OfType<FinancialProduct>();
 				if (!m.Any()) return 0;
-				var nml = m.Zip(m.Skip(1), (a, b) => b.TradeQuantity == 0 || a.Quantity == 0 ? 1D : (b.Quantity - b.TradeQuantity) / a.Quantity)
+				//if (m.Count() == 1) return m.Last().InvestmentValue / m.Last().TradeQuantity;
+				var nml = m.Zip(m.Skip(1), (a, b) => a.Quantity == 0 ? 1D : (b.Quantity - b.TradeQuantity) / a.Quantity)
 					.Concat(new double[] { 1.0 })
+					.Reverse()
+					.Scan(1D, (a, b) => a * b)
+					.Reverse()
 					.Zip(m, (r, fp) => new { TQuanty = fp.TradeQuantity * r, TAmount = fp.InvestmentValue })
 					.Where(a => a.TQuanty > 0)
 					.Aggregate(
