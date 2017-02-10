@@ -47,8 +47,8 @@ namespace PortFolion.ViewModels {
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
 			_currentPositionLine = null;
-			InvestmentTotal = CurrentPositionLine.Sum(a => a.Value.InvestmentValue);
-			InvestmentReturnTotal = CurrentPositionLine.Sum(a => a.Value.InvestmentReturnValue);
+			InvestmentTotal = CurrentPositionLine.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
+			InvestmentReturnTotal = CurrentPositionLine.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentReturnValue) * -1;
 			OnPropertyChanged(nameof(InvestmentTotal));
 			OnPropertyChanged(nameof(InvestmentReturnTotal));
 

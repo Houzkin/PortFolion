@@ -26,15 +26,21 @@ namespace PortFolion.ViewModels {
 			OnPropertyChanged(nameof(PerPriceAverage));
 			OnPropertyChanged(nameof(PerPrice));
 		}
-		/// <summary>平均取引コスト</summary>
+		/// <summary>平均取得コスト</summary>
 		public double PerPriceAverage {
 			get {
-				return MaybeModelAs<FinancialProduct>().TrueOrNot(
-					o => ((InvestmentTotal - InvestmentReturnTotal) / o.Quantity),
-					x => 0);
+				var m = this.CurrentPositionLine.OfType<FinancialProduct>();
+				if (!m.Any()) return 0;
+				var nml = m.Zip(m.Skip(1), (a, b) => b.TradeQuantity == 0 || a.Quantity == 0 ? 1D : (b.Quantity - b.TradeQuantity) / a.Quantity)
+					.Concat(new double[] { 1.0 })
+					.Zip(m, (r, fp) => new { TQuanty = fp.TradeQuantity * r, TAmount = fp.InvestmentValue })
+					.Where(a => a.TQuanty > 0)
+					.Aggregate(
+						new { TQuanty = 1D, TAmount = 1D },
+						(a, b) => new { TQuanty = a.TQuanty + b.TQuanty, TAmount = a.TAmount + b.TAmount });
+				return nml.TAmount / nml.TQuanty;
 			}
 		}
-		
 		/// <summary>現在単価</summary>
 		public double PerPrice {
 			get {
