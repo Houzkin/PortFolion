@@ -52,6 +52,7 @@ namespace PortFolion.ViewModels {
 			OnPropertyChanged(nameof(InvestmentTotal));
 			OnPropertyChanged(nameof(InvestmentReturnTotal));
 
+			OnPropertyChanged(nameof(ProfitLoss));
 			OnPropertyChanged(nameof(UnrealizedProfitLoss));
 		}
 
@@ -75,12 +76,20 @@ namespace PortFolion.ViewModels {
 		public long InvestmentTotal { get; private set; }
 		public long InvestmentReturnTotal { get; private set; }
 
-		/// <summary>含み</summary>
-		public long UnrealizedProfitLoss {
+		/// <summary>PL</summary>
+		public long ProfitLoss {
 			get {
 				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
 			}
 		}
+		public virtual long UnrealizedProfitLoss {
+			get {
+				return Children.Sum(a => a.UnrealizedProfitLoss);
+			}
+		}
+		public virtual double UnrealizedPLRatio
+			=> Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
+
 		#endregion
 		protected override void Dispose(bool disposing) {
 			if (disposing) listener?.Dispose();

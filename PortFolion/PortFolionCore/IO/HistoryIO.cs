@@ -35,13 +35,15 @@ namespace PortFolion.IO {
 			}
 		}
 		internal static IEnumerable<TotalRiskFundNode> ReadRoots() {
-			return new DirectoryInfo(_path)
-				.GetDirectories("*", SearchOption.TopDirectoryOnly)
-				.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
-				.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
-				.Where(a => ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name))
-				.Select(a => readRoot(a.FullName))
-				.Where(a => a != null);
+			return Enumerable.Empty<TotalRiskFundNode>();
+			//以下にエラーあり
+			//return new DirectoryInfo(_path)
+			//	.GetDirectories("*", SearchOption.TopDirectoryOnly)
+			//	.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
+			//	.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
+			//	.Where(a => ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name))
+			//	.Select(a => readRoot(a.FullName))
+			//	.Where(a => a != null);
 		}
 		static TotalRiskFundNode readRoot(string path) {
 			SerializableNodeMap<CushionNode> nodes;

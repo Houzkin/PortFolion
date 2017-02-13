@@ -10,7 +10,11 @@ using PortFolion.IO;
 namespace PortFolion.Core {
 	public class RootCollection : ObservableCollection<TotalRiskFundNode> {//,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
 
-		private RootCollection() : base(HistoryIO.ReadRoots().OrderBy(a=>a.CurrentDate)) { }
+		//private RootCollection() : base(HistoryIO.ReadRoots().OrderBy(a=>a.CurrentDate)) { }
+		private RootCollection() {
+			var itm = HistoryIO.ReadRoots().OrderBy(a => a.CurrentDate);
+			foreach (var i in itm) this.Items.Add(i);
+		}
 
 		public static RootCollection Instance { get; } = new RootCollection();
 

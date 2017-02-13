@@ -23,27 +23,31 @@ namespace PortFolion.ViewModels {
 		}
 		protected override void ReCalc() {
 			base.ReCalc();
-			OnPropertyChanged(nameof(PerPriceAverage));
 			OnPropertyChanged(nameof(PerPrice));
-		}
-		/// <summary>平均取得コスト</summary>
-		public double PerPriceAverage {
-			get {
-				var m = this.CurrentPositionLine.OfType<FinancialProduct>();
-				if (!m.Any()) return 0;
-				//if (m.Count() == 1) return m.Last().InvestmentValue / m.Last().TradeQuantity;
+			var m = this.CurrentPositionLine.OfType<FinancialProduct>();
+			if (m.Any()) {
 				var nml = m.Zip(m.Skip(1), (a, b) => a.Quantity == 0 ? 1D : (b.Quantity - b.TradeQuantity) / a.Quantity)
-					.Concat(new double[] { 1.0 })
-					.Reverse()
-					.Scan(1D, (a, b) => a * b)
-					.Reverse()
-					.Zip(m, (r, fp) => new { TQuanty = fp.TradeQuantity * r, TAmount = fp.InvestmentValue })
-					.Where(a => a.TQuanty > 0)
-					.Aggregate(
-						new { TQuanty = 1D, TAmount = 1D },
-						(a, b) => new { TQuanty = a.TQuanty + b.TQuanty, TAmount = a.TAmount + b.TAmount });
-				return nml.TAmount / nml.TQuanty;
+						.Concat(new double[] { 1.0 })
+						.Reverse()
+						.Scan(1D, (a, b) => a * b)
+						.Reverse()
+						.Zip(m, (r, fp) => new { TQuanty = fp.TradeQuantity * r, TAmount = fp.InvestmentValue })
+						.Where(a => a.TQuanty > 0)
+						.Aggregate(
+							new { TQuanty = 1D, TAmount = 1D },
+							(a, b) => new { TQuanty = a.TQuanty + b.TQuanty, TAmount = a.TAmount + b.TAmount });
+				PerBuyPriceAverage = nml.TAmount / nml.TQuanty;
+			} else {
+				PerBuyPriceAverage = 0;
 			}
+			OnPropertyChanged(nameof(UnrealizedProfitLoss));
+			OnPropertyChanged(nameof(UnrealizedPLRatio));
+		}
+		double _perBuyPriceAve;
+		/// <summary>平均買付額</summary>
+		public double PerBuyPriceAverage {
+			get { return _perBuyPriceAve; }
+			private set { SetProperty(ref _perBuyPriceAve, value); }
 		}
 		/// <summary>現在単価</summary>
 		public double PerPrice {
@@ -52,26 +56,23 @@ namespace PortFolion.ViewModels {
 					o => o.Amount / o.Quantity,
 					x => 0);
 			}
-			//set {
-			//	var fp = Model as FinancialProduct;
-			//	if (fp == null) return;
-			//	fp.SetAmount((long)(fp.Quantity * value));
-			//}
 		}
-		//[ReflectReferenceValue]
-		//public long Quantity {
+		/// <summary>含み</summary>
+		public override long UnrealizedProfitLoss {
+			get {
+				return MaybeModelAs<FinancialProduct>().TrueOrNot(
+					o => o.Amount - (long)(PerBuyPriceAverage * o.Quantity),
+					x => 0);
+			}
+		}
+		//public override double UnrealizedPLRatio
+		//	=> Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
 		//	get {
 		//		return MaybeModelAs<FinancialProduct>().TrueOrNot(
-		//			o => o.Quantity,
+		//			o => o.Amount != 0 ? UnrealizedProfitLoss / o.Amount * 100 : 0,
 		//			x => 0);
-		//	}
-		//	set {
-		//		var fp = Model as FinancialProduct;
-		//		if (fp == null || this.CurrentPerPrice == 0 || value == 0) return;
-		//		if(!IsBlocking(nameof(Quantity)))
-		//			fp.SetQuantity(value);
-		//		fp.SetAmount((long)(value * CurrentPerPrice));
 		//	}
 		//}
 	}
 }
+		

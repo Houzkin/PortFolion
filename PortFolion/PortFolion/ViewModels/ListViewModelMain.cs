@@ -12,7 +12,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Windows.Input;
-using PortFolion.Models;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
@@ -20,6 +19,7 @@ namespace PortFolion.ViewModels {
 		public ListviewModel() {
 			Model = RootCollection.Instance;
 			Model.CollectionChanged += CollectionChanged;
+
 			this.dtr.DateTimeSelected += selectedDateList;
 			totalRiskFund = RootCollection.Instance.LastOrDefault();
 			if (totalRiskFund != null) {
