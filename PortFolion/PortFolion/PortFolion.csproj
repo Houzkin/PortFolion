@@ -104,6 +104,7 @@
     </ApplicationDefinition>
     <Compile Include="ViewModels\DateTree.cs" />
     <Compile Include="ViewModels\ListViewModelMain.cs" />
+    <Compile Include="ViewModels\NodeElementEdit.cs" />
     <Compile Include="ViewModels\NodeNameEdit.cs" />
     <Compile Include="ViewModels\TreeLeafVM.cs" />
     <Compile Include="ViewModels\TreeNodeVM.cs" />

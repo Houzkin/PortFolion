@@ -124,61 +124,13 @@ namespace PortFolion.ViewModels {
 	}
 	public class FinancialBacketVM : CommonNodeVM {
 		public FinancialBacketVM(CommonNode model) : base(model){
-			init();
+			
 		}
-		private void init() {
-			var type = Model.GetType();
-			if(type == typeof(TotalRiskFundNode)) {
-
-			}else if(type == typeof(BrokerNode)) {
-
-			}else if(type == typeof(AccountNode)) {
-
-			}else if(typeof(FinancialValue).IsAssignableFrom(type)) {
-
+		ViewModelCommand editCmd;
+		public ICommand EditCommand {
+			get {
+				return editCmd;
 			}
 		}
 	}
-	//public class TotalRiskFundNodeVM : CommonNodeVM {
-	//	public TotalRiskFundNodeVM(TotalRiskFundNode model) : base(model) {
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを追加" });
-	//	}
-	//}
-	//public class BrokerNodeVM : CommonNodeVM {
-	//	public BrokerNodeVM(AccountNode model) : base(model) {
-	//		var addItem = new MenuItemVm() { Header = "追加" };
-	//		addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "一般" });
-	//		addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "信用" });
-	//		addItem.Children.Add(new MenuItemVm(()=> { }) { Header = "為替" });
-	//		MenuList.Add(addItem);
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカー名の変更" });
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "ブローカーを除外" });
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
-	//	}
-	//}
-	//public class AccountNodeVM : CommonNodeVM {
-	//	public AccountNodeVM(AccountNode model) : base(model) {
-	//		MenuItemVm addItem;
-	//		switch (model.Account) {
-	//		case AccountClass.General:
-	//			addItem = new MenuItemVm(() => { }) { Header = "新規買付" };
-	//			break;
-	//		case AccountClass.Credit:
-	//			addItem = new MenuItemVm(() => { }) { Header = "新規建玉" };
-	//			break;
-	//		case AccountClass.FX:
-	//			addItem = new MenuItemVm(() => { }) { Header = "新規ポジション" };
-	//			break;
-	//		default:
-	//			addItem = new MenuItemVm(() => { });
-	//			break;
-	//		}
-	//		MenuList.Add(addItem);
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "InvestOrRetrun" });
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウント名の変更" });
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "アカウントを除外" });
-	//		MenuList.Add(new MenuItemVm(()=> { }) { Header = "タグの編集" });
-	//	}
-		
-	//}
 }
