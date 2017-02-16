@@ -44,7 +44,7 @@ namespace PortFolion.Core {
 	}
 	/// <summary>金融商品</summary>
 	public class FinancialProduct : FinancialValue {
-		internal FinancialProduct() { }
+		public FinancialProduct() { }
 		internal FinancialProduct(CushionNode cushion) : base(cushion) {
 			_quantity = cushion.Quantity;
 			_tradeQuantity = cushion.TradeQuantity;
@@ -82,7 +82,7 @@ namespace PortFolion.Core {
 		}
 	}
 	public class StockValue : FinancialProduct {
-		internal StockValue() { }
+		public StockValue() { }
 		internal StockValue(CushionNode cushion) : base(cushion) {
 			_code = ResultWithValue.Of<int>(int.TryParse, cushion.Code)
 				.EitherWay(r => r);
