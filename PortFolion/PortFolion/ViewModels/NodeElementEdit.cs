@@ -90,7 +90,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		protected string _Amount;
-		public string Amount {
+		public virtual string Amount {
 			get { return _Amount; }
 			set { SetProperty(ref _Amount, value); }
 		}
@@ -110,12 +110,23 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		protected string _CurrentPerPriceAverage;
-		public string CurrentPerPriceAverage { get; set; }
 		protected string _CurrentPerPrice;
 		public string CurrentPerPrice { get; set; }
-		protected string _ProfitLoss;
-		public string ProfitLoss { get; set; }
+
+		void setValue(long tQuantity,long invest,long quantity,long amount,double perValue) {
+			//amount
+			if (amount == 0) {
+				var am = (long)((tQuantity + quantity) * perValue);
+				if (am != 0) amount = am;
+			}
+			//perValue
+			else if(perValue == 0) {
+				var q = tQuantity + quantity;
+				if (q != 0) {
+					perValue = amount / (tQuantity + quantity);
+				}
+			}
+		}
 
 		#region dummy's method
 		public virtual bool CanCreateNewViewModel {
