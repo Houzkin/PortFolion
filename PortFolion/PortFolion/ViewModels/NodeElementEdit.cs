@@ -1,5 +1,6 @@
 ﻿using Houzkin;
 using Houzkin.Architecture;
+using Houzkin.Tree;
 using Livet;
 using Livet.Commands;
 using PortFolion.Core;
@@ -13,7 +14,6 @@ using System.Windows.Input;
 
 namespace PortFolion.ViewModels {
 	public class AccountEditVM : DynamicViewModel<AccountNode> {
-		CashVM cashVM;
 		public AccountEditVM(AccountNode an) : base(an) {
 			var cash = Model.Children.FirstOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
 			if(cash == null) {
@@ -21,28 +21,27 @@ namespace PortFolion.ViewModels {
 				cash.Name = "余力";
 				Model.AddChild(cash);
 			}
-			cashVM = new CashVM(cash);
-			Stocks = new ObservableCollection<StockVM>(
-				Model.Children
-					.Where(a => a.GetType() == typeof(StockValue))
-					.Select(a => new StockVM(a as StockValue)));
-			Products = new ObservableCollection<ProductVM>(
-				Model.Children
-					.Where(a => a.GetType() == typeof(FinancialProduct))
-					.Select(a => new ProductVM(a as FinancialProduct)));
+			
+			Elements = new ObservableCollection<CashVM>(
+				Model.Children.Select(a => {
+					var t = a.GetType();
+					if (t == typeof(StockValue)) return new StockVM(a as StockValue);
+					else if (t == typeof(FinancialProduct)) return new ProductVM(a as FinancialProduct);
+					else return new CashVM(a as FinancialValue);
+				}));
+
 		}
-		public ObservableCollection<StockVM> Stocks { get; private set; }
-		public ObservableCollection<ProductVM> Products { get; private set; }
+		public ObservableCollection<CashVM> Elements { get; set; }
 
 		public StockVM DummyStock { get; } = new StockVM();
 		ViewModelCommand addStockCmd;
 		public ICommand AddStock 
 			=> addStockCmd = addStockCmd ?? new ViewModelCommand(executeAddStock, canAddStock);
 		bool canAddStock() {
-			return DummyStock.CanCreateNewViewModel && Stocks.All(a => a.Name != DummyStock.Name);
+			return DummyStock.CanCreateNewViewModel && Elements.Where(a=>a.IsStock).All(a => a.Name != DummyStock.Name);
 		}
 		void executeAddStock() {
-			Stocks.Add(DummyStock.CreateViewModel());
+			Elements.Add(DummyStock.CreateViewModel());
 		}
 
 		public ProductVM DummyProduct { get; } = new ProductVM();
@@ -50,30 +49,37 @@ namespace PortFolion.ViewModels {
 		public ICommand AddProduct
 			=> addProductCommand = addProductCommand ?? new ViewModelCommand(executeAddProduct, canAddProduct);
 		bool canAddProduct() {
-			return DummyProduct.CanCreateNewViewModel && Products.All(a => a.Name != DummyProduct.Name);
+			return DummyProduct.CanCreateNewViewModel && Elements.Where(a=>a.IsProduct).All(a => a.Name != DummyProduct.Name);
 		}
 		void executeAddProduct() {
-			Products.Add(DummyProduct.CreateViewModel());
+			Elements.Add(DummyProduct.CreateViewModel());
 		}
 
 		ViewModelCommand applyCmd;
 		public ICommand Apply => applyCmd = applyCmd ?? new ViewModelCommand(apply, canApply);
-		bool canApply() 
-			=> Stocks.All(a => !a.HasErrors) && Products.All(a => !a.HasErrors) && !cashVM.HasErrors;
-		
+		bool canApply()
+			=> Elements.All(a => !a.HasErrors);
 		void apply() {
+
+		}
+
+		ViewModelCommand allSellCmd;
+		public ICommand AllSell => allSellCmd = allSellCmd ?? new ViewModelCommand(allsell);
+		void allsell() {
 
 		}
 	}
 	
 	public class CashVM : DynamicViewModel<FinancialValue> {
 		public CashVM(FinancialValue fv) : base(fv) {
-			if (fv != null) {
-				Name = fv.Name;
-				_InvestmentValue = fv.InvestmentValue.ToString();
-				_Amount = fv.Amount.ToString();
-			}
+			Name = fv.Name;
+			_InvestmentValue = fv.InvestmentValue.ToString();
+			_Amount = fv.Amount.ToString();
 		}
+		protected CashVM() : base(null) { }
+		public bool IsCash => GetType() == typeof(CashVM);
+		public bool IsStock => GetType() == typeof(StockVM);
+		public bool IsProduct => GetType() == typeof(ProductVM);
 		protected bool IsDummy => Model == null;
 		string _name;
 		public string Name {
@@ -81,6 +87,7 @@ namespace PortFolion.ViewModels {
 			set { SetProperty(ref _name, value); }
 		}
 		protected string _InvestmentValue;
+		protected double _investmentValue => ResultWithValue.Of<double>(double.TryParse, _InvestmentValue).Value;
 		public virtual string InvestmentValue {
 			get { return _InvestmentValue; }
 			set {
@@ -90,41 +97,53 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		protected string _Amount;
+		protected double _amount => ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
 		public virtual string Amount {
 			get { return _Amount; }
 			set { SetProperty(ref _Amount, value); }
 		}
 	}
 	public class ProductVM : CashVM {
-		public ProductVM(FinancialProduct fp) : base(fp) { }
-		public ProductVM() : base(null) { }
+		public ProductVM(FinancialProduct fp) : base(fp) {
+			_TradeQuantity = fp.TradeQuantity.ToString();
+			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString() : "";
+			_Quantity = fp.Quantity.ToString();
+		}
+		public ProductVM() : base() { }
+
 		public new FinancialProduct Model => base.Model as FinancialProduct;
-		protected string _Quantity;
-		public string Quantity { get; set; }
 		protected string _TradeQuantity;
-		public string TradeQuantity {
+		protected double _tradeQuantity => ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
+		public virtual string TradeQuantity {
 			get { return _TradeQuantity; }
 			set {
 				if(SetProperty(ref _TradeQuantity, value)) {
+					Quantity = (Model.Quantity + _tradeQuantity).ToString();
 
 				}
 			}
 		}
+		public override string InvestmentValue {
+			get { return base.InvestmentValue; }
+			set { SetProperty(ref _InvestmentValue, value); }
+		}
 		protected string _CurrentPerPrice;
-		public string CurrentPerPrice { get; set; }
-
-		void setValue(long tQuantity,long invest,long quantity,long amount,double perValue) {
-			//amount
-			if (amount == 0) {
-				var am = (long)((tQuantity + quantity) * perValue);
-				if (am != 0) amount = am;
-			}
-			//perValue
-			else if(perValue == 0) {
-				var q = tQuantity + quantity;
-				if (q != 0) {
-					perValue = amount / (tQuantity + quantity);
+		protected double _currentPerPrice => ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
+		public virtual string CurrentPerPrice {
+			get { return _CurrentPerPrice; }
+			set {
+				if(SetProperty(ref _CurrentPerPrice, value)) {
+					Amount = (_quantity * _currentPerPrice).ToString();
 				}
+			}
+		}
+		protected string _Quantity;
+		protected double _quantity => ResultWithValue.Of<double>(double.TryParse, _Quantity).Value;
+		public virtual string Quantity {
+			get { return _Quantity; }
+			set {
+				if(SetProperty(ref _Quantity, value)) 
+					Amount = (_quantity * _currentPerPrice).ToString();
 			}
 		}
 
@@ -155,10 +174,24 @@ namespace PortFolion.ViewModels {
 		#endregion
 	}
 	public class StockVM: ProductVM {
-		public StockVM(StockValue sv) : base(sv) { }
+		public StockVM(StockValue sv) : base(sv) {
+			_Code = sv.Code.ToString();
+		}
 		public StockVM() : base() { }
 		public new StockValue Model => base.Model as StockValue;
-		public string Code { get; set; }
+		protected string _Code;
+		public string Code {
+			get { return _Code; }
+			set { SetProperty(ref _Code, value, codeValidate); }
+		}
+		string codeValidate(string value) {
+			var r = ResultWithValue.Of<int>(int.TryParse, value);
+			if (!r) return "コードを入力してください";
+			if (value.Count() > 4) return "4桁";
+			if (value.Count() < 4) return "";
+			//var codes = PortFolion.Web.KdbDataClient.AcqireStockInfo()
+			return null;
+		}
 
 		#region dummy's method
 		public override bool CanCreateNewViewModel
