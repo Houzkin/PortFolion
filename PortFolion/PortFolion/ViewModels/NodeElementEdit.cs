@@ -60,13 +60,36 @@ namespace PortFolion.ViewModels {
 		bool canApply()
 			=> Elements.All(a => !a.HasErrors);
 		void apply() {
+			int cnt = Elements.Count;
+			for(int i = 0; i<cnt; i++) {
 
+			}
+			Elements.Select(a => a.Model).ForEach((ele, index) => { });
 		}
 
 		ViewModelCommand allSellCmd;
 		public ICommand AllSell => allSellCmd = allSellCmd ?? new ViewModelCommand(allsell);
 		void allsell() {
+			var elem = Elements.OfType<ProductVM>();
+			var ec = Elements.Single(a => a.IsCash);
 
+			var unrePL = elem.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value);
+			var cam = ResultWithValue.Of<double>(double.TryParse, ec.Amount).Value;
+			var civ = ResultWithValue.Of<double>(double.TryParse, ec.InvestmentValue).Value;
+			ec.InvestmentValue = ((-1D * civ) + (-1D * cam)).ToString();
+			ec.Amount = "0";
+
+			foreach(var e in elem) {
+				var am = ResultWithValue.Of<double>(double.TryParse, e.Amount).Value;
+				var iv = ResultWithValue.Of<double>(double.TryParse, e.InvestmentValue).Value;
+				var q = ResultWithValue.Of<double>(double.TryParse, e.Quantity).Value;
+				var tq = ResultWithValue.Of<double>(double.TryParse, e.TradeQuantity).Value;
+				e.TradeQuantity = ((-1D * tq) + (-1D * q)).ToString();
+				e.InvestmentValue = ((-1D * iv) + (-1D * am)).ToString();
+				e.Quantity = "0";
+				e.Amount = "0";
+			}
+			if(canApply()) apply();
 		}
 	}
 	
@@ -80,7 +103,8 @@ namespace PortFolion.ViewModels {
 		public bool IsCash => GetType() == typeof(CashVM);
 		public bool IsStock => GetType() == typeof(StockVM);
 		public bool IsProduct => GetType() == typeof(ProductVM);
-		protected bool IsDummy => Model == null;
+		public virtual bool IsRemoveElement => false;
+		public new FinancialValue Model => base.Model;
 		string _name;
 		public string Name {
 			get { return _name; }
@@ -100,7 +124,10 @@ namespace PortFolion.ViewModels {
 		protected double _amount => ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
 		public virtual string Amount {
 			get { return _Amount; }
-			set { SetProperty(ref _Amount, value); }
+			set {
+				SetProperty(ref _Amount, value);
+				OnPropertyChanged(nameof(IsRemoveElement));
+			}
 		}
 	}
 	public class ProductVM : CashVM {
@@ -110,7 +137,7 @@ namespace PortFolion.ViewModels {
 			_Quantity = fp.Quantity.ToString();
 		}
 		public ProductVM() : base() { }
-
+		public override bool IsRemoveElement => _amount == 0 && _quantity == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
 		protected string _TradeQuantity;
 		protected double _tradeQuantity => ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
@@ -119,7 +146,6 @@ namespace PortFolion.ViewModels {
 			set {
 				if(SetProperty(ref _TradeQuantity, value)) {
 					Quantity = (Model.Quantity + _tradeQuantity).ToString();
-
 				}
 			}
 		}
@@ -189,7 +215,11 @@ namespace PortFolion.ViewModels {
 			if (!r) return "コードを入力してください";
 			if (value.Count() > 4) return "4桁";
 			if (value.Count() < 4) return "";
-			//var codes = PortFolion.Web.KdbDataClient.AcqireStockInfo()
+			var d = Model.Upstream().OfType<TotalRiskFundNode>().Last().CurrentDate;
+			var tgh = Web.KdbDataClient.AcqireStockInfo(d)
+				.Where(a => int.Parse(a.Symbol) == r.Value).ToArray();
+			if (!tgh.Any()) return "";
+			this.CurrentPerPrice = tgh.OrderBy(a => a.Turnover).Last().Close.ToString();
 			return null;
 		}
 
