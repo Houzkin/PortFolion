@@ -64,7 +64,33 @@ namespace PortFolion.ViewModels {
 			for(int i = 0; i<cnt; i++) {
 
 			}
-			Elements.Select(a => a.Model).ForEach((ele, index) => { });
+			Elements.Where(a => !a.IsRemoveElement || Model.Children.Contains(a.Model)).ForEach((ele, index) => {
+				if (Model.Children[index] == ele.Model) return;
+				if (Model.Children.Contains(ele.Model)) {
+					int oldIndex = Model.Children.IndexOf(ele.Model);
+					Model.Children.Move(oldIndex, index);
+					return;
+				}
+				if (ele.IsCash) {
+					Model.Children.Insert(0, ele.Model);
+				} else if (ele.IsProduct) {
+					var li = Model.Children.Where(a => a.GetType() == typeof(FinancialProduct)).OrderBy(a => a.Name).LastOrDefault();
+					if (li == null) {
+						Model.Children.Add(ele.Model);
+					} else {
+						int lidx = Model.Children.IndexOf(li);
+						Model.Children.Insert(lidx + 1, ele.Model);
+					}
+				} else if (ele.IsStock) {
+					var li = Model.Children.OfType<StockValue>().OrderBy(a => a.Code).LastOrDefault();
+					if (li == null) {
+						Model.Children.Insert(1, ele.Model);
+					} else {
+						int lidx = Model.Children.IndexOf(li);
+						Model.Children.Insert(lidx + 1, ele.Model);
+					}
+				}
+			});
 		}
 
 		ViewModelCommand allSellCmd;
