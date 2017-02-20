@@ -108,6 +108,9 @@
     <Compile Include="ViewModels\NodeNameEdit.cs" />
     <Compile Include="ViewModels\TreeLeafVM.cs" />
     <Compile Include="ViewModels\TreeNodeVM.cs" />
+    <Compile Include="Views\AccountEditWindow.xaml.cs">
+      <DependentUpon>AccountEditWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
     <Compile Include="Views\GraphContents.xaml.cs">
       <DependentUpon>GraphContents.xaml</DependentUpon>
@@ -124,6 +127,10 @@
     <Compile Include="Views\ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\AccountEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\GraphContents.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

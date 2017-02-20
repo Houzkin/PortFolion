@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PortFolion.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,7 @@ namespace PortFolion.Views {
 	public partial class ListTab : UserControl {
 		public ListTab() {
 			InitializeComponent();
+			this.DataContext = ListviewModel.Instance;
 		}
 	}
 }

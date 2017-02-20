@@ -15,8 +15,12 @@ using System.Windows.Input;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
+		static ListviewModel _instance;
+		public static ListviewModel Instance {
+			get { return _instance = _instance ?? new ListviewModel(); }
+		}
 		RootCollection Model;
-		public ListviewModel() {
+		private ListviewModel() {
 			Model = RootCollection.Instance;
 			Model.CollectionChanged += CollectionChanged;
 
@@ -134,5 +138,6 @@ namespace PortFolion.ViewModels {
 					n.IsExpand = false;
 		}
 		#endregion
+
 	}
 }

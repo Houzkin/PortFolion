@@ -10,8 +10,10 @@ using System.ComponentModel;
 using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
-
-	public class FinancialProductVM : CommonNodeVM {
+	public class FinancialValueVM : CommonNodeVM {
+		public FinancialValueVM(FinancialValue model) : base(model) { }
+	}
+	public class FinancialProductVM : FinancialBacketVM {
 		public FinancialProductVM(FinancialProduct model) : base(model) {
 		}
 		protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {

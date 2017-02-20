@@ -59,10 +59,10 @@ namespace PortFolion.ViewModels {
          */
 
 		public void Initialize() {
-			listContents = new ListviewModel();
+			//listContents = ListviewModel.Instance;
 		}
-		ListviewModel listContents;
-		public ListviewModel ListContents
-			=> listContents;
+		//ListviewModel listContents;
+		//public ListviewModel ListContents
+		//	=> listContents;
 	}
 }

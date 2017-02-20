@@ -19,7 +19,7 @@
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
         </Grid.Resources>
-      
+
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Date" TextAlignment="Left">
@@ -53,16 +53,16 @@
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
-                
-                <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Top" Margin="0" HorizontalAlignment="Center">
+
+                <StackPanel Orientation="Vertical" Grid.Row="1" VerticalAlignment="Top" Margin="0" HorizontalAlignment="Center">
                     <DatePicker
                         x:Name="PickedDate"
-                        Margin="5, 10"
-                        HorizontalAlignment="Center"
+                        Margin="5, 3"
+                        HorizontalAlignment="Right"
                         Controls:TextBoxHelper.UseFloatingWatermark="True"
                         Controls:TextBoxHelper.Watermark="Select a date" />
-                    <Button Content="新規追加" HorizontalAlignment="Center"
-                            Margin="5,10"
+                    <Button Content="新規追加" HorizontalAlignment="Right"
+                            Margin="5,3"
                             Command="{Binding AddNewRootCommand}"
                             CommandParameter="{Binding ElementName=PickedDate, Path=SelectedDate}"/>
                 </StackPanel>
@@ -128,22 +128,22 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="評価額" Width="auto">
-                        
+
                     </GridViewColumn>
                     <GridViewColumn Header="取引数" Width="auto">
-                        
+
                     </GridViewColumn>
                     <GridViewColumn Header="保有数" Width="auto">
-                        
+
                     </GridViewColumn>
                     <GridViewColumn Header="平均取得単価" Width="auto">
-                        
+
                     </GridViewColumn>
                     <GridViewColumn Header="現在単価" Width="auto">
-                        
+
                     </GridViewColumn>
                     <GridViewColumn Header="含み損益" Width="auto">
-                        
+
                     </GridViewColumn>
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
@@ -152,7 +152,7 @@
         <GridSplitter Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5"/>
         <StackPanel Orientation="Vertical" Grid.Column="2" Margin="5,0,0,0">
             <TextBlock Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
-            
+
             <DataGrid x:Name="History" Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" AutoGenerateColumns="False">
                 <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate}"/>
                 <DataGridTextColumn Header="買付額(+)・売却額(-)" Binding="{Binding InvestmentValue}"/>

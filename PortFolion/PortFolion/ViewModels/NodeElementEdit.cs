@@ -60,35 +60,17 @@ namespace PortFolion.ViewModels {
 		bool canApply()
 			=> Elements.All(a => !a.HasErrors);
 		void apply() {
-			int cnt = Elements.Count;
-			for(int i = 0; i<cnt; i++) {
-
-			}
-			Elements.Where(a => !a.IsRemoveElement || Model.Children.Contains(a.Model)).ForEach((ele, index) => {
-				if (Model.Children[index] == ele.Model) return;
+			var elems = Elements.Where(a => !a.IsRemoveElement || Model.Children.Contains(a.Model)).ToArray();
+			var csh = elems.Where(a => a.IsCash);
+			var stc = elems.Where(a => a.IsStock).OfType<StockVM>().OrderBy(a => a.Code);
+			var prd = elems.Where(a => a.IsProduct).OrderBy(a => a.Name);
+			csh.Concat(stc).Concat(prd).ForEach((ele, idx) => {
 				if (Model.Children.Contains(ele.Model)) {
-					int oldIndex = Model.Children.IndexOf(ele.Model);
-					Model.Children.Move(oldIndex, index);
-					return;
-				}
-				if (ele.IsCash) {
-					Model.Children.Insert(0, ele.Model);
-				} else if (ele.IsProduct) {
-					var li = Model.Children.Where(a => a.GetType() == typeof(FinancialProduct)).OrderBy(a => a.Name).LastOrDefault();
-					if (li == null) {
-						Model.Children.Add(ele.Model);
-					} else {
-						int lidx = Model.Children.IndexOf(li);
-						Model.Children.Insert(lidx + 1, ele.Model);
-					}
-				} else if (ele.IsStock) {
-					var li = Model.Children.OfType<StockValue>().OrderBy(a => a.Code).LastOrDefault();
-					if (li == null) {
-						Model.Children.Insert(1, ele.Model);
-					} else {
-						int lidx = Model.Children.IndexOf(li);
-						Model.Children.Insert(lidx + 1, ele.Model);
-					}
+					int oidx = Model.Children.IndexOf(ele.Model);
+					if(oidx != idx)
+						Model.Children.Move(oidx, idx);
+				}else {
+					Model.Children.Insert(idx, ele.Model);
 				}
 			});
 		}
@@ -116,6 +98,18 @@ namespace PortFolion.ViewModels {
 				e.Amount = "0";
 			}
 			if(canApply()) apply();
+		}
+
+		ViewModelCommand cancelCml;
+		public ICommand Cancel => cancelCml = cancelCml ?? new ViewModelCommand(cancel);
+		void cancel() {
+			Elements.Clear();
+			Model.Children.Select(a => {
+				var t = a.GetType();
+				if (t == typeof(StockValue)) return new StockVM(a as StockValue);
+				else if (t == typeof(FinancialProduct)) return new ProductVM(a as FinancialProduct);
+				else return new CashVM(a as FinancialValue);
+			}).ForEach(a => Elements.Add(a));
 		}
 	}
 	

@@ -51,9 +51,6 @@ namespace PortFolion.ViewModels {
 			InvestmentReturnTotal = CurrentPositionLine.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentReturnValue) * -1;
 			OnPropertyChanged(nameof(InvestmentTotal));
 			OnPropertyChanged(nameof(InvestmentReturnTotal));
-
-			OnPropertyChanged(nameof(ProfitLoss));
-			OnPropertyChanged(nameof(UnrealizedProfitLoss));
 		}
 
 		Dictionary<DateTime, CommonNode> _currentPositionLine;
@@ -98,8 +95,10 @@ namespace PortFolion.ViewModels {
 		public static CommonNodeVM Create(CommonNode node) {
 			if (node == null) return null;
 			var mcn = node.GetType();
-			if (typeof(FinancialProduct).IsAssignableFrom(mcn)) {
+			if (typeof(FinancialProduct)== mcn) {
 				return new FinancialProductVM(node as FinancialProduct);
+			}else if (typeof(FinancialValue)== mcn) {
+				return new FinancialValueVM(node as FinancialValue);
 			}else {
 				return new FinancialBacketVM(node);
 			}
@@ -124,13 +123,23 @@ namespace PortFolion.ViewModels {
 	}
 	public class FinancialBacketVM : CommonNodeVM {
 		public FinancialBacketVM(CommonNode model) : base(model){
-			
-		}
-		ViewModelCommand editCmd;
-		public ICommand EditCommand {
-			get {
-				return editCmd;
+			var ty = model.GetType();
+			if(ty == typeof(AccountNode)) {
+				var vc = new ViewModelCommand(() => {
+					var vm = new AccountEditVM(model as AccountNode);
+
+				});
+				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
 			}
+			MenuList.Add(new MenuItemVm(()=> { }) { Header = "名前の変更" });
 		}
+		protected override void ReCalc() {
+			base.ReCalc();
+			
+			OnPropertyChanged(nameof(ProfitLoss));
+			OnPropertyChanged(nameof(UnrealizedProfitLoss));
+		}
+		
+		
 	}
 }

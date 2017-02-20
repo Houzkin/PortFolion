@@ -85,7 +85,7 @@
             <Controls:MetroTabItem Header="_Graph">
                 <v:GraphTab/>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="_List" DataContext="{Binding ListContents}">
+            <Controls:MetroTabItem Header="_List">
                 <v:ListTab/>
             </Controls:MetroTabItem>
         </TabControl>
