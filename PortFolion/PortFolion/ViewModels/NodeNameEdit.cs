@@ -17,6 +17,7 @@ namespace PortFolion.ViewModels {
 		/// <param name="parent">親ノード</param>
 		/// <param name="model">編集対象となる子ノード</param>
 		public NodeNameEditerVM(CommonNode parent,CommonNode model) : base(model) {
+			if (parent == null || model == null) throw new ArgumentNullException();
 			Parent = parent;
 			this.Name = model.Name;
 		}

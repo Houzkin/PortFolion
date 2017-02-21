@@ -22,18 +22,18 @@ namespace PortFolion.ViewModels {
 				Model.AddChild(cash);
 			}
 			
-			Elements = new ObservableCollection<CashVM>(
+			Elements = new ObservableCollection<CashEditVM>(
 				Model.Children.Select(a => {
 					var t = a.GetType();
-					if (t == typeof(StockValue)) return new StockVM(a as StockValue);
-					else if (t == typeof(FinancialProduct)) return new ProductVM(a as FinancialProduct);
-					else return new CashVM(a as FinancialValue);
+					if (t == typeof(StockValue)) return new StockEditVM(a as StockValue);
+					else if (t == typeof(FinancialProduct)) return new ProductEditVM(a as FinancialProduct);
+					else return new CashEditVM(a as FinancialValue);
 				}));
 
 		}
-		public ObservableCollection<CashVM> Elements { get; set; }
+		public ObservableCollection<CashEditVM> Elements { get; private set; }
 
-		public StockVM DummyStock { get; } = new StockVM();
+		public StockEditVM DummyStock { get; } = new StockEditVM();
 		ViewModelCommand addStockCmd;
 		public ICommand AddStock 
 			=> addStockCmd = addStockCmd ?? new ViewModelCommand(executeAddStock, canAddStock);
@@ -44,7 +44,7 @@ namespace PortFolion.ViewModels {
 			Elements.Add(DummyStock.CreateViewModel());
 		}
 
-		public ProductVM DummyProduct { get; } = new ProductVM();
+		public ProductEditVM DummyProduct { get; } = new ProductEditVM();
 		ViewModelCommand addProductCommand;
 		public ICommand AddProduct
 			=> addProductCommand = addProductCommand ?? new ViewModelCommand(executeAddProduct, canAddProduct);
@@ -62,7 +62,7 @@ namespace PortFolion.ViewModels {
 		void apply() {
 			var elems = Elements.Where(a => !a.IsRemoveElement || Model.Children.Contains(a.Model)).ToArray();
 			var csh = elems.Where(a => a.IsCash);
-			var stc = elems.Where(a => a.IsStock).OfType<StockVM>().OrderBy(a => a.Code);
+			var stc = elems.Where(a => a.IsStock).OfType<StockEditVM>().OrderBy(a => a.Code);
 			var prd = elems.Where(a => a.IsProduct).OrderBy(a => a.Name);
 			csh.Concat(stc).Concat(prd).ForEach((ele, idx) => {
 				if (Model.Children.Contains(ele.Model)) {
@@ -78,7 +78,7 @@ namespace PortFolion.ViewModels {
 		ViewModelCommand allSellCmd;
 		public ICommand AllSell => allSellCmd = allSellCmd ?? new ViewModelCommand(allsell);
 		void allsell() {
-			var elem = Elements.OfType<ProductVM>();
+			var elem = Elements.OfType<ProductEditVM>();
 			var ec = Elements.Single(a => a.IsCash);
 
 			var unrePL = elem.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value);
@@ -106,23 +106,27 @@ namespace PortFolion.ViewModels {
 			Elements.Clear();
 			Model.Children.Select(a => {
 				var t = a.GetType();
-				if (t == typeof(StockValue)) return new StockVM(a as StockValue);
-				else if (t == typeof(FinancialProduct)) return new ProductVM(a as FinancialProduct);
-				else return new CashVM(a as FinancialValue);
+				if (t == typeof(StockValue)) return new StockEditVM(a as StockValue);
+				else if (t == typeof(FinancialProduct)) return new ProductEditVM(a as FinancialProduct);
+				else return new CashEditVM(a as FinancialValue);
 			}).ForEach(a => Elements.Add(a));
 		}
 	}
 	
-	public class CashVM : DynamicViewModel<FinancialValue> {
-		public CashVM(FinancialValue fv) : base(fv) {
+	public class CashEditVM : DynamicViewModel<FinancialValue> {
+		public CashEditVM(FinancialValue fv) : base(fv) {
 			Name = fv.Name;
 			_InvestmentValue = fv.InvestmentValue.ToString();
 			_Amount = fv.Amount.ToString();
 		}
-		protected CashVM() : base(null) { }
-		public bool IsCash => GetType() == typeof(CashVM);
-		public bool IsStock => GetType() == typeof(StockVM);
-		public bool IsProduct => GetType() == typeof(ProductVM);
+		public virtual void Apply() {
+			Model.Name = Name;
+			Model.SetInvestmentValue((long)_investmentValue);
+			Model.SetAmount((long)_amount);
+		}
+		public bool IsCash => GetType() == typeof(CashEditVM);
+		public bool IsStock => GetType() == typeof(StockEditVM);
+		public bool IsProduct => GetType() == typeof(ProductEditVM);
 		public virtual bool IsRemoveElement => false;
 		public new FinancialValue Model => base.Model;
 		string _name;
@@ -150,13 +154,17 @@ namespace PortFolion.ViewModels {
 			}
 		}
 	}
-	public class ProductVM : CashVM {
-		public ProductVM(FinancialProduct fp) : base(fp) {
+	public class ProductEditVM : CashEditVM {
+		public ProductEditVM(FinancialProduct fp) : base(fp) {
 			_TradeQuantity = fp.TradeQuantity.ToString();
 			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString() : "";
 			_Quantity = fp.Quantity.ToString();
 		}
-		public ProductVM() : base() { }
+		public override void Apply() {
+			base.Apply();
+			Model.SetTradeQuantity((long)_tradeQuantity);
+		}
+		public ProductEditVM() : base(new FinancialValue()) { }
 		public override bool IsRemoveElement => _amount == 0 && _quantity == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
 		protected string _TradeQuantity;
@@ -211,19 +219,19 @@ namespace PortFolion.ViewModels {
 			fp.SetTradeQuantity(long.Parse(TradeQuantity));
 			return fp;
 		}
-		public ProductVM CreateViewModel() {
+		public ProductEditVM CreateViewModel() {
 			if (CanCreateNewViewModel)
-				return new ProductVM(this.ToNewViewModel(new FinancialProduct()));
+				return new ProductEditVM(this.ToNewViewModel(new FinancialProduct()));
 			else
 				throw new InvalidOperationException();
 		}
 		#endregion
 	}
-	public class StockVM: ProductVM {
-		public StockVM(StockValue sv) : base(sv) {
+	public class StockEditVM: ProductEditVM {
+		public StockEditVM(StockValue sv) : base(sv) {
 			_Code = sv.Code.ToString();
 		}
-		public StockVM() : base() { }
+		public StockEditVM() : base(new StockValue()) { }
 		public new StockValue Model => base.Model as StockValue;
 		protected string _Code;
 		public string Code {
@@ -236,7 +244,8 @@ namespace PortFolion.ViewModels {
 			if (value.Count() > 4) return "4桁";
 			if (value.Count() < 4) return "";
 			var d = Model.Upstream().OfType<TotalRiskFundNode>().Last().CurrentDate;
-			var tgh = Web.KdbDataClient.AcqireStockInfo(d)
+			var tgh = Web.KdbDataClient
+				.AcqireStockInfo(d)
 				.Where(a => int.Parse(a.Symbol) == r.Value).ToArray();
 			if (!tgh.Any()) return "";
 			this.CurrentPerPrice = tgh.OrderBy(a => a.Turnover).Last().Close.ToString();
@@ -252,9 +261,9 @@ namespace PortFolion.ViewModels {
 			m.Code = int.Parse(Code);
 			return m;
 		}
-		public new StockVM CreateViewModel() {
+		public new StockEditVM CreateViewModel() {
 			if (CanCreateNewViewModel)
-				return new StockVM(ToNewViewModel(new StockValue()) as StockValue);
+				return new StockEditVM(ToNewViewModel(new StockValue()) as StockValue);
 			else
 				throw new InvalidOperationException();
 		}

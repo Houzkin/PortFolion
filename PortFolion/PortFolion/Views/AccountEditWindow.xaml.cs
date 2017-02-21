@@ -24,9 +24,12 @@ namespace PortFolion.Views {
 	/// <summary>
 	/// AccountEditWindow.xaml の相互作用ロジック
 	/// </summary>
-	public partial class AccountEditWindow : Window {
+	public partial class AccountEditWindow : MahApps.Metro.Controls.MetroWindow {
 		public AccountEditWindow() {
 			InitializeComponent();
+		}
+		public AccountEditWindow(object context) : this() {
+			this.DataContext = context;
 		}
 	}
 }

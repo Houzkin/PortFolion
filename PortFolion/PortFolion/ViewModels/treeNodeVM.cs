@@ -17,7 +17,7 @@ namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		protected CommonNodeVM(CommonNode model) : base(model) {
 			
-			listener = new PropertyChangedWeakEventListener(model, ModelPropertyChanged);
+			listener = new PropertyChangedWeakEventListener(model, new PropertyChangedEventHandler((o,e)=> { ModelPropertyChanged(o, e); }));
 			ReCalc();
 		}
 		IDisposable listener;
@@ -35,22 +35,24 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
-			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
+			foreach (var n in this.Levelorder().Reverse()) n.ReCalc();
+			//foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
 		}
-		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			if (e.PropertyName == nameof(Model.Amount) 
-				|| e.PropertyName == nameof(Model.InvestmentValue) 
-				|| e.PropertyName == nameof(Model.InvestmentReturnValue)) {
-				ReCalc();
+		protected virtual bool ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			if (e.PropertyName == nameof(Model.InvestmentValue)) {
+				reculcHistories();
+				return true;
 			}
+			return false;
+		}
+		void reculcHistories() {
+			_currentPositionLine = null;
+			InvestmentTotal = CurrentPositionLine.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
+			InvestmentReturnTotal = CurrentPositionLine.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue) * -1;
 		}
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
-			_currentPositionLine = null;
-			InvestmentTotal = CurrentPositionLine.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
-			InvestmentReturnTotal = CurrentPositionLine.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentReturnValue) * -1;
-			OnPropertyChanged(nameof(InvestmentTotal));
-			OnPropertyChanged(nameof(InvestmentReturnTotal));
+			reculcHistories();
 		}
 
 		Dictionary<DateTime, CommonNode> _currentPositionLine;
@@ -68,24 +70,26 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public DateTime? CurrentDate => (Model.Root() as TotalRiskFundNode)?.CurrentDate;
-		
-		#region DataViewColumn
-		public long InvestmentTotal { get; private set; }
-		public long InvestmentReturnTotal { get; private set; }
 
-		/// <summary>PL</summary>
-		public long ProfitLoss {
-			get {
-				return (Model.Amount - InvestmentTotal + InvestmentReturnTotal);
+		#region DataViewColumn
+		long _invTotal;
+		public virtual long InvestmentTotal {
+			get { return _invTotal; }
+			set {
+				if (_invTotal == value) return;
+				_invTotal = value;
+				OnPropertyChanged();
 			}
 		}
-		public virtual long UnrealizedProfitLoss {
-			get {
-				return Children.Sum(a => a.UnrealizedProfitLoss);
+		long _invReturnTotal;
+		public virtual long InvestmentReturnTotal {
+			get { return _invReturnTotal; }
+			set {
+				if (_invReturnTotal == value) return;
+				_invReturnTotal = value;
+				OnPropertyChanged();
 			}
 		}
-		public virtual double UnrealizedPLRatio
-			=> Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
 
 		#endregion
 		protected override void Dispose(bool disposing) {
@@ -100,7 +104,7 @@ namespace PortFolion.ViewModels {
 			}else if (typeof(FinancialValue)== mcn) {
 				return new FinancialValueVM(node as FinancialValue);
 			}else {
-				return new FinancialBacketVM(node);
+				return new FinancialBasketVM(node);
 			}
 		}
 	}
@@ -121,25 +125,55 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> Children 
 			=> children = children ?? new ObservableCollection<MenuItemVm>();
 	}
-	public class FinancialBacketVM : CommonNodeVM {
-		public FinancialBacketVM(CommonNode model) : base(model){
+	public class FinancialBasketVM : CommonNodeVM {
+		public FinancialBasketVM(CommonNode model) : base(model){
 			var ty = model.GetType();
 			if(ty == typeof(AccountNode)) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new AccountEditVM(model as AccountNode);
-
+					var w = new Views.AccountEditWindow(vm);
+					w.ShowDialog();
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
 			}
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "名前の変更" });
+
+			var vmc = new ViewModelCommand(() => {
+				var vm = new NodeNameEditerVM(model.Parent, model);
+				// window.ShowDialog();
+			}, () => model.Parent != null);
+			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
+			
 		}
 		protected override void ReCalc() {
 			base.ReCalc();
-			
-			OnPropertyChanged(nameof(ProfitLoss));
-			OnPropertyChanged(nameof(UnrealizedProfitLoss));
+			reculc();
 		}
-		
-		
+		protected override bool ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			if(base.ModelPropertyChanged(sender,e) 
+				|| e.PropertyName == nameof(Model.Amount)) {
+				reculc();
+				return true;
+			}
+			return false;
+		}
+		void reculc() {
+			this.ProfitLoss = Model.Amount - InvestmentTotal - InvestmentReturnTotal;
+			this.UnrealizedProfitLoss = Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
+			//this.UnrealizedPLRatio = Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
+			OnPropertyChanged(nameof(UnrealizedPLRatio));
+		}
+		long _pl;
+		/// <summary>PL</summary>
+		public long ProfitLoss {
+			get { return _pl; }
+			set { SetProperty(ref _pl, value); }
+		}
+		long _upl;
+		public virtual long UnrealizedProfitLoss {
+			get { return _upl; }
+			set { SetProperty(ref _upl, value); }
+		}
+		public double UnrealizedPLRatio
+			=> Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
 	}
 }
