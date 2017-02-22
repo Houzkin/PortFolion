@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.ComponentModel;
 
 namespace PortFolion.ViewModels {
 	public class AccountEditVM : DynamicViewModel<AccountNode> {
@@ -18,41 +19,82 @@ namespace PortFolion.ViewModels {
 			var cash = Model.Children.FirstOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
 			if(cash == null) {
 				cash = new FinancialValue();
-				cash.Name = "余力";
+				string name = "余力";
+				int num = 1;
+				while(Model.Children.Any(a=>a.Name == name)) {
+					name = "余力" + num;
+					num++;
+				}
+				cash.Name = name;
 				Model.AddChild(cash);
 			}
 			
 			Elements = new ObservableCollection<CashEditVM>(
 				Model.Children.Select(a => {
 					var t = a.GetType();
-					if (t == typeof(StockValue)) return new StockEditVM(a as StockValue);
-					else if (t == typeof(FinancialProduct)) return new ProductEditVM(a as FinancialProduct);
-					else return new CashEditVM(a as FinancialValue);
+					if (t == typeof(StockValue)) return new StockEditVM(this, a as StockValue);
+					else if (t == typeof(FinancialProduct)) return new ProductEditVM(this, a as FinancialProduct);
+					else return new CashEditVM(this, a as FinancialValue);
 				}));
-
+			DummyStock = new StockEditVM(this);
+			DummyProduct = new ProductEditVM(this);
 		}
 		public ObservableCollection<CashEditVM> Elements { get; private set; }
 
-		public StockEditVM DummyStock { get; } = new StockEditVM();
+		StockEditVM _dummyStock;
+		public StockEditVM DummyStock {
+			get { return _dummyStock; }
+			set {
+				if (_dummyStock == value) return;
+				var ndei = (_dummyStock as INotifyDataErrorInfo);
+				if(ndei != null) ndei.ErrorsChanged -= Ndei_ErrorsChanged;
+				_dummyStock = value;
+				ndei = _dummyStock;
+				if (ndei != null) ndei.ErrorsChanged += Ndei_ErrorsChanged;
+			}
+		}
+		private void Ndei_ErrorsChanged(object sender, DataErrorsChangedEventArgs e)
+			=> AddStock.RaiseCanExecuteChanged();
+
 		ViewModelCommand addStockCmd;
-		public ICommand AddStock 
+		public ViewModelCommand AddStock 
 			=> addStockCmd = addStockCmd ?? new ViewModelCommand(executeAddStock, canAddStock);
 		bool canAddStock() {
-			return DummyStock.CanCreateNewViewModel && Elements.Where(a=>a.IsStock).All(a => a.Name != DummyStock.Name);
+			return !DummyStock.HasErrors && Elements.Where(a=>a.IsStock).All(a => a.Name != DummyStock.Name);
 		}
 		void executeAddStock() {
-			Elements.Add(DummyStock.CreateViewModel());
+			DummyStock.Apply();
+			Elements.Add(DummyStock);
+			DummyStock = new StockEditVM(this);
+			OnPropertyChanged(nameof(DummyStock));
 		}
 
-		public ProductEditVM DummyProduct { get; } = new ProductEditVM();
+		ProductEditVM _dummyProduct;
+		public ProductEditVM DummyProduct {
+			get { return _dummyProduct; }
+			set {
+				if (_dummyProduct == value) return;
+				var tmp = (_dummyProduct as INotifyDataErrorInfo);
+				if(tmp != null) tmp.ErrorsChanged -= Tmp_ErrorsChanged;
+				_dummyProduct = value;
+				tmp = _dummyProduct;
+				if (tmp != null) tmp.ErrorsChanged += Tmp_ErrorsChanged;
+			}
+		}
+		private void Tmp_ErrorsChanged(object sender, DataErrorsChangedEventArgs e)
+			=> AddProduct.RaiseCanExecuteChanged();
+
 		ViewModelCommand addProductCommand;
-		public ICommand AddProduct
+		public ViewModelCommand AddProduct
 			=> addProductCommand = addProductCommand ?? new ViewModelCommand(executeAddProduct, canAddProduct);
 		bool canAddProduct() {
 			return DummyProduct.CanCreateNewViewModel && Elements.Where(a=>a.IsProduct).All(a => a.Name != DummyProduct.Name);
 		}
 		void executeAddProduct() {
-			Elements.Add(DummyProduct.CreateViewModel());
+			DummyProduct.Apply();
+			Elements.Add(DummyProduct);
+			DummyProduct = new ProductEditVM(this);
+			OnPropertyChanged(nameof(DummyProduct));
 		}
 
 		ViewModelCommand applyCmd;
@@ -106,16 +148,18 @@ namespace PortFolion.ViewModels {
 			Elements.Clear();
 			Model.Children.Select(a => {
 				var t = a.GetType();
-				if (t == typeof(StockValue)) return new StockEditVM(a as StockValue);
-				else if (t == typeof(FinancialProduct)) return new ProductEditVM(a as FinancialProduct);
-				else return new CashEditVM(a as FinancialValue);
+				if (t == typeof(StockValue)) return new StockEditVM(this, a as StockValue);
+				else if (t == typeof(FinancialProduct)) return new ProductEditVM(this, a as FinancialProduct);
+				else return new CashEditVM(this, a as FinancialValue);
 			}).ForEach(a => Elements.Add(a));
 		}
 	}
 	
 	public class CashEditVM : DynamicViewModel<FinancialValue> {
-		public CashEditVM(FinancialValue fv) : base(fv) {
-			Name = fv.Name;
+		protected readonly AccountEditVM AccountVM;
+		public CashEditVM(AccountEditVM ac, FinancialValue fv) : base(fv) {
+			AccountVM = ac;
+			_name = fv.Name;
 			_InvestmentValue = fv.InvestmentValue.ToString();
 			_Amount = fv.Amount.ToString();
 		}
@@ -129,10 +173,21 @@ namespace PortFolion.ViewModels {
 		public bool IsProduct => GetType() == typeof(ProductEditVM);
 		public virtual bool IsRemoveElement => false;
 		public new FinancialValue Model => base.Model;
+		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		string _name;
 		public string Name {
 			get { return _name; }
-			set { SetProperty(ref _name, value); }
+			set { SetProperty(ref _name, value,nameVali); }
+		}
+		string nameVali(string param) {
+			if (AccountVM.Elements.Contains(this)) {
+				if (1 < AccountVM.Elements.Count(a => a.Name == param))
+					return "重複あり";
+			}else {
+				if (AccountVM.Elements.Any(a => a.Name == param))
+					return "重複があるため追加不可";
+			}
+			return "";
 		}
 		protected string _InvestmentValue;
 		protected double _investmentValue => ResultWithValue.Of<double>(double.TryParse, _InvestmentValue).Value;
@@ -155,7 +210,7 @@ namespace PortFolion.ViewModels {
 		}
 	}
 	public class ProductEditVM : CashEditVM {
-		public ProductEditVM(FinancialProduct fp) : base(fp) {
+		public ProductEditVM(AccountEditVM ac, FinancialProduct fp) : base(ac, fp) {
 			_TradeQuantity = fp.TradeQuantity.ToString();
 			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString() : "";
 			_Quantity = fp.Quantity.ToString();
@@ -163,8 +218,9 @@ namespace PortFolion.ViewModels {
 		public override void Apply() {
 			base.Apply();
 			Model.SetTradeQuantity((long)_tradeQuantity);
+			Model.SetQuantity((long)_quantity);
 		}
-		public ProductEditVM() : base(new FinancialValue()) { }
+		public ProductEditVM(AccountEditVM ac) : base(ac, new FinancialValue()) { }
 		public override bool IsRemoveElement => _amount == 0 && _quantity == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
 		protected string _TradeQuantity;
@@ -228,10 +284,10 @@ namespace PortFolion.ViewModels {
 		#endregion
 	}
 	public class StockEditVM: ProductEditVM {
-		public StockEditVM(StockValue sv) : base(sv) {
+		public StockEditVM(AccountEditVM ac, StockValue sv) : base(ac, sv) {
 			_Code = sv.Code.ToString();
 		}
-		public StockEditVM() : base(new StockValue()) { }
+		public StockEditVM(AccountEditVM ac) : base(ac, new StockValue()) { }
 		public new StockValue Model => base.Model as StockValue;
 		protected string _Code;
 		public string Code {
@@ -241,15 +297,21 @@ namespace PortFolion.ViewModels {
 		string codeValidate(string value) {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
 			if (!r) return "コードを入力してください";
-			if (value.Count() > 4) return "4桁";
-			if (value.Count() < 4) return "";
+			if (value.Count() != 4) return "4桁";
 			var d = Model.Upstream().OfType<TotalRiskFundNode>().Last().CurrentDate;
 			var tgh = Web.KdbDataClient
 				.AcqireStockInfo(d)
 				.Where(a => int.Parse(a.Symbol) == r.Value).ToArray();
 			if (!tgh.Any()) return "";
-			this.CurrentPerPrice = tgh.OrderBy(a => a.Turnover).Last().Close.ToString();
+			var tg = tgh.OrderBy(a => a.Turnover).Last();
+			this.CurrentPerPrice = tg.Close.ToString();
+			if (string.IsNullOrEmpty(this.Name) || string.IsNullOrWhiteSpace(this.Name))
+				this.Name = tg.Name;
 			return null;
+		}
+		public override void Apply() {
+			base.Apply();
+			Model.Code = ResultWithValue.Of<int>(int.TryParse, _Code).Value;
 		}
 
 		#region dummy's method
