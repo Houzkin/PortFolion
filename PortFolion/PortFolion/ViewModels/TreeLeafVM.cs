@@ -31,10 +31,10 @@ namespace PortFolion.ViewModels {
 			reculc();
 		}
 		void reculc() {
-			var m = this.CurrentPositionLine.OfType<FinancialProduct>();
 			PerPrice = MaybeModelAs<FinancialProduct>().TrueOrNot(
 					o => o.Amount / o.Quantity,
 					x => 0D);
+			var m = this.CurrentPositionLine.OfType<FinancialProduct>();
 			if (m.Any()) {
 				var nml = m.Zip(m.Skip(1), (a, b) => a.Quantity == 0 ? 1D : (b.Quantity - b.TradeQuantity) / a.Quantity)
 						.Concat(new double[] { 1.0 })
@@ -50,11 +50,13 @@ namespace PortFolion.ViewModels {
 			} else {
 				PerBuyPriceAverage = 0;
 			}
-			UnrealizedProfitLoss = MaybeModelAs<FinancialProduct>().TrueOrNot(
-					o => o.Amount - (long)(PerBuyPriceAverage * o.Quantity),
-					x => 0);
+			OnPropertyChanged(nameof(UnrealizedProfitLoss));
 			OnPropertyChanged(nameof(UnrealizedPLRatio));
 		}
+		public override long UnrealizedProfitLoss
+			=> MaybeModelAs<FinancialProduct>().TrueOrNot(
+				o => o.Amount - (long)(PerBuyPriceAverage * o.Quantity),
+				x => 0);
 		double _perBuyPriceAve;
 		/// <summary>平均買付額</summary>
 		public double PerBuyPriceAverage {

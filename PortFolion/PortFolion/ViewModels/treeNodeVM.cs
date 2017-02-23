@@ -158,8 +158,9 @@ namespace PortFolion.ViewModels {
 		}
 		void reculc() {
 			this.ProfitLoss = Model.Amount - InvestmentTotal - InvestmentReturnTotal;
-			this.UnrealizedProfitLoss = Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
+			//this.UnrealizedProfitLoss = Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
 			//this.UnrealizedPLRatio = Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
+			OnPropertyChanged(nameof(UnrealizedProfitLoss));
 			OnPropertyChanged(nameof(UnrealizedPLRatio));
 		}
 		long _pl;
@@ -168,11 +169,11 @@ namespace PortFolion.ViewModels {
 			get { return _pl; }
 			set { SetProperty(ref _pl, value); }
 		}
-		long _upl;
-		public virtual long UnrealizedProfitLoss {
-			get { return _upl; }
-			set { SetProperty(ref _upl, value); }
-		}
+		/// <summary>含み損益</summary>
+		public virtual long UnrealizedProfitLoss
+			=> Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
+
+		/// <summary>含み損益率</summary>
 		public double UnrealizedPLRatio
 			=> Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
 	}
