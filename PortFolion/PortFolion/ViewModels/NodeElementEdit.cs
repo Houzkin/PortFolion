@@ -13,9 +13,16 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.ComponentModel;
 using System.Windows;
+using System.Collections.Specialized;
+using Livet.Messaging;
 
 namespace PortFolion.ViewModels {
 	public class AccountEditVM : DynamicViewModel<AccountNode> {
+		private InteractionMessenger _messenger;
+		public InteractionMessenger Messenger {
+			get { return _messenger = _messenger ?? new InteractionMessenger(); }
+			set { _messenger = value; }
+		}
 		public AccountEditVM(AccountNode an) : base(an) {
 			var cash = Model.Children.FirstOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
 			if(cash == null) {
@@ -29,20 +36,22 @@ namespace PortFolion.ViewModels {
 				cash.Name = name;
 				Model.AddChild(cash);
 			}
-			
-			Elements = new ObservableCollection<CashEditVM>(
-				Model.Children.Select(a => {
-					var t = a.GetType();
-					if (t == typeof(StockValue)) return new StockEditVM(this, a as StockValue);
-					else if (t == typeof(FinancialProduct)) return new ProductEditVM(this, a as FinancialProduct);
-					else return new CashEditVM(this, a as FinancialValue);
-				}));
+
+			resetElements();
+			Elements.CollectionChanged += (s, e) => ChangedTemporaryAmount();
 			DummyStock = new StockEditVM(this);
 			DummyProduct = new ProductEditVM(this);
 		}
-		public ObservableCollection<CashEditVM> Elements { get; private set; }
+		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
 		public DateTime CurrentDate
 			=> (Model.Root() as TotalRiskFundNode).CurrentDate;
+		public string TemporaryAmount {
+			get {
+				return Elements.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value).ToString("#.##");
+			}
+		}
+		public void ChangedTemporaryAmount() { OnPropertyChanged(nameof(TemporaryAmount)); }
+
 		StockEditVM _dummyStock;
 		public StockEditVM DummyStock {
 			get { return _dummyStock; }
@@ -150,8 +159,8 @@ namespace PortFolion.ViewModels {
 		}
 
 		ViewModelCommand cancelCml;
-		public ICommand Cancel => cancelCml = cancelCml ?? new ViewModelCommand(cancel);
-		void cancel() {
+		public ICommand Cancel => cancelCml = cancelCml ?? new ViewModelCommand(resetElements);
+		void resetElements() {
 			Elements.Clear();
 			Model.Children.Select(a => {
 				var t = a.GetType();
@@ -160,6 +169,38 @@ namespace PortFolion.ViewModels {
 				else return new CashEditVM(this, a as FinancialValue);
 			}).ForEach(a => Elements.Add(a));
 		}
+		ViewModelCommand applyCurrentPerPrice;
+		public ViewModelCommand ApplyCurrentPerPrice {
+			get {
+				if(applyCurrentPerPrice == null) {
+					applyCurrentPerPrice = new ViewModelCommand(applyCurrentPrice, canApplyCurrentPrice);
+					Elements.CollectionChanged += (o, e) => applyCurrentPerPrice.RaiseCanExecuteChanged();
+				}
+				return applyCurrentPerPrice;
+			}
+		}
+		void applyCurrentPrice() {
+			var pfs = Elements.OfType<StockEditVM>();
+			if (!pfs.Any()) return;
+			var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
+			var dic = new List<Tuple<string, string>>();
+			
+			foreach(var p in pfs) {
+				var sym = ary.Where(a => a.Symbol == p.Code).OrderBy(a => a.Turnover).LastOrDefault();
+				if (sym == null) {
+					dic.Add(new Tuple<string, string>(p.Code, p.Name));
+				} else {
+					p.CurrentPerPrice = sym.Close.ToString("#.##");
+				}
+			}
+			if (dic.Any()) {
+				string msg = "以下の銘柄は値を更新できませんでした。";
+				var m = dic.Aggregate(msg, (seed, ele) => seed + "\n" + ele.Item1 + " - " + ele.Item2);
+				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
+			}
+		}
+		bool canApplyCurrentPrice()
+			=> Elements.Where(a => a.IsStock).All(a => !a.HasErrors);
 	}
 	
 	public class CashEditVM : DynamicViewModel<FinancialValue> {
@@ -169,7 +210,7 @@ namespace PortFolion.ViewModels {
 			_name = fv.Name;
 			_InvestmentValue = fv.InvestmentValue.ToString();
 			_Amount = fv.Amount.ToString();
-			MenuList.Add(new MenuItemVm(()=> { }) { Header = "名前の変更" });
+			MenuList.Add(new MenuItemVm(editName) { Header = "名前の変更" });
 			MenuList.Add(new MenuItemVm(del) { Header = "削除" });
 		}
 		void editName() {
@@ -241,6 +282,7 @@ namespace PortFolion.ViewModels {
 			set {
 				SetProperty(ref _Amount, value);
 				OnPropertyChanged(nameof(IsRemoveElement));
+				if (AccountVM.Elements.Contains(this)) AccountVM.ChangedTemporaryAmount();
 			}
 		}
 	}
@@ -306,7 +348,10 @@ namespace PortFolion.ViewModels {
 		protected string _Code;
 		public string Code {
 			get { return _Code; }
-			set { SetProperty(ref _Code, value, codeValidate); }
+			set {
+				if (SetProperty(ref _Code, value, codeValidate))
+					AccountVM.ApplyCurrentPerPrice.RaiseCanExecuteChanged();
+			}
 		}
 		string codeValidate(string value) {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
@@ -318,7 +363,7 @@ namespace PortFolion.ViewModels {
 				.Where(a => int.Parse(a.Symbol) == r.Value).ToArray();
 			if (!tgh.Any()) return "";
 			var tg = tgh.OrderBy(a => a.Turnover).Last();
-			this.CurrentPerPrice = tg.Close.ToString();
+			this.CurrentPerPrice = tg.Close.ToString("#.##");
 			if (string.IsNullOrEmpty(this.Name) || string.IsNullOrWhiteSpace(this.Name))
 				this.Name = tg.Name;
 			return null;

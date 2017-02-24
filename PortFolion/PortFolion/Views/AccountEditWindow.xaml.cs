@@ -28,8 +28,5 @@ namespace PortFolion.Views {
 		public AccountEditWindow() {
 			InitializeComponent();
 		}
-		public AccountEditWindow(object context) : this() {
-			this.DataContext = context;
-		}
 	}
 }

@@ -38,6 +38,44 @@
     </i:Interaction.Triggers>
     
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+            <TextBlock Text="AA" FontSize="40"/>
+        </StackPanel>
+        <WrapPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="total" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
+                <TextBlock Text="Sample" Margin="30,1,1,1" FontSize="25" VerticalAlignment="Center"/>
+            </StackPanel>
+            
+        </WrapPanel>
+        <Grid Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Button Content="単価更新" Margin="5,10,5,0"/>
+        </Grid>
+        <DataGrid Grid.Row="3" Grid.Column="0" ItemsSource="{Binding Elements}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Symbol">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="Code"/>
+                                <TextBlock Text="Symbol"/>
+                                <Button Content="▼"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="数量" CanUserSort="False" IsReadOnly="{Binding IsEditableQuantity}"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Controls:MetroWindow>

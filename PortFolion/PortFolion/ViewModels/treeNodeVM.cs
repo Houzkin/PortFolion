@@ -131,7 +131,8 @@ namespace PortFolion.ViewModels {
 			if(ty == typeof(AccountNode)) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new AccountEditVM(model as AccountNode);
-					var w = new Views.AccountEditWindow(vm);
+					var w = new Views.AccountEditWindow();
+					w.DataContext = vm;
 					w.ShowDialog();
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
