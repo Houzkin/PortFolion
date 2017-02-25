@@ -49,21 +49,22 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
-            <TextBlock Text="AA" FontSize="40"/>
+            <TextBlock Text="{Binding CurrentDate, StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="40"/>
         </StackPanel>
         <WrapPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                <TextBlock Text="total :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
-                <TextBlock Text="Sample" Margin="10,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
-            </StackPanel>
+            
 
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                <TextBlock Text="余力 :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
-                <TextBox Text="Sample" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
+                <TextBlock Text="入金(+)または出金(-)額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
+                <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                <TextBlock Text="{Binding CashElement.Name, StringFormat=”{}{0} :”}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
+                <TextBox Text="{Binding CashElement.Amount}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="内、入金(+)または出金(-)額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
-                <TextBox Text="100000" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
+                <TextBlock Text="total :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
+                <TextBlock Text="0000000" Margin="10,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
             </StackPanel>
         </WrapPanel>
         <Grid Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -75,15 +76,21 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding Code}" Margin="0,0,3,0"/>
-                                <TextBlock Text="{Binding Name}" Margin="0,0,3,0"/>
+                                <TextBlock Margin="0,0,3,0">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} {1}" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding Path="Code"/>
+                                            <Binding Path="Name"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                                 <Button Content="▼"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="現在単価" CanUserSort="False"/>
-                <DataGridTextColumn Header="取引数量" CanUserSort="False">
+                <DataGridTextColumn Header="現在単価" Binding="{Binding CurrentPerPrice}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyPerPrice}"/>
+                <DataGridTextColumn Header="取引数量" Binding="{Binding TradeQuantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyTradeQuantity}">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
                             <Grid>
@@ -97,7 +104,7 @@
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
-                <DataGridTextColumn CanUserSort="False">
+                <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserSort="False">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
                             <Grid >
@@ -111,8 +118,8 @@
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="保有数量" CanUserSort="False" IsReadOnly="{Binding IsEditableQuantity}"/>
-                <DataGridTextColumn Header="評価額" CanUserSort="False"/>
+                <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyQuantity}"/>
+                <DataGridTextColumn Header="評価額" Binding="{Binding Amount}" CanUserSort="False"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

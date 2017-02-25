@@ -38,29 +38,31 @@ namespace PortFolion.ViewModels {
 			}
 
 			resetElements();
+			//CashElement = Elements.First(a => a.IsCash);
 			Elements.CollectionChanged += (s, e) => ChangedTemporaryAmount();
 			DummyStock = new StockEditVM(this);
 			DummyProduct = new ProductEditVM(this);
 		}
+		public CashEditVM CashElement => Elements.First(a => a.IsCash);
 		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
 		public DateTime CurrentDate
 			=> (Model.Root() as TotalRiskFundNode).CurrentDate;
-		public string TemporaryAmount {
-			get {
-				return Elements.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value).ToString("#.##");
-			}
-		}
-		public void ChangedTemporaryAmount() { OnPropertyChanged(nameof(TemporaryAmount)); }
+
+		public string TemporaryAmount
+			=> Elements.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value).ToString("#.##");
+
+		public void ChangedTemporaryAmount()
+			=> OnPropertyChanged(nameof(TemporaryAmount));
 
 		StockEditVM _dummyStock;
 		public StockEditVM DummyStock {
 			get { return _dummyStock; }
 			set {
 				if (_dummyStock == value) return;
-				var tmp = (_dummyStock as INotifyDataErrorInfo);
+				var tmp = _dummyStock as INotifyDataErrorInfo;
 				if(tmp != null) tmp.ErrorsChanged -= TempS_ErrorsChanged;
 				_dummyStock = value;
-				tmp = _dummyStock;
+				tmp = _dummyStock as INotifyDataErrorInfo;
 				if (tmp != null) tmp.ErrorsChanged += TempS_ErrorsChanged;
 			}
 		}
@@ -285,6 +287,10 @@ namespace PortFolion.ViewModels {
 				if (AccountVM.Elements.Contains(this)) AccountVM.ChangedTemporaryAmount();
 			}
 		}
+		
+		public virtual bool IsReadOnlyTradeQuantity => true;
+		public virtual bool IsReadOnlyQuantity => true;
+		public virtual bool IsReadOnlyPerPrice => true;
 	}
 	public class ProductEditVM : CashEditVM {
 		public ProductEditVM(AccountEditVM ac, FinancialProduct fp) : base(ac, fp) {
@@ -300,6 +306,15 @@ namespace PortFolion.ViewModels {
 		public ProductEditVM(AccountEditVM ac) : base(ac, new FinancialValue()) { }
 		public override bool IsRemoveElement => _amount == 0 && _quantity == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
+		public override string InvestmentValue {
+			get { return base.InvestmentValue; }
+			set {
+				if (SetProperty(ref _InvestmentValue, value)) {
+					Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
+				}
+			}
+		}
+		public override bool IsReadOnlyTradeQuantity => false;
 		protected string _TradeQuantity;
 		protected double _tradeQuantity => ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
 		public virtual string TradeQuantity {
@@ -310,14 +325,7 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		public override string InvestmentValue {
-			get { return base.InvestmentValue; }
-			set {
-				if (SetProperty(ref _InvestmentValue, value)) {
-					Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
-				}
-			}
-		}
+		public override bool IsReadOnlyPerPrice => false;
 		protected string _CurrentPerPrice;
 		protected double _currentPerPrice => ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
 		public virtual string CurrentPerPrice {
@@ -328,6 +336,7 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
+		public override bool IsReadOnlyQuantity => false;
 		protected string _Quantity;
 		protected double _quantity => ResultWithValue.Of<double>(double.TryParse, _Quantity).Value;
 		public virtual string Quantity {
