@@ -1,6 +1,7 @@
 ﻿using Houzkin.Architecture;
 using Houzkin.Tree;
 using Livet.Commands;
+using Livet.Messaging;
 using PortFolion.Core;
 using System;
 using System.Collections.Generic;
@@ -20,8 +21,21 @@ namespace PortFolion.ViewModels {
 			if (parent == null || model == null) throw new ArgumentNullException();
 			Parent = parent;
 			this.Name = model.Name;
+			this.PresentName = model.Name;
+		}
+		AccountEditVM acc;
+		public NodeNameEditerVM(AccountEditVM account, CommonNode parent, CommonNode model) : this(parent, model) {
+			acc = account;
+		}
+		InteractionMessenger _messenger = new InteractionMessenger();
+		public InteractionMessenger Messenger {
+			get {
+				if (acc != null) return acc.Messenger;
+				else return _messenger;
+			}
 		}
 		public CommonNode Parent { get; private set; }
+		public string PresentName { get; private set; }
 		string _name;
 		public string Name {
 			get { return _name; }
@@ -58,6 +72,7 @@ namespace PortFolion.ViewModels {
 		void AddExecute() {
 			Model.Name = Name;
 			Parent.AddChild(Model);
+			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
 		void EditExecute() {
 			var his = RootCollection.GetNodeLine(Parent.Path);
@@ -70,6 +85,7 @@ namespace PortFolion.ViewModels {
 			foreach(var n in RootCollection.GetNodeLine(Model.Path)) {
 				n.Name = this.Name;
 			}
+			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
 		protected virtual void ExecuteFunc() {
 			if(Parent != Model.Parent) {
@@ -77,6 +93,7 @@ namespace PortFolion.ViewModels {
 			}else {
 				EditExecute();
 			}
+			
 		}
 		protected virtual bool CanExecuteFunc() {
 			return !HasErrors && Model.Name != this.Name && !string.IsNullOrEmpty(this.Name) && !string.IsNullOrWhiteSpace(this.Name);
@@ -84,6 +101,10 @@ namespace PortFolion.ViewModels {
 		ViewModelCommand execute;
 		public ViewModelCommand ExecuteCmd
 			=> execute = execute ?? new ViewModelCommand(ExecuteFunc, CanExecuteFunc);
+		ViewModelCommand cancel;
+		public ViewModelCommand CancelCmd
+			=> cancel = cancel ?? new ViewModelCommand(() => Messenger.Raise(new InteractionMessage("EditEndNodeName")));
+		
 	}
 
 	//public class NodeTagEditerVM : DynamicViewModel<CommonNode> {

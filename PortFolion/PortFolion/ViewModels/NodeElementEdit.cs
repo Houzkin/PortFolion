@@ -43,6 +43,15 @@ namespace PortFolion.ViewModels {
 			DummyStock = new StockEditVM(this);
 			DummyProduct = new ProductEditVM(this);
 		}
+		NodeNameEditerVM nne;
+		public NodeNameEditerVM NodeNameEditer {
+			get { return nne; }
+			set {
+				if (SetProperty(ref nne, value) && nne != null) {
+					Messenger.Raise(new InteractionMessage("EditNodeName"));
+				}
+			}
+		}
 		public CashEditVM CashElement => Elements.First(a => a.IsCash);
 		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
 		public DateTime CurrentDate
@@ -217,7 +226,8 @@ namespace PortFolion.ViewModels {
 		}
 		void editName() {
 			var edi = new NodeNameEditerVM(Model.Parent, Model);
-
+			AccountVM.NodeNameEditer = edi;
+			
 		}
 		void del() {
 			if (IsCash) {

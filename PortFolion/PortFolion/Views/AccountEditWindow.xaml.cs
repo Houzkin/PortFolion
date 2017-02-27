@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Livet.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,5 +29,12 @@ namespace PortFolion.Views {
 		public AccountEditWindow() {
 			InitializeComponent();
 		}
+		ViewModelCommand oennf;
+		public ICommand OpenEditNodeNameFlyout 
+			=> oennf = oennf ?? new ViewModelCommand(() => this.NameEditFlyout.IsOpen = true);
+
+		ViewModelCommand cennf;
+		public ICommand CloseEditNodeNameFlyout
+			=> cennf = cennf ?? new ViewModelCommand(() => this.NameEditFlyout.IsOpen = false);
 	}
 }
