@@ -29,12 +29,13 @@ namespace PortFolion.Views {
 		public AccountEditWindow() {
 			InitializeComponent();
 		}
-		ViewModelCommand oennf;
-		public ICommand OpenEditNodeNameFlyout 
-			=> oennf = oennf ?? new ViewModelCommand(() => this.NameEditFlyout.IsOpen = true);
-
-		ViewModelCommand cennf;
-		public ICommand CloseEditNodeNameFlyout
-			=> cennf = cennf ?? new ViewModelCommand(() => this.NameEditFlyout.IsOpen = false);
+		//ViewModelCommand oennf;
+		//public ICommand OpenEditNodeNameFlyout 
+		//	=> oennf = oennf ?? new ViewModelCommand(() => this.NameEditFlyout.IsOpen = true);
+		public void OpenNameEditFlyout() => this.NameEditFlyout.IsOpen = true;
+		//ViewModelCommand cennf;
+		//public ICommand CloseEditNodeNameFlyout
+		//	=> cennf = cennf ?? new ViewModelCommand(() => this.NameEditFlyout.IsOpen = false);
+		public void CloseNameEditFlyout() => this.NameEditFlyout.IsOpen = false;
 	}
 }

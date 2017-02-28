@@ -40,11 +40,11 @@
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
          
         <l:InteractionMessageTrigger MessageKey="EditNodeName" Messenger="{Binding Messenger}">
-            <i:InvokeCommandAction Command="{x:Reference Name=OpenEditNodeNameFlyout}"/>
+            <l:LivetCallMethodAction MethodTarget="{x:Reference}" MethodName="OpenNameEditFlyout"/>
         </l:InteractionMessageTrigger>
          
         <l:InteractionMessageTrigger MessageKey="EditEndNodeName" Messenger="{Binding Messenger}">
-            <i:InvokeCommandAction Command="{x:Reference Name=CloseEditNodeNameFlyout}"/>
+            <l:LivetCallMethodAction MethodTarget="{x:Reference}" MethodName="CloseNameEditFlyout"/>
         </l:InteractionMessageTrigger>
 
 
@@ -83,8 +83,6 @@
             <TextBlock Text="{Binding CurrentDate, StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="40"/>
         </StackPanel>
         <WrapPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
-            
-
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
                 <TextBlock Text="入金(+)または出金(-)額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
@@ -138,7 +136,7 @@
                 <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserSort="False">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
-                            <Grid >
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -153,5 +151,8 @@
                 <DataGridTextColumn Header="評価額" Binding="{Binding Amount}" CanUserSort="False"/>
             </DataGrid.Columns>
         </DataGrid>
+        <TabControl Grid.Row="3" Grid.Column="1">
+            
+        </TabControl>
     </Grid>
 </mah:MetroWindow>

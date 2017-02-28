@@ -225,9 +225,8 @@ namespace PortFolion.ViewModels {
 			MenuList.Add(new MenuItemVm(del) { Header = "削除" });
 		}
 		void editName() {
-			var edi = new NodeNameEditerVM(Model.Parent, Model);
+			var edi = new FromAccountEditerNameEditVM(AccountVM, Model.Parent, Model);// new NodeNameEditerVM(Model.Parent, Model);
 			AccountVM.NodeNameEditer = edi;
-			
 		}
 		void del() {
 			if (IsCash) {

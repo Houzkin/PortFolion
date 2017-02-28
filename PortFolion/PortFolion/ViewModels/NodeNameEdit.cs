@@ -11,6 +11,35 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace PortFolion.ViewModels {
+	public class FromAccountEditerNameEditVM : NodeNameEditerVM {
+		AccountEditVM acc;
+		public FromAccountEditerNameEditVM(AccountEditVM account, CommonNode parent,CommonNode model)
+			: base(parent, model) {
+			acc = account;
+		}
+		public override InteractionMessenger Messenger => acc.Messenger;
+		protected override string NameValidate(string newName) {
+			newName = newName.Trim();
+			if (acc.Elements.Where(a => a.Model != this.Model).Select(a => a.Name).Contains(newName))
+				return "名前が重複するため変更できません";
+			else
+				return NameValidateHistory(newName);
+		}
+		protected override void ExecuteFunc() {
+			if (Parent != Model.Parent) {
+				Model.Name = Name.Trim();
+				Messenger.Raise(new InteractionMessage("EditEndNodeName"));
+			} else {
+				base.ExecuteFunc();
+			}
+		}
+		ViewModelCommand _cancelCmd;
+		public override ViewModelCommand CancelCmd
+			=> _cancelCmd = _cancelCmd ?? new ViewModelCommand(
+				() => {
+					acc.NodeNameEditer = null;
+				});
+	}
 		
 	public class NodeNameEditerVM : DynamicViewModel<CommonNode> {
 		
@@ -23,17 +52,14 @@ namespace PortFolion.ViewModels {
 			this.Name = model.Name;
 			this.PresentName = model.Name;
 		}
-		AccountEditVM acc;
-		public NodeNameEditerVM(AccountEditVM account, CommonNode parent, CommonNode model) : this(parent, model) {
-			acc = account;
-		}
-		InteractionMessenger _messenger = new InteractionMessenger();
-		public InteractionMessenger Messenger {
-			get {
-				if (acc != null) return acc.Messenger;
-				else return _messenger;
-			}
-		}
+		//AccountEditVM acc;
+		//public NodeNameEditerVM(AccountEditVM account, CommonNode parent, CommonNode model) : this(parent, model) {
+		//	acc = account;
+		//}
+		InteractionMessenger _messenger;
+		public virtual InteractionMessenger Messenger
+			=> _messenger = _messenger ?? new InteractionMessenger(); 
+
 		public CommonNode Parent { get; private set; }
 		public string PresentName { get; private set; }
 		string _name;
@@ -45,10 +71,18 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		protected virtual string NameValidate(string newName) {
+			newName = newName.Trim();
 			if (Parent != Model.Parent && Parent.Children.Any(a => a.Name == newName)) return "名前が重複するため追加できません";
 			if(Parent == Model.Parent) {
-				if (Parent.Children.Where(a => a != Model).Any(a => a.Name == newName)) return "名前が重複するため変更できません";
-
+				if (Parent.Children.Where(a => a != Model).Any(a => a.Name == newName))
+					return "名前が重複するため変更できません";
+				else
+					return NameValidateHistory(newName);
+			}
+			return null;
+		}
+		protected string NameValidateHistory(string newName) {
+			if(Parent == Model.Parent) {
 				var his = RootCollection.GetNodeLine(Parent.Path)
 					.ToDictionary(
 						a => (a.Root() as TotalRiskFundNode).CurrentDate,
@@ -70,20 +104,21 @@ namespace PortFolion.ViewModels {
 			return null;
 		}
 		void AddExecute() {
-			Model.Name = Name;
+			Model.Name = Name.Trim();
 			Parent.AddChild(Model);
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
 		void EditExecute() {
+			var name = this.Name.Trim();
 			var his = RootCollection.GetNodeLine(Parent.Path);
-			if(his.Any(a=>a.Children.Any(b=>b.Name == this.Name))) {
-				string msg = "[" + this.Name + "] は別の時系列に既に存在します。\n["
-					+Model.Name+ "] は変更後、既存の ["+this.Name+"] と同一のものとして扱われます。\nこの操作は不可逆です。";
+			if(his.Any(a=>a.Children.Any(b=>b.Name == name))) {
+				string msg = "[" + name + "] は別の時系列に既に存在します。\n["
+					+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。\nこの操作は不可逆です。";
 				var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
 				if (r == MessageBoxResult.Cancel) return;
 			}
 			foreach(var n in RootCollection.GetNodeLine(Model.Path)) {
-				n.Name = this.Name;
+				n.Name = name;
 			}
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
@@ -96,14 +131,18 @@ namespace PortFolion.ViewModels {
 			
 		}
 		protected virtual bool CanExecuteFunc() {
-			return !HasErrors && Model.Name != this.Name && !string.IsNullOrEmpty(this.Name) && !string.IsNullOrWhiteSpace(this.Name);
+			var name = this.Name.Trim();
+			return !HasErrors && Model.Name != name && !string.IsNullOrEmpty(name);
 		}
 		ViewModelCommand execute;
 		public ViewModelCommand ExecuteCmd
 			=> execute = execute ?? new ViewModelCommand(ExecuteFunc, CanExecuteFunc);
 		ViewModelCommand cancel;
-		public ViewModelCommand CancelCmd
-			=> cancel = cancel ?? new ViewModelCommand(() => Messenger.Raise(new InteractionMessage("EditEndNodeName")));
+		public virtual ViewModelCommand CancelCmd
+			=> cancel = cancel ?? new ViewModelCommand(
+				() => {
+					Messenger.Raise(new InteractionMessage("EditEndNodeName"));
+				});
 		
 	}
 
