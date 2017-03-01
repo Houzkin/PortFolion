@@ -28,17 +28,14 @@ namespace PortFolion.ViewModels {
 		protected override void ExecuteFunc() {
 			if (Parent != Model.Parent) {
 				Model.Name = Name.Trim();
-				Messenger.Raise(new InteractionMessage("EditEndNodeName"));
+				acc.NodeNameEditer = null;
 			} else {
 				base.ExecuteFunc();
 			}
 		}
 		ViewModelCommand _cancelCmd;
 		public override ViewModelCommand CancelCmd
-			=> _cancelCmd = _cancelCmd ?? new ViewModelCommand(
-				() => {
-					acc.NodeNameEditer = null;
-				});
+			=> _cancelCmd = _cancelCmd ?? new ViewModelCommand(() => acc.NodeNameEditer = null);
 	}
 		
 	public class NodeNameEditerVM : DynamicViewModel<CommonNode> {

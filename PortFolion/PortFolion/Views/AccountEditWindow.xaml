@@ -11,7 +11,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d" SaveWindowPosition="False"
         GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
-        Title="AccountEdit" Height="500" Width="800">
+        Title="AccountEdit" Height="500" Width="750">
     
     <!--<Window.DataContext>
         <vm:AccountEditWindowViewModel/>
@@ -76,8 +76,8 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
             <TextBlock Text="{Binding CurrentDate, StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="40"/>
@@ -96,10 +96,10 @@
                 <TextBlock Text="0000000" Margin="10,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
             </StackPanel>
         </WrapPanel>
-        <Grid Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
+        <Grid Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
             <Button Content="単価更新" Margin="5,10,5,0"/>
         </Grid>
-        <DataGrid Grid.Row="3" Grid.Column="0" ItemsSource="{Binding Elements}" AutoGenerateColumns="False">
+        <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Elements}" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="銘柄・ポジション" >
                     <DataGridTemplateColumn.CellTemplate>
@@ -151,8 +151,81 @@
                 <DataGridTextColumn Header="評価額" Binding="{Binding Amount}" CanUserSort="False"/>
             </DataGrid.Columns>
         </DataGrid>
-        <TabControl Grid.Row="3" Grid.Column="1">
-            
+        <TabControl Grid.Row="3" Grid.Column="0" Margin="5,5,16,5">
+            <TabItem Header="Stock">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="DarkGray"/>
+                        </Style>
+                    </Grid.Resources>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Code : " HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DummyStock.Code}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DummyStock.Name}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.Quantity}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice}"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount}"/>
+                    <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="クリア" Margin="5,5,5,1"/>
+                        <Button Content="追加" Margin="5,5,1,1"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Other">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="DarkGray"/>
+                        </Style>
+                    </Grid.Resources>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Quantity}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InvestmentValue}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentPerPrice}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Amount}"/>
+                    <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="クリア" Margin="5,5,5,1"/>
+                        <Button Content="追加" Margin="5,5,1,1"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </mah:MetroWindow>

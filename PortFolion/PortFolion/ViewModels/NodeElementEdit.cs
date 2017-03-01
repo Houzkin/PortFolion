@@ -48,7 +48,10 @@ namespace PortFolion.ViewModels {
 			get { return nne; }
 			set {
 				if (SetProperty(ref nne, value) && nne != null) {
-					Messenger.Raise(new InteractionMessage("EditNodeName"));
+					if (nne == null)
+						Messenger.Raise(new InteractionMessage("EditEndNodeName"));
+					else
+						Messenger.Raise(new InteractionMessage("EditNodeName"));
 				}
 			}
 		}
