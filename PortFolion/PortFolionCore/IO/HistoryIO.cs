@@ -46,23 +46,31 @@ namespace PortFolion.IO {
 		static IEnumerable<FileInfo> pickUp(DateTime since, DateTime until) {
 			var d = new DirectoryInfo(_path);
 			if (!d.Exists) return Enumerable.Empty<FileInfo>(); //new Dictionary<DateTime, FileInfo>();
-			return d.GetDirectories("*", SearchOption.AllDirectories)
-				.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
-				.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
-				.Select(a => new { rwv = ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name.Replace(a.Extension, string.Empty)), rsult = a })
-				.Where(a => a.rwv && since <= a.rwv.Value && a.rwv.Value <= until)
-				.Select(a => a.rsult);
+			try {
+				return d.GetDirectories("*", SearchOption.AllDirectories)
+					.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
+					.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
+					.Select(a => new { rwv = ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name.Replace(a.Extension, string.Empty)), rsult = a })
+					.Where(a => a.rwv && since <= a.rwv.Value && a.rwv.Value <= until)
+					.Select(a => a.rsult);
+			} catch {
+				return Enumerable.Empty<FileInfo>();
+			}
 		}
 		internal static IEnumerable<TotalRiskFundNode> ReadRoots() {
 			var d = new DirectoryInfo(_path);
 			if (!d.Exists) d.Create();
-			var dd = d.GetDirectories("*", SearchOption.AllDirectories)
-				.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
-				.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
-				.Where(a => ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name.Replace(a.Extension,string.Empty)))
-				.Select(a => readRoot(a.FullName))
-				.Where(a => a != null);
-			return dd;
+			try {
+				var dd = d.GetDirectories("*", SearchOption.AllDirectories)
+					.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
+					.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
+					.Where(a => ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name.Replace(a.Extension,string.Empty)))
+					.Select(a => readRoot(a.FullName))
+					.Where(a => a != null);
+				return dd;
+			} catch {
+				return Enumerable.Empty<TotalRiskFundNode>();
+			}
 		}
 		static TotalRiskFundNode readRoot(string path) {
 			SerializableNodeMap<CushionNode> nodes;

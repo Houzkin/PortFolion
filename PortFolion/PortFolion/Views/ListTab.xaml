@@ -13,8 +13,8 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
@@ -70,8 +70,8 @@
         </Expander>
 
         <StackPanel Orientation="Vertical" Grid.Column="1">
-            <TextBlock x:Name="Date" Text="{Binding CurrentDate}"/>
-            <ToolBar>
+            <TextBlock x:Name="Date" Text="{Binding CurrentDate, StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
+            <ToolBar HorizontalAlignment="Left">
                 <Button Content="開"/>
                 <Button Content="閉"/>
             </ToolBar>
@@ -153,13 +153,15 @@
         <StackPanel Orientation="Vertical" Grid.Column="2" Margin="5,0,0,0">
             <TextBlock Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
 
-            <DataGrid x:Name="History" Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" AutoGenerateColumns="False">
-                <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate}"/>
-                <DataGridTextColumn Header="買付額(+)・売却額(-)" Binding="{Binding InvestmentValue}"/>
-                <DataGridTextColumn Header="買付数(+)・売却数(-)" Binding="{Binding TradeQuantity}"/>
-                <DataGridTextColumn Header="保有数" Binding="{Binding Quantity}"/>
-                <DataGridTextColumn Header="評価額" Binding="{Binding Amount}"/>
-                <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}"/>
+            <DataGrid Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate}" CanUserReorder="True" CanUserResize="True"/>
+                    <DataGridTextColumn Header="買付額(+)・売却額(-)" Binding="{Binding InvestmentValue}"/>
+                    <DataGridTextColumn Header="買付数(+)・売却数(-)" Binding="{Binding TradeQuantity}"/>
+                    <DataGridTextColumn Header="保有数" Binding="{Binding Quantity}"/>
+                    <DataGridTextColumn Header="評価額" Binding="{Binding Amount}"/>
+                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}"/>
+                </DataGrid.Columns>
             </DataGrid>
         </StackPanel>
     </Grid>

@@ -13,6 +13,7 @@ using Livet.Messaging.Windows;
 
 using PortFolion.Models;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace PortFolion.ViewModels {
 	public class MainWindowViewModel : ViewModel {
@@ -64,5 +65,7 @@ namespace PortFolion.ViewModels {
 		//ListviewModel listContents;
 		//public ListviewModel ListContents
 		//	=> listContents;
+		public ICommand ShowLisence
+			=> new ViewModelCommand(() => { });
 	}
 }

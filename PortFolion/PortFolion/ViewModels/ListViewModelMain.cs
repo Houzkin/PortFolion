@@ -15,7 +15,7 @@ using System.Windows.Input;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
-		static ListviewModel _instance;
+		static ListviewModel _instance =null;
 		public static ListviewModel Instance {
 			get { return _instance = _instance ?? new ListviewModel(); }
 		}
@@ -30,9 +30,10 @@ namespace PortFolion.ViewModels {
 				CurrentDate = totalRiskFund.CurrentDate;
 				Path = totalRiskFund.Path;
 			}else {
-				CurrentDate = DateTime.Today;
+				CurrentDate = null;//DateTime.Today;
 				Path = Enumerable.Empty<string>();
 			}
+			this.RefreshHistory();
 		}
 
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
@@ -40,7 +41,7 @@ namespace PortFolion.ViewModels {
 			if (totalRiskFund == rt) return;
 			if(rt == null) {
 				totalRiskFund = null;
-				CurrentDate = DateTime.Today;
+				CurrentDate = null;// DateTime.Today;
 				Path = Enumerable.Empty<string>();
 				Refresh();
 				return;
@@ -50,7 +51,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 
-		public DateTime CurrentDate { get; private set; }
+		public DateTime? CurrentDate { get; private set; }
 		TotalRiskFundNode _trfn;
 		TotalRiskFundNode totalRiskFund {
 			get { return _trfn; }
@@ -65,8 +66,13 @@ namespace PortFolion.ViewModels {
 
 		public IEnumerable<string> Path { get; private set; }
 
+		public void RefreshHistory() {
+			_history = RootCollection.GetNodeLine(new NodePath<string>(Path)).Select(a => CommonNodeVM.Create(a));
+			this.RaisePropertyChanged(nameof(History));
+		}
+		IEnumerable<CommonNodeVM> _history = null;
 		public IEnumerable<CommonNodeVM> History
-			=> RootCollection.GetNodeLine(new NodePath<string>(Path)).Select(a => CommonNodeVM.Create(a));
+			=> _history;
 		
 		public void SetCurrentDate(DateTime date) {
 			date = date.Date;
@@ -81,7 +87,7 @@ namespace PortFolion.ViewModels {
 			}
 			totalRiskFund = c;//notify
 			CurrentDate = totalRiskFund.CurrentDate;//notify
-			selectDateListItem(CurrentDate);
+			selectDateListItem(totalRiskFund.CurrentDate);
 			
 			if (Path.Any() && totalRiskFund.Levelorder().Any(a => a.Path.SequenceEqual(Path))) {
 				RaisePropertyChanged(nameof(Root));
@@ -104,7 +110,7 @@ namespace PortFolion.ViewModels {
 		public void Refresh() {
 			RaisePropertyChanged(nameof(this.Root));
 			RaisePropertyChanged(nameof(this.Path));
-			RaisePropertyChanged(nameof(this.History));
+			RefreshHistory();
 			RaisePropertyChanged(nameof(this.CurrentDate));
 			ExpandCurrentNode();
 		}

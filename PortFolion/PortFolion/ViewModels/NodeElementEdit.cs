@@ -17,6 +17,18 @@ using System.Collections.Specialized;
 using Livet.Messaging;
 
 namespace PortFolion.ViewModels {
+	public static class ExpParse {
+		public static double Try(string exp) {
+			return ResultWithValue.Of<double>(double.TryParse, exp).TrueOrNot(
+				o => o,
+				x => {
+					var dt = new System.Data.DataTable();
+					var r = dt.Compute(exp, "");
+					if (r == null) return 0;
+					else return (double)r;
+				});
+		}
+	}
 	public class AccountEditVM : DynamicViewModel<AccountNode> {
 		private InteractionMessenger _messenger;
 		public InteractionMessenger Messenger {
@@ -61,7 +73,7 @@ namespace PortFolion.ViewModels {
 			=> (Model.Root() as TotalRiskFundNode).CurrentDate;
 
 		public string TemporaryAmount
-			=> Elements.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value).ToString("#.##");
+			=> Elements.Sum(a => ExpParse.Try(a.Amount)).ToString("#.##");
 
 		public void ChangedTemporaryAmount()
 			=> OnPropertyChanged(nameof(TemporaryAmount));
@@ -153,17 +165,17 @@ namespace PortFolion.ViewModels {
 			var elem = Elements.OfType<ProductEditVM>();
 			var ec = Elements.First(a => a.IsCash);
 
-			var unrePL = elem.Sum(a => ResultWithValue.Of<double>(double.TryParse, a.Amount).Value);
-			var cam = ResultWithValue.Of<double>(double.TryParse, ec.Amount).Value;
-			var civ = ResultWithValue.Of<double>(double.TryParse, ec.InvestmentValue).Value;
+			var unrePL = elem.Sum(a => ExpParse.Try(a.Amount)); //ResultWithValue.Of<double>(double.TryParse, a.Amount).Value);
+			var cam = ExpParse.Try(ec.Amount);//ResultWithValue.Of<double>(double.TryParse, ec.Amount).Value;
+			var civ = ExpParse.Try(ec.InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, ec.InvestmentValue).Value;
 			ec.InvestmentValue = ((-1D * civ) + (-1D * cam)).ToString();
 			ec.Amount = "0";
 
 			foreach(var e in elem) {
-				var am = ResultWithValue.Of<double>(double.TryParse, e.Amount).Value;
-				var iv = ResultWithValue.Of<double>(double.TryParse, e.InvestmentValue).Value;
-				var q = ResultWithValue.Of<double>(double.TryParse, e.Quantity).Value;
-				var tq = ResultWithValue.Of<double>(double.TryParse, e.TradeQuantity).Value;
+				var am = ExpParse.Try(e.Amount);//ResultWithValue.Of<double>(double.TryParse, e.Amount).Value;
+				var iv = ExpParse.Try(e.InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, e.InvestmentValue).Value;
+				var q = ExpParse.Try(e.Quantity);//ResultWithValue.Of<double>(double.TryParse, e.Quantity).Value;
+				var tq = ExpParse.Try(e.TradeQuantity);//ResultWithValue.Of<double>(double.TryParse, e.TradeQuantity).Value;
 				e.TradeQuantity = ((-1D * tq) + (-1D * q)).ToString();
 				e.InvestmentValue = ((-1D * iv) + (-1D * am)).ToString();
 				e.Quantity = "0";
@@ -280,17 +292,17 @@ namespace PortFolion.ViewModels {
 			return null;
 		}
 		protected string _InvestmentValue;
-		protected double _investmentValue => ResultWithValue.Of<double>(double.TryParse, _InvestmentValue).Value;
+		protected double _investmentValue => ExpParse.Try(_InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, _InvestmentValue).Value;
 		public virtual string InvestmentValue {
 			get { return _InvestmentValue; }
 			set {
 				if(SetProperty(ref _InvestmentValue, value)) {
-					Amount = Model.Amount + _InvestmentValue;
+					Amount = (Model.Amount + _investmentValue).ToString("#.##");
 				}
 			}
 		}
 		protected string _Amount;
-		protected double _amount => ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
+		protected double _amount => ExpParse.Try(_Amount);//ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
 		public virtual string Amount {
 			get { return _Amount; }
 			set {
@@ -322,24 +334,24 @@ namespace PortFolion.ViewModels {
 			get { return base.InvestmentValue; }
 			set {
 				if (SetProperty(ref _InvestmentValue, value)) {
-					Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
+					//Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
 				}
 			}
 		}
 		public override bool IsReadOnlyTradeQuantity => false;
 		protected string _TradeQuantity;
-		protected double _tradeQuantity => ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
+		protected double _tradeQuantity => ExpParse.Try(_TradeQuantity);//ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
 		public virtual string TradeQuantity {
 			get { return _TradeQuantity; }
 			set {
 				if(SetProperty(ref _TradeQuantity, value)) {
-					Quantity = (Model.Quantity + _tradeQuantity).ToString();
+					Quantity = (Model.Quantity + _tradeQuantity).ToString("#.##");
 				}
 			}
 		}
 		public override bool IsReadOnlyPerPrice => false;
 		protected string _CurrentPerPrice;
-		protected double _currentPerPrice => ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
+		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);//ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
 		public virtual string CurrentPerPrice {
 			get { return _CurrentPerPrice; }
 			set {
@@ -350,7 +362,7 @@ namespace PortFolion.ViewModels {
 		}
 		public override bool IsReadOnlyQuantity => false;
 		protected string _Quantity;
-		protected double _quantity => ResultWithValue.Of<double>(double.TryParse, _Quantity).Value;
+		protected double _quantity => ExpParse.Try(_Quantity);//ResultWithValue.Of<double>(double.TryParse, _Quantity).Value;
 		public virtual string Quantity {
 			get { return _Quantity; }
 			set {
@@ -358,7 +370,16 @@ namespace PortFolion.ViewModels {
 					Amount = (_quantity * _currentPerPrice).ToString();
 			}
 		}
-
+		string vali(string value) {
+			value = value.Trim();
+			if (string.IsNullOrEmpty(value)) return null;
+			if (ResultWithValue.Of<double>(double.TryParse, value).Result)
+				return null;
+			var dt = new System.Data.DataTable();
+			var r = dt.Compute(value, "");
+			if (r == null) return "入力値が不正です";
+			return null;
+		}
 	}
 	public class StockEditVM: ProductEditVM {
 		public StockEditVM(AccountEditVM ac, StockValue sv) : base(ac, sv) {
@@ -385,8 +406,7 @@ namespace PortFolion.ViewModels {
 			if (!tgh.Any()) return "";
 			var tg = tgh.OrderBy(a => a.Turnover).Last();
 			this.CurrentPerPrice = tg.Close.ToString("#.##");
-			if (string.IsNullOrEmpty(this.Name) || string.IsNullOrWhiteSpace(this.Name))
-				this.Name = tg.Name;
+			this.Name = tg.Name;
 			return null;
 		}
 		

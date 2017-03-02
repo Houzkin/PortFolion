@@ -43,7 +43,7 @@
         <Controls:WindowCommands>
             <Button Content="settings"/>
             <Button Content="options" />
-            <Button Content="lisence"/>
+            <Button Content="lisence" Command="{Binding ShowLisence}"/>
             <Button Content="help"/>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>

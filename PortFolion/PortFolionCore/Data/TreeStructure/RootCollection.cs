@@ -10,8 +10,7 @@ using PortFolion.IO;
 namespace PortFolion.Core {
 	public class RootCollection : ObservableCollection<TotalRiskFundNode> {//,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
 
-		//private RootCollection() : base(HistoryIO.ReadRoots().OrderBy(a=>a.CurrentDate)) { }
-		private RootCollection() {
+		private RootCollection() :base() {
 			var itm = HistoryIO.ReadRoots().OrderBy(a => a.CurrentDate);
 			foreach (var i in itm) this.Items.Add(i);
 		}
@@ -80,7 +79,12 @@ namespace PortFolion.Core {
 			//指定した日付を含んだノードを取得
 			var curNd = lne.LastOrDefault(a => currentTenure <= a.Key);
 			if (curNd.Value == null) return new Dictionary<DateTime, CommonNode>();
-			
+			Func<CommonNode, bool> hasPosi = a => {
+				if (a.Amount != 0) return true;
+				var q = a.Levelorder().OfType<FinancialProduct>().Sum(b => b.Quantity);
+				if (q != 0) return true;
+				return false;
+			};
 			var bef = lne.TakeWhile(a => a.Value != curNd.Value).Reverse().TakeWhile(a => a.Value.Amount != 0);
 			var aft = lne.SkipWhile(a => a.Value != curNd.Value).Separate(a => a.Value.Amount == 0).First();
 
@@ -112,7 +116,7 @@ namespace PortFolion.Core {
 			foreach (var t in GetNodeLine(path, current).Values) t.Tag = null;
 		}
 
-		#region インスタンス
+#region インスタンス
 		internal void DateTimeChange(DateTime date) {
 			var lst = new List<DateTime>(this.Keys);
 			var cur = lst.IndexOf(date);
@@ -179,6 +183,6 @@ namespace PortFolion.Core {
 		//IEnumerator<KeyValuePair<DateTime, TotalRiskFundNode>> IEnumerable<KeyValuePair<DateTime, TotalRiskFundNode>>.GetEnumerator() {
 		//	return Items.Select(a => new KeyValuePair<DateTime, TotalRiskFundNode>(a.CurrentDate, a)).GetEnumerator();
 		//}
-		#endregion
+#endregion
 	}
 }

@@ -11,7 +11,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d" SaveWindowPosition="False"
         GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
-        Title="AccountEdit" Height="500" Width="750">
+        Title="AccountEdit" Height="500" Width="780">
     
     <!--<Window.DataContext>
         <vm:AccountEditWindowViewModel/>
@@ -73,6 +73,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -93,7 +94,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="total :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
-                <TextBlock Text="0000000" Margin="10,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
+                <TextBlock Text="{Binding TemporaryAmount}" Margin="10,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
             </StackPanel>
         </WrapPanel>
         <Grid Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -148,10 +149,10 @@
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyQuantity}"/>
-                <DataGridTextColumn Header="評価額" Binding="{Binding Amount}" CanUserSort="False"/>
+                <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserSort="False"/>
             </DataGrid.Columns>
         </DataGrid>
-        <TabControl Grid.Row="3" Grid.Column="0" Margin="5,5,16,5">
+        <TabControl Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" Margin="5,5,16,5">
             <TabItem Header="Stock">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -173,17 +174,27 @@
                         </Style>
                     </Grid.Resources>
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Code : " HorizontalAlignment="Right" VerticalAlignment="Center" />
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DummyStock.Code}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DummyStock.Code}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DummyStock.Name}"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.Quantity}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.TradeQuantity}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue}"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount}"/>
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="クリア" Margin="5,5,5,1"/>
                         <Button Content="追加" Margin="5,5,1,1"/>
@@ -213,13 +224,21 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Quantity}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Quantity}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InvestmentValue}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InvestmentValue}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentPerPrice}"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentPerPrice}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Amount}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Amount}"
+                             InputMethod.PreferredImeState="On"
+                             InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="クリア" Margin="5,5,5,1"/>
                         <Button Content="追加" Margin="5,5,1,1"/>
@@ -227,5 +246,9 @@
                 </Grid>
             </TabItem>
         </TabControl>
+        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="キャンセル"/>
+            <Button Content="完了"/>
+        </StackPanel>
     </Grid>
 </mah:MetroWindow>
