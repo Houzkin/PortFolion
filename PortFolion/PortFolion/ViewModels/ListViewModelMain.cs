@@ -37,14 +37,22 @@ namespace PortFolion.ViewModels {
 		}
 
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-			var rt = Model.LastOrDefault(a => a.CurrentDate <= this.CurrentDate) ?? Model.LastOrDefault();
+			TotalRiskFundNode rt;
+			switch (e.Action) {
+			case NotifyCollectionChangedAction.Add:
+				rt = e.NewItems[0] as TotalRiskFundNode;
+				if (rt == null) goto default;
+				break;
+			default:
+				rt = Model.LastOrDefault(a => a.CurrentDate <= (this.CurrentDate ?? DateTime.Today)) ?? Model.LastOrDefault();
+				break;
+			}
 			if (totalRiskFund == rt) return;
 			if(rt == null) {
 				totalRiskFund = null;
 				CurrentDate = null;// DateTime.Today;
 				Path = Enumerable.Empty<string>();
 				Refresh();
-				return;
 			}else {
 				totalRiskFund = rt;
 				SetCurrentDate(totalRiskFund.CurrentDate);
@@ -67,7 +75,7 @@ namespace PortFolion.ViewModels {
 		public IEnumerable<string> Path { get; private set; }
 
 		public void RefreshHistory() {
-			_history = RootCollection.GetNodeLine(new NodePath<string>(Path)).Select(a => CommonNodeVM.Create(a));
+			_history = RootCollection.GetNodeLine(new NodePath<string>(Path)).Select(a => CommonNodeVM.Create(a.Value));
 			this.RaisePropertyChanged(nameof(History));
 		}
 		IEnumerable<CommonNodeVM> _history = null;
@@ -103,7 +111,7 @@ namespace PortFolion.ViewModels {
 			Path = path;
 
 			RaisePropertyChanged(nameof(this.Path));
-			RaisePropertyChanged(nameof(this.History));
+			RefreshHistory();
 			RaisePropertyChanged(nameof(this.CurrentDate));
 			ExpandCurrentNode();
 		}
@@ -115,7 +123,10 @@ namespace PortFolion.ViewModels {
 			ExpandCurrentNode();
 		}
 		#region date
-		ListenerCommand<DateTime> addNewRootCommand = new ListenerCommand<DateTime>(d => { });
+		ListenerCommand<DateTime> addNewRootCommand = new ListenerCommand<DateTime>(d => {
+			var w = new Views.AccountEditWindow();
+			//
+		});
 		public ICommand AddNewRootCommand => addNewRootCommand;
 		DateTreeRoot dtr = new DateTreeRoot(RootCollection.Instance);
 		public IEnumerable<DateTree> DateList => dtr.Children;

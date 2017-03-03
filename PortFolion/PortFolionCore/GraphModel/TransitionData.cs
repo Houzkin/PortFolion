@@ -182,8 +182,8 @@ namespace PortFolion.Core {
 		void setCurrentMap() {
 			var d = RootCollection.GetNodeLine(CurrentNode.Path)
 				.ToDictionary(
-					k => (k.Root() as TotalRiskFundNode).CurrentDate,
-					v => mapping(v, TargetLevel));
+					k => k.Key,//(k.Root() as TotalRiskFundNode).CurrentDate,
+					v => mapping(v.Value, TargetLevel));
 			var nodes = from tx in d
 						from sx in tx.Value
 						select new NodeMap() {
@@ -199,7 +199,7 @@ namespace PortFolion.Core {
 			IEnumerable<DateTime> rlt;
 			var nds = RootCollection
 				.GetNodeLine(CurrentNode.Path)
-				.Select(a => (a as TotalRiskFundNode).CurrentDate);
+				.Keys;//.Select(a => (a as TotalRiskFundNode).CurrentDate);
 			if (!nds.Any()) rlt = nds;
 			DateTime ls = nds.Last();
 			DateTime fs = nds.First();

@@ -85,15 +85,15 @@
         </StackPanel>
         <WrapPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                <TextBlock Text="入金(+)または出金(-)額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
-                <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
-            </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
                 <TextBlock Text="{Binding CashElement.Name, StringFormat=”{}{0} :”}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.Amount}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
+                <TextBlock Text="内、当日入(+)・出(-)金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
+                <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
+            </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="total :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
+                <TextBlock Text="総評価額 :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
                 <TextBlock Text="{Binding TemporaryAmount}" Margin="10,1,1,1" FontSize="25" VerticalAlignment="Bottom"/>
             </StackPanel>
         </WrapPanel>
@@ -120,7 +120,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="現在単価" Binding="{Binding CurrentPerPrice}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyPerPrice}"/>
-                <DataGridTextColumn Header="取引数量" Binding="{Binding TradeQuantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyTradeQuantity}">
+                <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyTradeQuantity}">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
                             <Grid>

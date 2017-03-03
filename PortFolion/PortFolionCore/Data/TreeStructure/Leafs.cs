@@ -28,6 +28,9 @@ namespace PortFolion.Core {
 		public override long Amount {
 			get { return _amount; }
 		}
+		public override bool HasPosition
+			=> Amount != 0;
+
 		protected override CommonNode Clone(CommonNode node) {
 			(node as FinancialValue)._amount = Amount;
 			return base.Clone(node);
@@ -58,6 +61,9 @@ namespace PortFolion.Core {
 		public long Quantity {
 			get { return _quantity; }
 		}
+		public override bool HasPosition
+			=> base.HasPosition && Quantity != 0;
+
 		long _tradeQuantity;
 		public void SetTradeQuantity(long tradeQuantity) {
 			if (_tradeQuantity == tradeQuantity) return;

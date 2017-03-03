@@ -80,10 +80,10 @@ namespace PortFolion.ViewModels {
 		}
 		protected string NameValidateHistory(string newName) {
 			if(Parent == Model.Parent) {
-				var his = RootCollection.GetNodeLine(Parent.Path)
-					.ToDictionary(
-						a => (a.Root() as TotalRiskFundNode).CurrentDate,
-						b => b);
+				var his = RootCollection.GetNodeLine(Parent.Path);
+					//.ToDictionary(
+					//	a => (a.Root() as TotalRiskFundNode).CurrentDate,
+					//	b => b);
 				Func<KeyValuePair<DateTime, CommonNode>, bool> fun = 
 					a => a.Value.Children
 						.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
@@ -107,14 +107,14 @@ namespace PortFolion.ViewModels {
 		}
 		void EditExecute() {
 			var name = this.Name.Trim();
-			var his = RootCollection.GetNodeLine(Parent.Path);
+			var his = RootCollection.GetNodeLine(Parent.Path).Values;
 			if(his.Any(a=>a.Children.Any(b=>b.Name == name))) {
 				string msg = "[" + name + "] は別の時系列に既に存在します。\n["
 					+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。\nこの操作は不可逆です。";
 				var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
 				if (r == MessageBoxResult.Cancel) return;
 			}
-			foreach(var n in RootCollection.GetNodeLine(Model.Path)) {
+			foreach(var n in RootCollection.GetNodeLine(Model.Path).Values) {
 				n.Name = name;
 			}
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));

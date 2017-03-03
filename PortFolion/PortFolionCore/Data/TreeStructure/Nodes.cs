@@ -88,12 +88,12 @@ namespace PortFolion.Core {
 		}
 		
 		public abstract long Amount { get; }
+		/// <summary>リスク資産としてのポジションを持つかどうか示す値を取得する。</summary>
+		public abstract bool HasPosition { get; }
 
 		protected virtual CommonNode Clone(CommonNode node){
 			node._name = _name;
 			node._tag = _tag;
-			//node._investmentReturnValue = _investmentReturnValue;
-			//node._investmentValue = _investmentValue;
 			return node;
 		}
 		public abstract CommonNode Clone();
@@ -139,6 +139,13 @@ namespace PortFolion.Core {
 		}
 		public override long Amount {
 			get { return _amount; }
+		}
+		public override bool HasPosition {
+			get {
+				if (this.Inorder().Any(a => a.Amount != 0)) return true;
+				if (this.Inorder().OfType<FinancialProduct>().Any(a => a.Quantity != 0)) return true;
+				return false;
+			}
 		}
 		protected override CommonNode Clone(CommonNode node) {
 			(node as FinancialBasket)._amount = _amount;
@@ -290,12 +297,16 @@ namespace PortFolion.Core {
 		}
 		public CommonNode SearchNodeOf(IEnumerable<string> path) {
 			var p = this.Levelorder()
-				.Select(a => a.Path.Zip(this.Path, (b, d) => new { b, d })
+				.Select(a => a.Path.Zip(path, (b, d) => new { b, d })
 					.TakeWhile(e => e.b == e.d)
 					.Select(f => f.b))
 				.LastOrDefault();
-			return this.Levelorder()
-				.FirstOrDefault(a => a.Path.SequenceEqual(p));
+			//return this.Levelorder()
+			//	.FirstOrDefault(a => a.Path.SequenceEqual(p));
+			return this.Evolve(
+					a => a.Path.Except(p).Any() ? null : a.Children,
+					(c, d) => c.Concat(d))
+				.LastOrDefault();
 		}
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
