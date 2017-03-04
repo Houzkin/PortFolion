@@ -21,14 +21,20 @@ namespace PortFolion.Core {
 			date = new DateTime(date.Year, date.Month, date.Day);
 			if (!Instance.Keys.Contains(date)) {
 				var ins = Instance.Keys.Where(a => a < date);
-				if (!ins.Any()) {
+				var pns = Instance.Keys.Where(a => a > date);
+				if (!ins.Any() && !pns.Any()) {
 					Instance.Add(new TotalRiskFundNode() { CurrentDate = date });
-				}else {
+				}else if(ins.Any()) {
 					var d = ins.Max();
 					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
-					trfn.RemoveDescendant(a => a.Amount == 0 && a.GetType() != typeof(FinancialValue));
+					trfn.RemoveDescendant(a => !a.HasPosition /*a.Amount == 0*/ && a.GetType() != typeof(FinancialValue));
 					trfn.CurrentDate = date;
 					Instance.Add(trfn);
+				}else if (pns.Any()) {
+					var d = pns.Min();
+					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
+					trfn.CurrentDate = date;
+					Instance.Insert(0, trfn);
 				}
 			}
 			return Instance[date];

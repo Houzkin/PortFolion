@@ -24,7 +24,7 @@ namespace PortFolion.ViewModels {
 			Model = RootCollection.Instance;
 			Model.CollectionChanged += CollectionChanged;
 
-			this.dtr.DateTimeSelected += selectedDateList;
+			this.dtr.DateTimeSelected += (e) => SetCurrentDate(e);// selectedDateList;
 			totalRiskFund = RootCollection.Instance.LastOrDefault();
 			if (totalRiskFund != null) {
 				CurrentDate = totalRiskFund.CurrentDate;
@@ -123,16 +123,20 @@ namespace PortFolion.ViewModels {
 			ExpandCurrentNode();
 		}
 		#region date
-		ListenerCommand<DateTime> addNewRootCommand = new ListenerCommand<DateTime>(d => {
-			var w = new Views.AccountEditWindow();
-			//
+		ListenerCommand<DateTime> addNewRootCommand;
+		public ICommand AddNewRootCommand => addNewRootCommand = new ListenerCommand<DateTime>(d => {
+			var r = RootCollection.GetOrCreate(d);
+			if (string.IsNullOrEmpty(r.Name)) r.Name = "総リスク資産";
+			dtr.SelectAt(d);
+			this.SetCurrentDate(d);
+			
 		});
-		public ICommand AddNewRootCommand => addNewRootCommand;
+
 		DateTreeRoot dtr = new DateTreeRoot(RootCollection.Instance);
 		public IEnumerable<DateTree> DateList => dtr.Children;
-		void selectedDateList(DateTime date) {
-			this.SetCurrentDate(date);
-		}
+		//void selectedDateList(DateTime date) {
+		//	this.SetCurrentDate(date);
+		//}
 		void selectDateListItem(DateTime date) {
 			dtr.SelectAt(date);
 		}

@@ -140,13 +140,14 @@ namespace PortFolion.Core {
 		public override long Amount {
 			get { return _amount; }
 		}
-		public override bool HasPosition {
-			get {
-				if (this.Inorder().Any(a => a.Amount != 0)) return true;
-				if (this.Inorder().OfType<FinancialProduct>().Any(a => a.Quantity != 0)) return true;
-				return false;
-			}
-		}
+		public override bool HasPosition
+			=> this.Preorder().Any(
+				cn => {
+					if (cn.Amount != 0) return true;
+					var c = cn as FinancialProduct;
+					if (c != null && c.Quantity != 0) return true;
+					return false;
+			});
 		protected override CommonNode Clone(CommonNode node) {
 			(node as FinancialBasket)._amount = _amount;
 			return base.Clone(node);
