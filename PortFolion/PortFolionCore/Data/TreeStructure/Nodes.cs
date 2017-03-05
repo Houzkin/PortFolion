@@ -89,7 +89,13 @@ namespace PortFolion.Core {
 		
 		public abstract long Amount { get; }
 		/// <summary>リスク資産としてのポジションを持つかどうか示す値を取得する。</summary>
-		public abstract bool HasPosition { get; }
+		public bool HasPosition => this.Preorder().Any(
+				cn => {
+					if (cn.Amount != 0) return true;
+					var c = cn as FinancialProduct;
+					if (c != null && c.Quantity != 0) return true;
+					return false;
+				});
 
 		protected virtual CommonNode Clone(CommonNode node){
 			node._name = _name;
@@ -104,6 +110,20 @@ namespace PortFolion.Core {
 				InvestmentValue = _investmentValue,
 				InvestmentReturnValue = _investmentReturnValue,
 			};
+		}
+	}
+	internal class AnonymousNode : CommonNode {
+		CushionNode _cushion;
+		internal AnonymousNode(CushionNode cushion) {
+			_cushion = cushion;
+		}
+		internal override CushionNode ToSerialCushion() {
+			return _cushion;
+		}
+		public override long Amount => _cushion.Amount;
+
+		public override CommonNode Clone() {
+			throw new NotImplementedException();
 		}
 	}
 	/// <summary>User,ブローカーまたはアカウントのベースクラス</summary>
@@ -140,14 +160,7 @@ namespace PortFolion.Core {
 		public override long Amount {
 			get { return _amount; }
 		}
-		public override bool HasPosition
-			=> this.Preorder().Any(
-				cn => {
-					if (cn.Amount != 0) return true;
-					var c = cn as FinancialProduct;
-					if (c != null && c.Quantity != 0) return true;
-					return false;
-			});
+		
 		protected override CommonNode Clone(CommonNode node) {
 			(node as FinancialBasket)._amount = _amount;
 			return base.Clone(node);
@@ -177,7 +190,7 @@ namespace PortFolion.Core {
 				RaisePropertyChanged();
 			}
 		}
-		FinancialValue setOrCreateNuetral() {
+		public FinancialValue GetOrCreateNuetral() {
 			var nd = ChildNodes.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
 			if (nd != null) return nd;
 			string name;
@@ -192,25 +205,26 @@ namespace PortFolion.Core {
 				name = "有効証拠金";
 				break;
 			default:
-				name = "その他現金";
+				name = "余力";
 				break;
 			}
 			var n = new FinancialValue() { Name = name };
-			this.AddChild(n);
+			//this.AddChild(n);
+			this.InsertChild(0, n);
 			return n;
 		}
 		public override bool IsInvestmentTarget => true;
 		public override long InvestmentValue 
-			=> setOrCreateNuetral().InvestmentValue;
+			=> GetOrCreateNuetral().InvestmentValue;
 		public override void SetInvestmentValue(long value) {
-			var ntr = setOrCreateNuetral();
+			var ntr = GetOrCreateNuetral();
 			ntr.SetInvestmentValue(value);
 		}
 
 		public override long InvestmentReturnValue 
-			=> setOrCreateNuetral().InvestmentReturnValue;
+			=> GetOrCreateNuetral().InvestmentReturnValue;
 		public override void SetInvestmentReturnValue(long value) {
-			var ntr = setOrCreateNuetral();
+			var ntr = GetOrCreateNuetral();
 			ntr.SetInvestmentReturnValue(value);
 		}
 		protected override CommonNode Clone(CommonNode nd) {

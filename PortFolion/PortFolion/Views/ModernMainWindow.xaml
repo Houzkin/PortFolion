@@ -85,7 +85,7 @@
             <Controls:MetroTabItem Header="_Graph">
                 <v:GraphTab/>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="_List">
+            <Controls:MetroTabItem Header="_Edit">
                 <v:ListTab/>
             </Controls:MetroTabItem>
         </TabControl>

@@ -64,7 +64,7 @@ namespace PortFolion.IO {
 				cn = new FinancialProduct(cushion);
 				break;
 			default:
-				cn = null;
+				cn = new AnonymousNode(cushion);
 				break;
 			}
 			return cn;

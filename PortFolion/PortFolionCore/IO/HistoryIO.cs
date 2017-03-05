@@ -82,7 +82,9 @@ namespace PortFolion.IO {
 			} catch {
 				nodes = null;
 			}
-			return nodes?.AssembleTree(a => a.ToInstance()) as TotalRiskFundNode;
+			return nodes?.AssembleTree(a => a.ToInstance())
+				.RemoveDescendant(a => (a as AnonymousNode) != null) as TotalRiskFundNode;
 		}
+
 	}
 }

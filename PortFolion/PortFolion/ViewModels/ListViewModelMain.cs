@@ -12,19 +12,34 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Windows.Input;
+using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
-		static ListviewModel _instance =null;
+		static WeakReference<ListviewModel> _inst = new WeakReference<ListviewModel>(new ListviewModel());
 		public static ListviewModel Instance {
-			get { return _instance = _instance ?? new ListviewModel(); }
+			get {
+				ListviewModel vm;
+				if(!_inst.TryGetTarget(out vm)) {
+					vm = new ListviewModel();
+					_inst = new WeakReference<ListviewModel>(vm);
+				}
+				return vm;
+			}
 		}
 		RootCollection Model;
 		private ListviewModel() {
 			Model = RootCollection.Instance;
-			Model.CollectionChanged += CollectionChanged;
+			//Model.CollectionChanged += CollectionChanged;
+			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(Model, CollectionChanged));
 
-			this.dtr.DateTimeSelected += (e) => SetCurrentDate(e);// selectedDateList;
+
+			this.CompositeDisposable.Add(new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>, DateTimeSelectedEventArgs>(
+				a => a,
+				h => this.dtr.DateTimeSelected += h,
+				h => this.dtr.DateTimeSelected -= h,
+				(o, e) => SetCurrentDate(e.SelectedDateTime)));
+
 			totalRiskFund = RootCollection.Instance.LastOrDefault();
 			if (totalRiskFund != null) {
 				CurrentDate = totalRiskFund.CurrentDate;
@@ -95,7 +110,7 @@ namespace PortFolion.ViewModels {
 			}
 			totalRiskFund = c;//notify
 			CurrentDate = totalRiskFund.CurrentDate;//notify
-			selectDateListItem(totalRiskFund.CurrentDate);
+			dtr.SelectAt(totalRiskFund.CurrentDate);
 			
 			if (Path.Any() && totalRiskFund.Levelorder().Any(a => a.Path.SequenceEqual(Path))) {
 				RaisePropertyChanged(nameof(Root));
@@ -127,19 +142,19 @@ namespace PortFolion.ViewModels {
 		public ICommand AddNewRootCommand => addNewRootCommand = new ListenerCommand<DateTime>(d => {
 			var r = RootCollection.GetOrCreate(d);
 			if (string.IsNullOrEmpty(r.Name)) r.Name = "総リスク資産";
-			dtr.SelectAt(d);
+			//dtr.SelectAt(d);
 			this.SetCurrentDate(d);
 			
 		});
 
-		DateTreeRoot dtr = new DateTreeRoot(RootCollection.Instance);
+		DateTreeRoot dtr = DateTreeRoot.Instance;// new DateTreeRoot(RootCollection.Instance);
 		public IEnumerable<DateTree> DateList => dtr.Children;
 		//void selectedDateList(DateTime date) {
 		//	this.SetCurrentDate(date);
 		//}
-		void selectDateListItem(DateTime date) {
-			dtr.SelectAt(date);
-		}
+		//void selectDateListItem(DateTime date) {
+		//	dtr.SelectAt(date);
+		//}
 		#endregion
 
 		#region tree

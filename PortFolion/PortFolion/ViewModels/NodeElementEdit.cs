@@ -36,18 +36,18 @@ namespace PortFolion.ViewModels {
 			set { _messenger = value; }
 		}
 		public AccountEditVM(AccountNode an) : base(an) {
-			var cash = Model.Children.FirstOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
-			if(cash == null) {
-				cash = new FinancialValue();
-				string name = "余力";
-				int num = 1;
-				while(Model.Children.Any(a=>a.Name == name)) {
-					name = "余力" + num;
-					num++;
-				}
-				cash.Name = name;
-				Model.AddChild(cash);
-			}
+			var cash = Model.GetOrCreateNuetral();//Model.Children.FirstOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
+			//if(cash == null) {
+			//	cash = new FinancialValue();
+			//	string name = "余力";
+			//	int num = 1;
+			//	while(Model.Children.Any(a=>a.Name == name)) {
+			//		name = "余力" + num;
+			//		num++;
+			//	}
+			//	cash.Name = name;
+			//	Model.AddChild(cash);
+			//}
 
 			resetElements();
 			//CashElement = Elements.First(a => a.IsCash);
