@@ -44,7 +44,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Houzkin.Architecture, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Houzkin.Architecture.1.0.5\lib\Houzkin.Architecture.dll</HintPath>
+      <HintPath>..\packages\Houzkin.Architecture.1.0.6\lib\Houzkin.Architecture.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Houzkin.Tree, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

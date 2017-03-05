@@ -34,11 +34,11 @@ namespace PortFolion.ViewModels {
 			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(Model, CollectionChanged));
 
 
-			this.CompositeDisposable.Add(new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>, DateTimeSelectedEventArgs>(
-				a => a,
-				h => this.dtr.DateTimeSelected += h,
-				h => this.dtr.DateTimeSelected -= h,
-				(o, e) => SetCurrentDate(e.SelectedDateTime)));
+			//this.CompositeDisposable.Add(new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>, DateTimeSelectedEventArgs>(
+			//	a => a,
+			//	h => this.dtr.DateTimeSelected += h,
+			//	h => this.dtr.DateTimeSelected -= h,
+			//	(o, e) => SetCurrentDate(e.SelectedDateTime)));
 
 			totalRiskFund = RootCollection.Instance.LastOrDefault();
 			if (totalRiskFund != null) {
@@ -147,7 +147,7 @@ namespace PortFolion.ViewModels {
 			
 		});
 
-		DateTreeRoot dtr = DateTreeRoot.Instance;// new DateTreeRoot(RootCollection.Instance);
+		DateTreeRoot dtr = new DateTreeRoot(RootCollection.Instance);
 		public IEnumerable<DateTree> DateList => dtr.Children;
 		//void selectedDateList(DateTime date) {
 		//	this.SetCurrentDate(date);

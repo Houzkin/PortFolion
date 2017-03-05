@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace PortFolion.ViewModels {
 	
 	
-	public class DateTree : ObservableTreeNode<DateTree> ,INotifyPropertyChanged{
+	public class DateTree : TreeNode<DateTree> ,INotifyPropertyChanged{
 
 		public virtual DateTime? Date {
 			get {
@@ -25,7 +25,7 @@ namespace PortFolion.ViewModels {
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected void RaisePropertyChanged([CallerMemberName] string name = "") {
-			PropertyChanged(this, new PropertyChangedEventArgs(name));
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 		bool _isExpand;
 		public bool IsExpand {
@@ -70,16 +70,21 @@ namespace PortFolion.ViewModels {
 	}
 
 	public class DateTreeRoot : DateTree {
-		public static DateTreeRoot Instance
-			=> _instance = _instance ?? new DateTreeRoot(RootCollection.Instance);
+		//public static DateTreeRoot Instance {
+		//	get {
+		//		if (_instance == null) _instance = new DateTreeRoot(RootCollection.Instance);
+		//		return _instance;
+		//	}
+		//}
+			//=> _instance = _instance ?? new DateTreeRoot(RootCollection.Instance);
 
 		readonly INotifyCollectionChanged src;
 		readonly IEnumerable<TotalRiskFundNode> items;
-		static DateTreeRoot _instance;
+		//static DateTreeRoot _instance = null;
 
-		private DateTreeRoot(IEnumerable<TotalRiskFundNode> dateCollection) {
+		public DateTreeRoot(IEnumerable<TotalRiskFundNode> dateCollection) {
 			src = dateCollection as INotifyCollectionChanged;
-			items = (src as IEnumerable<TotalRiskFundNode>).OrderBy(a => a.CurrentDate);
+			items = dateCollection;
 			src.CollectionChanged += reAssembleTree;
 			foreach(var i in items)
 				assembleTree(i.CurrentDate);
@@ -99,12 +104,12 @@ namespace PortFolion.ViewModels {
 				m.AddChild(new DateTreeLeaf(date));
 		}
 		void reAssembleTree(object s, NotifyCollectionChangedEventArgs e) {
-			this.Children.Clear();//ClearChildren();
+			//this.Children.Clear();//ClearChildren();
 			foreach (var i in items) assembleTree(i.CurrentDate);
 		}
 		public EventHandler<DateTimeSelectedEventArgs> DateTimeSelected;
 		public void SelectAt(DateTime date) {
-			var n = this.Levelorder().OfType<DateTreeLeaf>().SingleOrDefault(a => a.Date == date);
+			var n = this.Levelorder().OfType<DateTreeLeaf>().LastOrDefault(a => a.Date == date);
 			if (n != null) {
 				foreach (var nd in n.Upstream()) nd.IsExpand = true;
 				n.IsSelected = true;
