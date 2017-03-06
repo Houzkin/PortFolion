@@ -6,8 +6,28 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Houzkin.Tree;
 using PortFolion.IO;
+using Houzkin.Collections;
 
 namespace PortFolion.Core {
+	public static class ExtBugs {
+		public static U convert<T, U>(T self, Func<T, U> generator, Action<U, U> addAction)
+		where T : IReadOnlyTreeNode<T> {
+			if (generator == null) throw new ArgumentNullException("generator");
+			if (addAction == null) throw new ArgumentNullException("addAction");
+			var t = self.Postorder().Select(x => Tuple.Create(x, generator(x)));
+			var vst = new ElementScroller<Tuple<T, U>>(t);
+			foreach (var tr in vst.GetSequence()) {
+				vst.MoveTo(tr)
+					.MaybeNext(x => x.Item1.Children.Contains(tr.Item1))
+					.TrueOrNot(r => addAction(r.Current.Item2, tr.Item2));
+			}
+			return vst.Current.Item2;
+		}
+		public static U ConvertTest<T, U>(this T self, Func<T, U> generator, Action<U, U> addAction)
+		where T : IReadOnlyTreeNode<T> {
+			return convert(self, generator, addAction);
+		}
+	}
 	public class RootCollection : ObservableCollection<TotalRiskFundNode> {//,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
 
 		private RootCollection() :base() {
@@ -23,10 +43,15 @@ namespace PortFolion.Core {
 				var ins = Instance.Keys.Where(a => a < date);
 				var pns = Instance.Keys.Where(a => a > date);
 				if (!ins.Any() && !pns.Any()) {
-					Instance.Add(new TotalRiskFundNode() { CurrentDate = date });
+					var r = new TotalRiskFundNode();
+					r.CurrentDate = date;
+					Instance.Add(r);
 				}else if(ins.Any()) {
 					var d = ins.Max();
-					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
+					var a1 = Instance[d] as CommonNode;
+					var a2 = a1.ConvertTest(a => a.Clone(),(a,b)=>a.AddChild(b));
+
+					var trfn = a2 as TotalRiskFundNode;//= ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
 					trfn.RemoveDescendant(a => !a.HasPosition /*a.Amount == 0*/ && a.GetType() != typeof(FinancialValue));
 					trfn.CurrentDate = date;
 					Instance.Add(trfn);
@@ -154,7 +179,7 @@ namespace PortFolion.Core {
 		public TotalRiskFundNode this[DateTime key] {
 			get {
 				key = new DateTime(key.Year, key.Month, key.Day);
-				if (!Keys.Contains(key)) throw new KeyNotFoundException();
+				if (/*!Keys.Contains(key)*/!this.ContainsKey(key)) throw new KeyNotFoundException();
 				return Items.First(a => a.CurrentDate == key);
 			}
 		}

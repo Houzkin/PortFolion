@@ -89,13 +89,13 @@ namespace PortFolion.Core {
 		
 		public abstract long Amount { get; }
 		/// <summary>リスク資産としてのポジションを持つかどうか示す値を取得する。</summary>
-		public bool HasPosition => this.Preorder().Any(
-				cn => {
-					if (cn.Amount != 0) return true;
-					var c = cn as FinancialProduct;
-					if (c != null && c.Quantity != 0) return true;
-					return false;
-				});
+		public virtual bool HasPosition => this.Preorder().Any(
+			cn => {
+				if (cn.Amount != 0) return true;
+				var c = cn as FinancialProduct;
+				if (c != null && c.Quantity != 0) return true;
+				return false;
+			});
 
 		protected virtual CommonNode Clone(CommonNode node){
 			node._name = _name;
@@ -112,8 +112,9 @@ namespace PortFolion.Core {
 			};
 		}
 	}
-	internal class AnonymousNode : CommonNode {
+	public class AnonymousNode : CommonNode {
 		CushionNode _cushion;
+		public AnonymousNode() : this(new IO.CushionNode()){ }
 		internal AnonymousNode(CushionNode cushion) {
 			_cushion = cushion;
 		}
@@ -129,7 +130,9 @@ namespace PortFolion.Core {
 	/// <summary>User,ブローカーまたはアカウントのベースクラス</summary>
 	public abstract class FinancialBasket : CommonNode {
 
-		internal FinancialBasket() { init(); }
+		internal FinancialBasket():base() {
+			init();
+		}
 		internal FinancialBasket(CushionNode cushion) : base(cushion) {
 			init();
 			_amount = cushion.Amount;
@@ -246,7 +249,7 @@ namespace PortFolion.Core {
 	}
 	/// <summary>ブローカー</summary>
 	public class BrokerNode: FinancialBasket {
-		public BrokerNode() { }
+		public BrokerNode() : base() { }
 		internal BrokerNode(CushionNode cushion) : base(cushion) { }
 
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -284,7 +287,7 @@ namespace PortFolion.Core {
 	}
 	/// <summary>ルートとなる総リスクファンド</summary>
 	public class TotalRiskFundNode : BrokerNode {
-		internal TotalRiskFundNode() { }
+		internal TotalRiskFundNode():base() { }
 		internal TotalRiskFundNode(CushionNode cushion):base(cushion) {
 			CurrentDate = cushion.Date;
 		}
