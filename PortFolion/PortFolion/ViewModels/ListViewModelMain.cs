@@ -52,6 +52,7 @@ namespace PortFolion.ViewModels {
 		}
 
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+			dtr.Refresh();
 			TotalRiskFundNode rt;
 			switch (e.Action) {
 			case NotifyCollectionChangedAction.Add:
@@ -147,7 +148,7 @@ namespace PortFolion.ViewModels {
 			
 		});
 
-		DateTreeRoot dtr = new DateTreeRoot(RootCollection.Instance);
+		DateTreeRoot dtr = new DateTreeRoot();
 		public IEnumerable<DateTree> DateList => dtr.Children;
 		//void selectedDateList(DateTime date) {
 		//	this.SetCurrentDate(date);

@@ -78,16 +78,16 @@ namespace PortFolion.ViewModels {
 		//}
 			//=> _instance = _instance ?? new DateTreeRoot(RootCollection.Instance);
 
-		readonly INotifyCollectionChanged src;
-		readonly IEnumerable<TotalRiskFundNode> items;
+		//readonly INotifyCollectionChanged src;
+		//readonly IEnumerable<TotalRiskFundNode> items;
 		//static DateTreeRoot _instance = null;
 
-		public DateTreeRoot(IEnumerable<TotalRiskFundNode> dateCollection) {
-			src = dateCollection as INotifyCollectionChanged;
-			items = dateCollection;
-			src.CollectionChanged += reAssembleTree;
-			foreach(var i in items)
-				assembleTree(i.CurrentDate);
+		public DateTreeRoot() {
+			//src = dateCollection as INotifyCollectionChanged;
+			//items = dateCollection;
+			//src.CollectionChanged += reAssembleTree;
+			//foreach(var i in items)
+			//	assembleTree(i.CurrentDate);
 		}
 		void assembleTree(DateTime date) {
 			var y = Children.FirstOrDefault(a => a.Display == date.Year.ToString());
@@ -103,9 +103,21 @@ namespace PortFolion.ViewModels {
 			if(!m.Children.Any(a=>a.Date == date))
 				m.AddChild(new DateTreeLeaf(date));
 		}
-		void reAssembleTree(object s, NotifyCollectionChangedEventArgs e) {
-			//this.Children.Clear();//ClearChildren();
-			foreach (var i in items) assembleTree(i.CurrentDate);
+		//void reAssembleTree(object s, NotifyCollectionChangedEventArgs e) {
+		//	//this.Children.Clear();//ClearChildren();
+		//	//foreach (var i in items) assembleTree(i.CurrentDate);
+		//}
+		public void Refresh() {
+			var cur = RootCollection.Instance.Select(a => a.CurrentDate);
+			var prv = this.Preorder().OfType<DateTreeLeaf>().Select(a => (DateTime)a.Date);
+			var ads = cur.Except(prv).ToArray();
+			var rmv = prv.Except(cur).ToArray();
+			foreach (var d in ads)
+				assembleTree(d);
+			foreach (var d in rmv)
+				foreach (var dd in this.Preorder().OfType<DateTreeLeaf>().Where(a => a.Date == d).ToArray())
+					dd.Parent.RemoveChild(dd);
+			this.RemoveDescendant(a => !a.Preorder().OfType<DateTreeLeaf>().Any());
 		}
 		public EventHandler<DateTimeSelectedEventArgs> DateTimeSelected;
 		public void SelectAt(DateTime date) {

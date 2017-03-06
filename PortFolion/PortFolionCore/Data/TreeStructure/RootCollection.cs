@@ -57,7 +57,7 @@ namespace PortFolion.Core {
 					Instance.Add(trfn);
 				}else if (pns.Any()) {
 					var d = pns.Min();
-					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
+					var trfn = ((Instance[d] as CommonNode).ConvertTest(a => a.Clone(),(a,b)=>a.AddChild(b))) as TotalRiskFundNode;
 					trfn.CurrentDate = date;
 					Instance.Insert(0, trfn);
 				}
@@ -178,8 +178,8 @@ namespace PortFolion.Core {
 		}
 		public TotalRiskFundNode this[DateTime key] {
 			get {
-				key = new DateTime(key.Year, key.Month, key.Day);
-				if (/*!Keys.Contains(key)*/!this.ContainsKey(key)) throw new KeyNotFoundException();
+				key = key.Date;// new DateTime(key.Year, key.Month, key.Day);
+				if (!this.ContainsKey(key)) throw new KeyNotFoundException();
 				return Items.First(a => a.CurrentDate == key);
 			}
 		}
@@ -193,12 +193,12 @@ namespace PortFolion.Core {
 		//}
 
 		public bool ContainsKey(DateTime key) {
-			key = new DateTime(key.Year, key.Month, key.Day);
+			key = key.Date;// new DateTime(key.Year, key.Month, key.Day);
 			return Keys.Contains(key);
 		}
 
 		public bool TryGetValue(DateTime key, out TotalRiskFundNode value) {
-			key = new DateTime(key.Year, key.Month, key.Day);
+			key = key.Date; //new DateTime(key.Year, key.Month, key.Day);
 			if (ContainsKey(key)) {
 				value = Items.First(a => a.CurrentDate == key);
 				return true;
