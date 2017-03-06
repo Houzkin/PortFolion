@@ -21,7 +21,7 @@ namespace PortFolion.Views {
 	public partial class ListTab : UserControl {
 		public ListTab() {
 			InitializeComponent();
-			this.DataContext = ListviewModel.Instance;
+			this.DataContext = new ListviewModel();
 		}
 	}
 }

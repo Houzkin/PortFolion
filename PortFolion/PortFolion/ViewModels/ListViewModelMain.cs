@@ -16,29 +16,11 @@ using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
-		static WeakReference<ListviewModel> _inst = new WeakReference<ListviewModel>(new ListviewModel());
-		public static ListviewModel Instance {
-			get {
-				ListviewModel vm;
-				if(!_inst.TryGetTarget(out vm)) {
-					vm = new ListviewModel();
-					_inst = new WeakReference<ListviewModel>(vm);
-				}
-				return vm;
-			}
-		}
+		
 		RootCollection Model;
-		private ListviewModel() {
+		public ListviewModel() {
 			Model = RootCollection.Instance;
-			//Model.CollectionChanged += CollectionChanged;
 			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(Model, CollectionChanged));
-
-
-			//this.CompositeDisposable.Add(new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>, DateTimeSelectedEventArgs>(
-			//	a => a,
-			//	h => this.dtr.DateTimeSelected += h,
-			//	h => this.dtr.DateTimeSelected -= h,
-			//	(o, e) => SetCurrentDate(e.SelectedDateTime)));
 
 			totalRiskFund = RootCollection.Instance.LastOrDefault();
 			if (totalRiskFund != null) {
@@ -150,12 +132,7 @@ namespace PortFolion.ViewModels {
 
 		DateTreeRoot dtr = new DateTreeRoot();
 		public IEnumerable<DateTree> DateList => dtr.Children;
-		//void selectedDateList(DateTime date) {
-		//	this.SetCurrentDate(date);
-		//}
-		//void selectDateListItem(DateTime date) {
-		//	dtr.SelectAt(date);
-		//}
+		
 		#endregion
 
 		#region tree
@@ -176,5 +153,34 @@ namespace PortFolion.ViewModels {
 		}
 		#endregion
 
+		private class VmControler : NotificationObject {
+			ListviewModel lvm;
+			public VmControler(ListviewModel vm) { lvm = vm; }
+
+			DateTime? _currentDate;
+			public DateTime? CurrentDate {
+				get { return _currentDate; }
+				set {
+					if (_currentDate == value) return;
+					_currentDate = value;
+					RaisePropertyChanged();
+				}
+			}
+
+			IEnumerable<string> _path;
+			public IEnumerable<string> Path {
+				get { return _path; }
+				set {
+					if (_path.SequenceEqual(value)) return;
+					_path = value;
+					RaisePropertyChanged();
+				}
+			}
+			
+
+			public void RootCollectionChanged(object s, NotifyCollectionChangedEventArgs e) {
+
+			}
+		}
 	}
 }

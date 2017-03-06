@@ -52,7 +52,7 @@ namespace PortFolion.Core {
 					var a2 = a1.ConvertTest(a => a.Clone(),(a,b)=>a.AddChild(b));
 
 					var trfn = a2 as TotalRiskFundNode;//= ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
-					trfn.RemoveDescendant(a => !a.HasPosition /*a.Amount == 0*/ && a.GetType() != typeof(FinancialValue));
+					trfn.RemoveDescendant(a => !a.HasPosition && a.GetType() != typeof(FinancialValue));
 					trfn.CurrentDate = date;
 					Instance.Add(trfn);
 				}else if (pns.Any()) {

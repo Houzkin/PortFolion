@@ -12,7 +12,10 @@ using System.Threading.Tasks;
 namespace PortFolion.ViewModels {
 	
 	
-	public class DateTree : TreeNode<DateTree> ,INotifyPropertyChanged{
+	public class DateTree : ObservableTreeNode<DateTree> ,INotifyPropertyChanged{
+		protected DateTree() {
+			this.Children.CollectionChanged += (o, e) => RaisePropertyChanged(nameof(Children));
+		}
 
 		public virtual DateTime? Date {
 			get {
@@ -88,6 +91,7 @@ namespace PortFolion.ViewModels {
 			//src.CollectionChanged += reAssembleTree;
 			//foreach(var i in items)
 			//	assembleTree(i.CurrentDate);
+			
 		}
 		void assembleTree(DateTime date) {
 			var y = Children.FirstOrDefault(a => a.Display == date.Year.ToString());

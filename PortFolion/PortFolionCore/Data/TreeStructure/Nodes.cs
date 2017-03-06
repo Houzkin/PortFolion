@@ -287,7 +287,7 @@ namespace PortFolion.Core {
 	}
 	/// <summary>ルートとなる総リスクファンド</summary>
 	public class TotalRiskFundNode : BrokerNode {
-		internal TotalRiskFundNode():base() { }
+		internal TotalRiskFundNode():base() { this.Name = "総リスク資産"; }
 		internal TotalRiskFundNode(CushionNode cushion):base(cushion) {
 			CurrentDate = cushion.Date;
 		}

@@ -49,7 +49,7 @@
                     </TreeView.ItemContainerStyle>
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate DataType="model:DateTree" ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Display}"/>
+                            <TextBlock Text="{Binding Display,UpdateSourceTrigger=PropertyChanged}"/>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
