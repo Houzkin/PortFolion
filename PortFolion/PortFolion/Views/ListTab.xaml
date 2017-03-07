@@ -9,7 +9,7 @@
              xmlns:tree="clr-namespace:System.Windows.Controls;assembly=TreeListView"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000">
+             d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -34,7 +34,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TreeView Grid.Row="0" x:Name="DateLists">
+                <TreeView Grid.Row="0" x:Name="DateLists" ItemsSource="{Binding DateList}">
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="{x:Type TreeViewItem}">
                             <Setter Property="IsSelected" Value="{Binding IsSelected,Mode=TwoWay}"/>
@@ -57,7 +57,7 @@
                 <StackPanel Orientation="Vertical" Grid.Row="1" VerticalAlignment="Top" Margin="0" HorizontalAlignment="Center">
                     <DatePicker
                         x:Name="PickedDate"
-                        Margin="5, 3"
+                        Margin="5, 3" Text="{Binding SelectedDateText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                         HorizontalAlignment="Right"
                         Controls:TextBoxHelper.UseFloatingWatermark="True"
                         Controls:TextBoxHelper.Watermark="Select a date" />
@@ -75,7 +75,7 @@
                 <Button Content="開"/>
                 <Button Content="閉"/>
             </ToolBar>
-            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root.Children}">
+            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}">
                 <!-- Style="{StaticResource VirtualisedMetroTreeView}"-->
                 <tree:TreeListView.Resources>
                     <Style TargetType="ToggleButton">
@@ -149,11 +149,11 @@
             </tree:TreeListView>
             <Grid x:Name="PortFolioResult"></Grid>
         </StackPanel>
-        <GridSplitter Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5"/>
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="5"/>
         <StackPanel Orientation="Vertical" Grid.Column="2" Margin="5,0,0,0">
             <TextBlock Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
 
-            <DataGrid Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate}" CanUserReorder="True" CanUserResize="True"/>
                     <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserReorder="True" CanUserResize="True">

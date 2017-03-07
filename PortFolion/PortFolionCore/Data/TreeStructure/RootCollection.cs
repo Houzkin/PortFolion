@@ -159,8 +159,11 @@ namespace PortFolion.Core {
 		}
 		protected override void InsertItem(int index, TotalRiskFundNode item) {
 			if (ContainsKey(item.CurrentDate)) return;
-			base.InsertItem(index, item);
-			if (!checkSeq(index)) DateTimeChange(item.CurrentDate);
+			var hs = new HashSet<DateTime>(this.Keys);
+			hs.Add(item.CurrentDate);
+			var idx = new List<DateTime>(hs.OrderBy(a => a)).IndexOf(item.CurrentDate);
+			base.InsertItem(idx, item);
+			//if (!checkSeq(index)) DateTimeChange(item.CurrentDate);
 		}
 		protected override void SetItem(int index, TotalRiskFundNode item) {
 			if (ContainsKey(item.CurrentDate)) return;
