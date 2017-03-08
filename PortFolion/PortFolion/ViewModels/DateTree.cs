@@ -23,9 +23,12 @@ namespace PortFolion.ViewModels {
 				return dd.Any() ? dd.Last() : null;
 			}
 		}
+		public virtual int Number { get; }
 		public virtual string Display { get; }
 
 		public event PropertyChangedEventHandler PropertyChanged;
+
+		public void Sort() => this.ChildNodes.Sort(a => a.Number);
 
 		protected void RaisePropertyChanged([CallerMemberName] string name = "") {
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -60,48 +63,33 @@ namespace PortFolion.ViewModels {
 		public DateTreeLeaf(DateTime date) { _date = date; }
 		DateTime _date;
 		public override DateTime? Date => _date;
-		public override string Display {
-			get {
-				return _date.ToString("dd");
-			}
-		}
+		public override int Number => _date.Day;
+		public override string Display => Number.ToString() + "日";
 	}
 	public class DateTreeNode : DateTree {
-		string _display;
-		public DateTreeNode(string displayName) { _display = displayName; }
-		public override string Display => _display;
+		int _number;
+		Func<int, string> _toDisplay;
+		public DateTreeNode(int displayName, Func<int,string> toDisplay) {
+			_number = displayName;
+			_toDisplay = toDisplay;
+		}
+		public override int Number => _number;
+		public override string Display => _toDisplay(Number);
 	}
 
 	public class DateTreeRoot : DateTree {
-		//public static DateTreeRoot Instance {
-		//	get {
-		//		if (_instance == null) _instance = new DateTreeRoot(RootCollection.Instance);
-		//		return _instance;
-		//	}
-		//}
-			//=> _instance = _instance ?? new DateTreeRoot(RootCollection.Instance);
-
-		//readonly INotifyCollectionChanged src;
-		//readonly IEnumerable<TotalRiskFundNode> items;
-		//static DateTreeRoot _instance = null;
-
 		public DateTreeRoot() {
-			//src = dateCollection as INotifyCollectionChanged;
-			//items = dateCollection;
-			//src.CollectionChanged += reAssembleTree;
-			//foreach(var i in items)
-			//	assembleTree(i.CurrentDate);
-			
+			Refresh();
 		}
 		void assembleTree(DateTime date) {
-			var y = Children.FirstOrDefault(a => a.Display == date.Year.ToString());
+			var y = Children.FirstOrDefault(a => a.Number == date.Year);
 			if(y==null) {
-				y = new DateTreeNode(date.Year.ToString());
+				y = new DateTreeNode(date.Year, a => a.ToString() + "年");
 				this.AddChild(y);
 			}
-			var m = y.Children.FirstOrDefault(a => a.Display == date.Month.ToString());
+			var m = y.Children.FirstOrDefault(a => a.Number == date.Month);
 			if (m == null) {
-				m = new DateTreeNode(date.Month.ToString());
+				m = new DateTreeNode(date.Month, a => a.ToString() + "月");
 				y.AddChild(m);
 			}
 			if(!m.Children.Any(a=>a.Date == date))
@@ -122,6 +110,7 @@ namespace PortFolion.ViewModels {
 				foreach (var dd in this.Preorder().OfType<DateTreeLeaf>().Where(a => a.Date == d).ToArray())
 					dd.Parent.RemoveChild(dd);
 			this.RemoveDescendant(a => !a.Preorder().OfType<DateTreeLeaf>().Any());
+			this.Levelorder().ToArray().ForEach(a => a.Sort());
 		}
 		public EventHandler<DateTimeSelectedEventArgs> DateTimeSelected;
 		public void SelectAt(DateTime date) {

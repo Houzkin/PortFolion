@@ -18,23 +18,11 @@ using Houzkin;
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
 		
-		RootCollection Model;
 		VmControler controler;
 		public ListviewModel() {
-			Model = RootCollection.Instance;
 			controler = new VmControler(this);
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
-			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(Model, controler.RootCollectionChanged));
-
-			//totalRiskFund = RootCollection.Instance.LastOrDefault();
-			//if (totalRiskFund != null) {
-			//	CurrentDate = totalRiskFund.CurrentDate;
-			//	Path = totalRiskFund.Path;
-			//}else {
-			//	CurrentDate = null;//DateTime.Today;
-			//	Path = Enumerable.Empty<string>();
-			//}
-			//this.RefreshHistory();
+			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
 		}
 
 		//private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
@@ -66,17 +54,6 @@ namespace PortFolion.ViewModels {
 			get { return controler.CurrentDate; }
 			set { controler.CurrentDate = value; }
 		}
-		//TotalRiskFundNode _trfn;
-		//TotalRiskFundNode totalRiskFund {
-		//	get { return _trfn; }
-		//	set {
-		//		if (value == _trfn) return;
-		//		_trfn = value;
-		//		root = CommonNodeVM.Create(_trfn);
-		//	}
-		//}
-		//CommonNodeVM root;
-		//public CommonNodeVM Root => root;
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
 			Root.Clear();
@@ -99,46 +76,6 @@ namespace PortFolion.ViewModels {
 		public IEnumerable<CommonNodeVM> History
 			=> _history;
 		
-		//public void SetCurrentDate(DateTime date) {
-		//	date = date.Date;
-		//	if (CurrentDate == date) return;
-		//	var c = RootCollection.Instance.LastOrDefault(a => date <= a.CurrentDate) ?? RootCollection.Instance.LastOrDefault();
-		//	if (c == null) {
-		//		if (totalRiskFund == null) {
-		//			CurrentDate = date;//notify
-		//			RaisePropertyChanged(nameof(CurrentDate));
-		//		}
-		//		return;
-		//	}
-		//	totalRiskFund = c;//notify
-		//	CurrentDate = totalRiskFund.CurrentDate;//notify
-		//	dtr.SelectAt(totalRiskFund.CurrentDate);
-			
-		//	if (Path.Any() && totalRiskFund.Levelorder().Any(a => a.Path.SequenceEqual(Path))) {
-		//		RaisePropertyChanged(nameof(Root));
-		//		RaisePropertyChanged(nameof(CurrentDate));
-		//		ExpandCurrentNode();
-		//		return;
-		//	}
-		//	Path = totalRiskFund.SearchNodeOf(this.Path)?.Path ?? Enumerable.Empty<string>();
-		//	Refresh();
-		//}
-		//public void SetPath(IEnumerable<string> path) {
-		//	if (path.SequenceEqual(Path)) return;
-		//	Path = path;
-
-		//	RaisePropertyChanged(nameof(this.Path));
-		//	RefreshHistory();
-		//	RaisePropertyChanged(nameof(this.CurrentDate));
-		//	ExpandCurrentNode();
-		//}
-		//public void Refresh() {
-		//	RaisePropertyChanged(nameof(this.Root));
-		//	RaisePropertyChanged(nameof(this.Path));
-		//	RefreshHistory();
-		//	RaisePropertyChanged(nameof(this.CurrentDate));
-		//	ExpandCurrentNode();
-		//}
 		#region date
 		string _selectedDateText = DateTime.Today.ToShortDateString();
 		public string SelectedDateText {
@@ -185,11 +122,13 @@ namespace PortFolion.ViewModels {
 		}
 		#endregion
 
+		#region Controler as inner class
 		private class VmControler : NotificationObject {
 			ListviewModel lvm;
 			public VmControler(ListviewModel vm) {
 				lvm = vm;
-				RootCollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				//RootCollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				this.CurrentDate = DateTime.Today;
 			}
 
 			public void RootCollectionChanged(object s, NotifyCollectionChangedEventArgs e) {
@@ -247,6 +186,7 @@ namespace PortFolion.ViewModels {
 			public IEnumerable<string> Path {
 				get { return _path; }
 				set {
+					value = value ?? Enumerable.Empty<string>();
 					if (_path.SequenceEqual(value)) return;
 					_path = value;
 					RaisePropertyChanged();
@@ -256,6 +196,7 @@ namespace PortFolion.ViewModels {
 					}
 				}
 			}
-		}//end inner class
+		}
+		#endregion
 	}
 }

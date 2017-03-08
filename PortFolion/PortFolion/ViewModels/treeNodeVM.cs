@@ -62,10 +62,11 @@ namespace PortFolion.ViewModels {
 				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
 				_currentPositionLine = RootCollection
 					.GetNodeLine(Model.Path, d)
-					.Values
-					.Select(value => new { (value.Root() as TotalRiskFundNode).CurrentDate, value })
-					.Where(a => a.CurrentDate <= d)
-					.ToDictionary(a => a.CurrentDate, a => a.value);
+					//.Values
+					//.Select(value => new { (value.Root() as TotalRiskFundNode).CurrentDate, value })
+					//.Where(a => a.CurrentDate <= d)
+					.Where(a=>a.Key <= d)
+					.ToDictionary(a => a.Key, a => a.Value);
 				return _currentPositionLine;
 			}
 		}
