@@ -22,7 +22,8 @@ namespace PortFolion.ViewModels {
 		public ListviewModel() {
 			controler = new VmControler(this);
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
-			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
+			RootCollection.Instance.CollectionChanged += controler.RootCollectionChanged;
+			//this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
 		}
 
 		//private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
@@ -56,11 +57,13 @@ namespace PortFolion.ViewModels {
 		}
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
+			if (Root.Any(a => a.IsModel(root))) return;
 			Root.Clear();
 			if (root != null) {
 				Root.Add(CommonNodeVM.Create(root));
 				this.ExpandCurrentNode();
 			}
+			//RaisePropertyChanged(nameof(Root));
 		}
 
 		public IEnumerable<string> Path {
@@ -91,11 +94,12 @@ namespace PortFolion.ViewModels {
 		public ICommand AddNewRootCommand => addNewRootCommand = new ListenerCommand<DateTime>(d => {
 			var r = RootCollection.GetOrCreate(d);
 			if (string.IsNullOrEmpty(r.Name)) r.Name = "総リスク資産";
+			this.CurrentDate = d;
 			//dtr.SelectAt(d);
 			//this.SetCurrentDate(d);
 		},()=> {
 			var d = ResultWithValue.Of<DateTime>(DateTime.TryParse, _selectedDateText);
-			return d.Result;
+			return d.Result;//&& !RootCollection.Instance.ContainsKey(d.Value);//.Any(a=>a.CurrentDate != d.Value);
 		});
 
 		DateTreeRoot dtr = new DateTreeRoot();
@@ -127,7 +131,6 @@ namespace PortFolion.ViewModels {
 			ListviewModel lvm;
 			public VmControler(ListviewModel vm) {
 				lvm = vm;
-				//RootCollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 				this.CurrentDate = DateTime.Today;
 			}
 
@@ -136,7 +139,7 @@ namespace PortFolion.ViewModels {
 				TotalRiskFundNode rt;
 				switch (e.Action) {
 				case NotifyCollectionChangedAction.Add:
-					rt = e.NewItems.Cast<TotalRiskFundNode>().FirstOrDefault();// as TotalRiskFundNode;
+					rt = e.NewItems.OfType<TotalRiskFundNode>().FirstOrDefault();
 					if (rt == null) goto default;
 					lvm.SetRoot(rt);
 					break;
@@ -161,8 +164,8 @@ namespace PortFolion.ViewModels {
 						lvm.SetRoot(null);
 						return;
 					}
-					var r = RootCollection.Instance.FirstOrDefault(a => _currentDate <= a.CurrentDate)
-						?? RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= _currentDate);
+					var r = RootCollection.Instance.FirstOrDefault(a => value <= a.CurrentDate)
+						?? RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= value);
 					if (r == null) {
 						_currentDate = null;
 						RaisePropertyChanged();

@@ -11,14 +11,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
+        <Grid.Resources>
+            <converter:PathToStringConverter x:Key="PathToString"/>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <Grid.Resources>
-            <converter:PathToStringConverter x:Key="PathToString"/>
-        </Grid.Resources>
 
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
@@ -70,7 +70,7 @@
         </Expander>
 
         <StackPanel Orientation="Vertical" Grid.Column="1">
-            <TextBlock x:Name="Date" Text="{Binding CurrentDate, StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
+            <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
             <ToolBar HorizontalAlignment="Left">
                 <Button Content="開"/>
                 <Button Content="閉"/>
@@ -123,27 +123,63 @@
                                 <StackPanel Orientation="Horizontal">
                                     <tree:TreeListViewExpander/>
                                     <TextBlock Text="{Binding Name}"/>
+                                    <MenuItem Header="編" ItemsSource="{Binding MenuList}">
+                                        <MenuItem.ItemTemplate>
+                                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                                <MenuItem Header="{Binding Header}" Command="{Binding MenuCommand}"/>
+                                            </HierarchicalDataTemplate>
+                                        </MenuItem.ItemTemplate>
+                                        <MenuItem.Template>
+                                            <ControlTemplate TargetType="MenuItem">
+                                                <Button Content="編"/>
+                                            </ControlTemplate>
+                                        </MenuItem.Template>
+                                    </MenuItem>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="評価額" Width="auto">
-
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Amount}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="取引数" Width="auto">
-
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TradeQuantity}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="保有数" Width="auto">
-
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Quantity}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="平均取得単価" Width="auto">
-
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PerBuyPriceAverage}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="現在単価" Width="auto">
-
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PerPrice}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="含み損益" Width="auto">
-
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UnrealizedProfitLoss}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                 </tree:TreeListView.Columns>
             </tree:TreeListView>

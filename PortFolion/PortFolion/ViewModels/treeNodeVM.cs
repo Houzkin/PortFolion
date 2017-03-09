@@ -23,8 +23,6 @@ namespace PortFolion.ViewModels {
 		IDisposable listener;
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			return CommonNodeVM.Create(modelChildNode);
-			
-			
 		}
 		bool isExpand;
 		public bool IsExpand {
@@ -32,6 +30,7 @@ namespace PortFolion.ViewModels {
 			set { this.SetProperty(ref isExpand, value); }
 		}
 		public NodePath<string> Path => Model.Path;
+		public bool IsModel(CommonNode node) => this.Model == node;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
@@ -62,9 +61,6 @@ namespace PortFolion.ViewModels {
 				var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
 				_currentPositionLine = RootCollection
 					.GetNodeLine(Model.Path, d)
-					//.Values
-					//.Select(value => new { (value.Root() as TotalRiskFundNode).CurrentDate, value })
-					//.Where(a => a.CurrentDate <= d)
 					.Where(a=>a.Key <= d)
 					.ToDictionary(a => a.Key, a => a.Value);
 				return _currentPositionLine;
@@ -142,6 +138,7 @@ namespace PortFolion.ViewModels {
 			var vmc = new ViewModelCommand(() => {
 				var vm = new NodeNameEditerVM(model.Parent, model);
 				// window.ShowDialog();
+				throw new NotImplementedException();
 			}, () => model.Parent != null);
 			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
 			

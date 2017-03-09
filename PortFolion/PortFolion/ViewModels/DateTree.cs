@@ -19,8 +19,9 @@ namespace PortFolion.ViewModels {
 
 		public virtual DateTime? Date {
 			get {
-				var dd = this.Levelorder().Where(a => !a.Children.Any()).Select(a => a.Date).OrderBy(a => a);
-				return dd.Any() ? dd.Last() : null;
+				return this.Levelorder().OfType<DateTreeLeaf>().Select(a => a.Date).OrderBy(a => a).LastOrDefault();
+				//var dd = this.Levelorder().Where(a => !a.Children.Any()).Select(a => a.Date).OrderBy(a => a);
+				//return dd.Any() ? dd.Last() : null;
 			}
 		}
 		public virtual int Number { get; }
@@ -48,19 +49,22 @@ namespace PortFolion.ViewModels {
 			set {
 				if (_isSelected == value) return;
 				_isSelected = value;
-				foreach (var t in this.Upstream()) t.IsExpand = true;
 				RaisePropertyChanged();
-				var d = this.Date;
-				if (d != null) {
-					this.Upstream()
-						.OfType<DateTreeRoot>()
-						.SingleOrDefault()?.DateTimeSelected?.Invoke(this, new DateTimeSelectedEventArgs((DateTime)d));
-				}
 			}
 		}
 	}
 	public class DateTreeLeaf : DateTree {
-		public DateTreeLeaf(DateTime date) { _date = date; }
+		public DateTreeLeaf(DateTime date) {
+			_date = date;
+			this.PropertyChanged += (o, e) => {
+				if(e.PropertyName == nameof(this.IsSelected) && this.IsSelected) {
+					foreach (var t in this.Upstream().Skip(1)) t.IsExpand = true;
+					(this.Root() as DateTreeRoot)
+					?.DateTimeSelected
+					?.Invoke(this.Root(), new DateTimeSelectedEventArgs(_date));
+				}
+			};
+		}
 		DateTime _date;
 		public override DateTime? Date => _date;
 		public override int Number => _date.Day;
@@ -95,10 +99,7 @@ namespace PortFolion.ViewModels {
 			if(!m.Children.Any(a=>a.Date == date))
 				m.AddChild(new DateTreeLeaf(date));
 		}
-		//void reAssembleTree(object s, NotifyCollectionChangedEventArgs e) {
-		//	//this.Children.Clear();//ClearChildren();
-		//	//foreach (var i in items) assembleTree(i.CurrentDate);
-		//}
+		
 		public void Refresh() {
 			var cur = RootCollection.Instance.Select(a => a.CurrentDate);
 			var prv = this.Preorder().OfType<DateTreeLeaf>().Select(a => (DateTime)a.Date);
@@ -116,7 +117,7 @@ namespace PortFolion.ViewModels {
 		public void SelectAt(DateTime date) {
 			var n = this.Levelorder().OfType<DateTreeLeaf>().LastOrDefault(a => a.Date == date);
 			if (n != null) {
-				foreach (var nd in n.Upstream()) nd.IsExpand = true;
+				//foreach (var nd in n.Upstream()) nd.IsExpand = true;
 				n.IsSelected = true;
 			}
 		}
