@@ -49,6 +49,11 @@ namespace PortFolion.ViewModels {
 			this.Name = model.Name;
 			this.PresentName = model.Name;
 		}
+		string title;
+		public string Title {
+			get { return title; }
+			set { SetProperty(ref title, value); }
+		}
 		//AccountEditVM acc;
 		//public NodeNameEditerVM(AccountEditVM account, CommonNode parent, CommonNode model) : this(parent, model) {
 		//	acc = account;
@@ -81,9 +86,6 @@ namespace PortFolion.ViewModels {
 		protected string NameValidateHistory(string newName) {
 			if(Parent == Model.Parent) {
 				var his = RootCollection.GetNodeLine(Parent.Path);
-					//.ToDictionary(
-					//	a => (a.Root() as TotalRiskFundNode).CurrentDate,
-					//	b => b);
 				Func<KeyValuePair<DateTime, CommonNode>, bool> fun = 
 					a => a.Value.Children
 						.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
@@ -110,7 +112,7 @@ namespace PortFolion.ViewModels {
 			var his = RootCollection.GetNodeLine(Parent.Path).Values;
 			if(his.Any(a=>a.Children.Any(b=>b.Name == name))) {
 				string msg = "[" + name + "] は別の時系列に既に存在します。\n["
-					+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。\nこの操作は不可逆です。";
+					+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。\nこの操作は元に戻せません。";
 				var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
 				if (r == MessageBoxResult.Cancel) return;
 			}
@@ -142,7 +144,6 @@ namespace PortFolion.ViewModels {
 				});
 		
 	}
-
 	//public class NodeTagEditerVM : DynamicViewModel<CommonNode> {
 	//	public NodeTagEditerVM(CommonNode model) : base(model) {
 	//		TagList = RootCollection.Instance.SelectMany(a => a.Levelorder()).Select(a => a.Tag.TagName).Distinct();
@@ -164,5 +165,4 @@ namespace PortFolion.ViewModels {
 
 	//	}
 	//}
-	
 }

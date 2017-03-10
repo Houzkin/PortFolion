@@ -133,6 +133,17 @@ namespace PortFolion.ViewModels {
 					w.ShowDialog();
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
+			}else if (ty == typeof(BrokerNode)) {
+				var vc = new ViewModelCommand(() => {
+					var vm = new NodeNameEditerVM(model, new AccountNode(AccountClass.General));
+
+				});
+				MenuList.Add(new MenuItemVm(vc) { Header = "アカウント追加" });
+			}else if(ty == typeof(TotalRiskFundNode)) {
+				var vc = new ViewModelCommand(() => {
+
+				});
+				MenuList.Add(new MenuItemVm(vc) { Header = "ブローカー追加" });
 			}
 
 			var vmc = new ViewModelCommand(() => {

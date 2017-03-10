@@ -8,6 +8,7 @@
              xmlns:converter="clr-namespace:PortFolion.Views.Converter"
              xmlns:tree="clr-namespace:System.Windows.Controls;assembly=TreeListView"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:ddmb="clr-namespace:DropDownMenuButton;assembly=DropDownMenuButton"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
@@ -71,10 +72,12 @@
 
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
-            <ToolBar HorizontalAlignment="Left">
-                <Button Content="開"/>
-                <Button Content="閉"/>
-            </ToolBar>
+            <Menu HorizontalAlignment="Left">
+                <!--<Button Content="開"/>
+                <Button Content="閉"/>-->
+                <MenuItem Header="開"/>
+                <MenuItem Header="閉"/>
+            </Menu>
             <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}">
                 <!-- Style="{StaticResource VirtualisedMetroTreeView}"-->
                 <tree:TreeListView.Resources>
@@ -123,18 +126,22 @@
                                 <StackPanel Orientation="Horizontal">
                                     <tree:TreeListViewExpander/>
                                     <TextBlock Text="{Binding Name}"/>
-                                    <MenuItem Header="編" ItemsSource="{Binding MenuList}">
-                                        <MenuItem.ItemTemplate>
-                                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                                <MenuItem Header="{Binding Header}" Command="{Binding MenuCommand}"/>
-                                            </HierarchicalDataTemplate>
-                                        </MenuItem.ItemTemplate>
-                                        <MenuItem.Template>
-                                            <ControlTemplate TargetType="MenuItem">
-                                                <Button Content="編"/>
-                                            </ControlTemplate>
-                                        </MenuItem.Template>
-                                    </MenuItem>
+                                    <ddmb:DropDownMenuButton Style="{StaticResource MetroFlatToggleButton}">
+                                        <!--<StackPanel Orientation="Horizontal ">-->
+                                            <TextBlock Text="編"/>
+                                            <!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->
+                                        <!--</StackPanel>-->
+                                        <ddmb:DropDownMenuButton.DropDownContextMenu>
+                                            <ContextMenu ItemsSource="{Binding MenuList}">
+                                                <ContextMenu.ItemContainerStyle>
+                                                    <Style TargetType="MenuItem">
+                                                        <Setter Property="Header" Value="{Binding Header}"/>
+                                                        <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                                                    </Style>
+                                                </ContextMenu.ItemContainerStyle>
+                                            </ContextMenu>
+                                        </ddmb:DropDownMenuButton.DropDownContextMenu>
+                                    </ddmb:DropDownMenuButton>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

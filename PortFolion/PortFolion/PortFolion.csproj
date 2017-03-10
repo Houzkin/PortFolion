@@ -131,6 +131,9 @@
     <Compile Include="Views\ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\NodeNameEditWindow.xaml.cs">
+      <DependentUpon>NodeNameEditWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="Views\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -166,6 +169,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\ModernMainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NodeNameEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
