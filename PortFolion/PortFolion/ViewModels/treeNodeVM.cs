@@ -136,20 +136,26 @@ namespace PortFolion.ViewModels {
 			}else if (ty == typeof(BrokerNode)) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new NodeNameEditerVM(model, new AccountNode(AccountClass.General));
-
+					var w = new Views.NodeNameEditWindow();
+					w.DataContext = vm;
+					w.ShowDialog();
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "アカウント追加" });
 			}else if(ty == typeof(TotalRiskFundNode)) {
 				var vc = new ViewModelCommand(() => {
-
+					var vm = new NodeNameEditerVM(model, new BrokerNode());
+					var w = new Views.NodeNameEditWindow();
+					w.DataContext = vm;
+					w.ShowDialog();
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "ブローカー追加" });
 			}
 
 			var vmc = new ViewModelCommand(() => {
 				var vm = new NodeNameEditerVM(model.Parent, model);
-				// window.ShowDialog();
-				throw new NotImplementedException();
+				var w = new Views.NodeNameEditWindow();
+				w.DataContext = vm;
+				w.ShowDialog();
 			}, () => model.Parent != null);
 			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
 			

@@ -127,7 +127,6 @@ namespace PortFolion.ViewModels {
 			}else {
 				EditExecute();
 			}
-			
 		}
 		protected virtual bool CanExecuteFunc() {
 			var name = this.Name.Trim();
@@ -139,9 +138,8 @@ namespace PortFolion.ViewModels {
 		ViewModelCommand cancel;
 		public virtual ViewModelCommand CancelCmd
 			=> cancel = cancel ?? new ViewModelCommand(
-				() => {
-					Messenger.Raise(new InteractionMessage("EditEndNodeName"));
-				});
+				() => Messenger.Raise(new InteractionMessage("EditEndNodeName")));
+				
 		
 	}
 	//public class NodeTagEditerVM : DynamicViewModel<CommonNode> {

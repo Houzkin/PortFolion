@@ -78,7 +78,7 @@
                 <MenuItem Header="開"/>
                 <MenuItem Header="閉"/>
             </Menu>
-            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}">
+            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}" >
                 <!-- Style="{StaticResource VirtualisedMetroTreeView}"-->
                 <tree:TreeListView.Resources>
                     <Style TargetType="ToggleButton">
@@ -128,8 +128,8 @@
                                     <TextBlock Text="{Binding Name}"/>
                                     <ddmb:DropDownMenuButton Style="{StaticResource MetroFlatToggleButton}">
                                         <!--<StackPanel Orientation="Horizontal ">-->
-                                            <TextBlock Text="編"/>
-                                            <!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->
+                                        <TextBlock Text="編"/>
+                                        <!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->
                                         <!--</StackPanel>-->
                                         <ddmb:DropDownMenuButton.DropDownContextMenu>
                                             <ContextMenu ItemsSource="{Binding MenuList}">
