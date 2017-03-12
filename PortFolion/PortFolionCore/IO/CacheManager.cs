@@ -12,11 +12,17 @@ namespace PortFolion.IO {
 		static readonly string _path = AppDomain.CurrentDomain.BaseDirectory + "cache";
 		static string checkPath(string[] path) {
 			if (!path.Any()) throw new ArgumentNullException();
-			return path.Aggregate("", (a, b) => a + Path.DirectorySeparatorChar + b);
+			var p = _path + path.Aggregate("", (a, b) => a + Path.DirectorySeparatorChar + b);
+			var d = Path.GetDirectoryName(p);
+			if (!Directory.Exists(d)) {
+				Directory.CreateDirectory(d);
+			}
+			return p;
 		}
 
 		public static void SaveCache(string data, params string[] path) {
-			using (var sw = new StreamWriter(_path, false)) {
+			var s = checkPath(path);
+			using (var sw = new StreamWriter(s,false)) {
 				sw.Write(data);
 			}
 		}

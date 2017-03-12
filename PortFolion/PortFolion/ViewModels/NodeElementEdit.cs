@@ -399,7 +399,7 @@ namespace PortFolion.ViewModels {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
 			if (!r) return "コードを入力してください";
 			if (value.Count() != 4) return "4桁";
-			var d = Model.Upstream().OfType<TotalRiskFundNode>().Last().CurrentDate;
+			var d = this.AccountVM.CurrentDate;// Model.Upstream().OfType<TotalRiskFundNode>().Last().CurrentDate;
 			var tgh = Web.KdbDataClient
 				.AcqireStockInfo(d)
 				.Where(a => int.Parse(a.Symbol) == r.Value).ToArray();

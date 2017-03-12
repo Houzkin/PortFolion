@@ -16,15 +16,24 @@ namespace PortFolion.ViewModels {
 	public class FinancialProductVM : FinancialBasketVM {
 		public FinancialProductVM(FinancialProduct model) : base(model) {
 		}
-		protected override bool ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			if(base.ModelPropertyChanged(sender,e) 
-				|| MaybeModelAs<FinancialProduct>().TrueOrNot(
-					o=> e.PropertyName == nameof(o.Quantity) || e.PropertyName == nameof(o.TradeQuantity), 
-					x => false)) {
+		protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			base.ModelPropertyChanged(sender, e);
+			if(MaybeModelAs<FinancialProduct>().TrueOrNot(
+				o => e.PropertyName == nameof(o.InvestmentValue)
+					|| e.PropertyName == nameof(o.Amount)
+					|| e.PropertyName == nameof(o.Quantity)
+					|| e.PropertyName == nameof(o.TradeQuantity),
+				x => false)) {
 				reculc();
-				return true;
 			}
-			return false;
+			//if(base.ModelPropertyChanged(sender,e) 
+			//	|| MaybeModelAs<FinancialProduct>().TrueOrNot(
+			//		o=> e.PropertyName == nameof(o.Quantity) || e.PropertyName == nameof(o.TradeQuantity), 
+			//		x => false)) {
+			//	reculc();
+			//	return true;
+			//}
+			//return false;
 		}
 		protected override void ReCalc() {
 			base.ReCalc();

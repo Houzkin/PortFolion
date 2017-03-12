@@ -69,7 +69,7 @@ namespace PortFolion.ViewModels {
 			get { return _name; }
 			set {
 				SetProperty(ref _name, value, NameValidate);
-				execute.RaiseCanExecuteChanged();
+				this.ExecuteCmd.RaiseCanExecuteChanged();
 			}
 		}
 		protected virtual string NameValidate(string newName) {

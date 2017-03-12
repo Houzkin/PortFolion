@@ -40,9 +40,9 @@ namespace PortFolion.Web {
 				var numberStyle = options.NumberStyle ?? System.Globalization.NumberStyles.Integer;
 				int i;
 				if (int.TryParse(s, numberStyle, options.CultureInfo, out i)) {
-					return i;
+					return i.ToString();
 				}
-				return 0;
+				return "unknown";
 			}
 		}
 		#endregion
@@ -86,7 +86,7 @@ namespace PortFolion.Web {
 			using (var csv = new CsvReader(str)) {
 				csv.Configuration.RegisterClassMap<KdbMap>();
 				//csv.Configuration.WillThrowOnMissingField = false;
-				return csv.GetRecords<StockInfo>();
+				return csv.GetRecords<StockInfo>().ToArray();
 			}
 		}
 		static WebClient wc = new WebClient() { Encoding = Encoding.Default };

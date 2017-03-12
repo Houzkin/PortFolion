@@ -37,12 +37,15 @@ namespace PortFolion.ViewModels {
 			foreach (var n in this.Levelorder().Reverse()) n.ReCalc();
 			//foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
 		}
-		protected virtual bool ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			if (e.PropertyName == nameof(Model.InvestmentValue)) {
 				reculcHistories();
-				return true;
+				//return true;
 			}
-			return false;
+			if(e.PropertyName == nameof(Model.Amount)) {
+
+			}
+			//return false;
 		}
 		void reculcHistories() {
 			_currentPositionLine = null;
@@ -164,13 +167,17 @@ namespace PortFolion.ViewModels {
 			base.ReCalc();
 			reculc();
 		}
-		protected override bool ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			if(base.ModelPropertyChanged(sender,e) 
-				|| e.PropertyName == nameof(Model.Amount)) {
+		protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			base.ModelPropertyChanged(sender, e);
+			if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.Amount)) {
 				reculc();
-				return true;
 			}
-			return false;
+			//if(base.ModelPropertyChanged(sender,e) 
+			//	|| e.PropertyName == nameof(Model.Amount)) {
+			//	reculc();
+			//	return true;
+			//}
+			//return false;
 		}
 		void reculc() {
 			this.ProfitLoss = Model.Amount - InvestmentTotal - InvestmentReturnTotal;

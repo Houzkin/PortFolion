@@ -22,8 +22,8 @@ namespace PortFolion.ViewModels {
 		public ListviewModel() {
 			controler = new VmControler(this);
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
-			RootCollection.Instance.CollectionChanged += controler.RootCollectionChanged;
-			//this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
+			//RootCollection.Instance.CollectionChanged += controler.RootCollectionChanged;
+			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
 		}
 
 		//private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {

@@ -28,9 +28,9 @@
     	<!--Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています --> 
         
         <!--WindowのContentRenderedイベントのタイミングでViewModelのInitializeメソッドが呼ばれます-->
-        <i:EventTrigger EventName="ContentRendered">
+        <!--<i:EventTrigger EventName="ContentRendered">
             <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Initialize"/>
-        </i:EventTrigger>
+        </i:EventTrigger>-->
 
         <!--Windowが閉じたタイミングでViewModelのDisposeメソッドが呼ばれます-->
         <i:EventTrigger EventName="Closed">
