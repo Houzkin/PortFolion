@@ -21,14 +21,14 @@ namespace PortFolion.Web {
 		class KdbMap : CsvClassMap<StockInfo> {
 			public KdbMap() {
 				Map(m => m.Symbol).Name("コード").TypeConverter<SymbolConverter>().Default("unknown");
-				Map(m => m.Name).Name("銘柄名");
-				Map(m => m.Market).Name("市場");
-				Map(m => m.Open).Name("始値");
-				Map(m => m.High).Name("高値");
-				Map(m => m.Low).Name("安値");
-				Map(m => m.Close).Name("終値");
-				Map(m => m.Turnover).Name("出来高");
-				Map(m => m.TradingValue).Name("売買代金");
+				Map(m => m.Name).Name("銘柄名").Default("");
+				Map(m => m.Market).Name("市場").Default("");
+				Map(m => m.Open).Name("始値").Default(0);
+				Map(m => m.High).Name("高値").Default(0);
+				Map(m => m.Low).Name("安値").Default(0);
+				Map(m => m.Close).Name("終値").Default(0);
+				Map(m => m.Turnover).Name("出来高").Default(0);
+				Map(m => m.TradingValue).Name("売買代金").Default(0);
 			}
 		}
 		class SymbolConverter : DefaultTypeConverter {
@@ -85,7 +85,8 @@ namespace PortFolion.Web {
 			using (StreamReader str = new StreamReader(fi.FullName))
 			using (var csv = new CsvReader(str)) {
 				csv.Configuration.RegisterClassMap<KdbMap>();
-				//csv.Configuration.WillThrowOnMissingField = false;
+				
+				csv.Configuration.WillThrowOnMissingField = false;
 				return csv.GetRecords<StockInfo>().ToArray();
 			}
 		}

@@ -36,21 +36,8 @@ namespace PortFolion.ViewModels {
 			set { _messenger = value; }
 		}
 		public AccountEditVM(AccountNode an) : base(an) {
-			var cash = Model.GetOrCreateNuetral();//Model.Children.FirstOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
-			//if(cash == null) {
-			//	cash = new FinancialValue();
-			//	string name = "余力";
-			//	int num = 1;
-			//	while(Model.Children.Any(a=>a.Name == name)) {
-			//		name = "余力" + num;
-			//		num++;
-			//	}
-			//	cash.Name = name;
-			//	Model.AddChild(cash);
-			//}
-
+			var cash = Model.GetOrCreateNuetral();
 			resetElements();
-			//CashElement = Elements.First(a => a.IsCash);
 			Elements.CollectionChanged += (s, e) => ChangedTemporaryAmount();
 			DummyStock = new StockEditVM(this);
 			DummyProduct = new ProductEditVM(this);
@@ -66,6 +53,11 @@ namespace PortFolion.ViewModels {
 						Messenger.Raise(new InteractionMessage("EditNodeName"));
 				}
 			}
+		}
+		public string StatusComment { get; private set; }
+		public void SetStatusComment(string comment) {
+			StatusComment = comment;
+			OnPropertyChanged(nameof(StatusComment));
 		}
 		public CashEditVM CashElement => Elements.First(a => a.IsCash);
 		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
@@ -156,7 +148,9 @@ namespace PortFolion.ViewModels {
 				}else {
 					Model.Children.Insert(idx, ele.Model);
 				}
-			});
+			}
+			
+			);
 		}
 
 		ViewModelCommand allSellCmd;
@@ -184,8 +178,8 @@ namespace PortFolion.ViewModels {
 			if(canApply()) apply();
 		}
 
-		ViewModelCommand cancelCml;
-		public ICommand Cancel => cancelCml = cancelCml ?? new ViewModelCommand(resetElements);
+		ViewModelCommand resetCmd;
+		public ICommand Reset => resetCmd = resetCmd ?? new ViewModelCommand(resetElements);
 		void resetElements() {
 			Elements.Clear();
 			Model.Children.Select(a => {
@@ -399,17 +393,35 @@ namespace PortFolion.ViewModels {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
 			if (!r) return "コードを入力してください";
 			if (value.Count() != 4) return "4桁";
-			var d = this.AccountVM.CurrentDate;// Model.Upstream().OfType<TotalRiskFundNode>().Last().CurrentDate;
-			var tgh = Web.KdbDataClient
-				.AcqireStockInfo(d)
-				.Where(a => int.Parse(a.Symbol) == r.Value).ToArray();
-			if (!tgh.Any()) return "";
-			var tg = tgh.OrderBy(a => a.Turnover).Last();
-			this.CurrentPerPrice = tg.Close.ToString("#.##");
-			this.Name = tg.Name;
+			var d = this.AccountVM.CurrentDate;
+			this.AccountVM.SetStatusComment("コード: " + r.Value.ToString() + " の銘柄情報を取得開始します");
+			var cm = setNameAndPrice(r.Value, d);
+			this.AccountVM.SetStatusComment(cm);
 			return null;
 		}
-		
+		string setNameAndPrice(int r, DateTime d) {
+			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
+			try {
+				siis = Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray();
+			} catch {
+				return "エラーにより取得不可";
+			} finally { }
+
+			StockInfo si = null;
+			if (!siis.Any()) {
+				return "指定したコードの銘柄は存在しません";
+			}else {
+				si = siis.OrderBy(a => a.Turnover).Last();
+			}
+			this.Name = si.Name;
+			if(si.Turnover != 0) {
+				this.CurrentPerPrice = si.Close.ToString("#.##");
+				return this.Name + "の終値を適用しました";
+			}else {
+				return this.Name + "は出来高がないため終値を取得できませんでした";
+			}
+
+		}
 		public override void Apply() {
 			base.Apply();
 			Model.Code = ResultWithValue.Of<int>(int.TryParse, _Code).Value;

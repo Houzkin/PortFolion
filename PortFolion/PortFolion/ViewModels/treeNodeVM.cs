@@ -34,18 +34,15 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
-			foreach (var n in this.Levelorder().Reverse()) n.ReCalc();
-			//foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
+			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
 		}
 		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			if (e.PropertyName == nameof(Model.InvestmentValue)) {
 				reculcHistories();
-				//return true;
 			}
 			if(e.PropertyName == nameof(Model.Amount)) {
 
 			}
-			//return false;
 		}
 		void reculcHistories() {
 			_currentPositionLine = null;
@@ -133,7 +130,7 @@ namespace PortFolion.ViewModels {
 					var vm = new AccountEditVM(model as AccountNode);
 					var w = new Views.AccountEditWindow();
 					w.DataContext = vm;
-					w.ShowDialog();
+					if (w.ShowDialog() == true) this.ReCalcurate();
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
 			}else if (ty == typeof(BrokerNode)) {
@@ -172,12 +169,6 @@ namespace PortFolion.ViewModels {
 			if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.Amount)) {
 				reculc();
 			}
-			//if(base.ModelPropertyChanged(sender,e) 
-			//	|| e.PropertyName == nameof(Model.Amount)) {
-			//	reculc();
-			//	return true;
-			//}
-			//return false;
 		}
 		void reculc() {
 			this.ProfitLoss = Model.Amount - InvestmentTotal - InvestmentReturnTotal;

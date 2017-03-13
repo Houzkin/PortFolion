@@ -9,6 +9,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        x:Name="editWindow"
         mc:Ignorable="d" SaveWindowPosition="False"
         GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
         Title="AccountEdit" Height="500" Width="780">
@@ -48,7 +49,14 @@
             <!--<l:LivetCallMethodAction MethodTarget="{x:Reference}" MethodName="CloseNameEditFlyout"/>-->
             <ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="false"/>
         </l:InteractionMessageTrigger>
-
+         
+        <l:InteractionMessageTrigger MessageKey="CloseAsTrue" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="{Binding ElementName=editWindow}" PropertyName="DialogResult" Value="true"/>
+        </l:InteractionMessageTrigger>
+         
+        <l:InteractionMessageTrigger MessageKey="CloseAsFalse" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="{Binding ElementName=editWindow}" PropertyName="DialogResult" Value="false"/>
+        </l:InteractionMessageTrigger>
 
     </i:Interaction.Triggers>
     <mah:MetroWindow.Flyouts>
@@ -88,7 +96,7 @@
         <WrapPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                <TextBlock Text="{Binding CashElement.Name, StringFormat=”{}{0} :”}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
+                <TextBlock Text="{Binding CashElement.Name, StringFormat=”{0} :”}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.Amount}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
                 <TextBlock Text="内、当日入(+)・出(-)金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
@@ -100,7 +108,7 @@
             </StackPanel>
         </WrapPanel>
         <Grid Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Content="単価更新" Margin="5,10,5,0"/>
+            <Button Content="単価更新" Margin="5,10,5,0" Command="{Binding ApplyCurrentPerPrice}"/>
         </Grid>
         <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Elements}" AutoGenerateColumns="False">
             <DataGrid.Columns>
@@ -249,8 +257,15 @@
             </TabItem>
         </TabControl>
         <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="キャンセル"/>
-            <Button Content="完了"/>
+            <Button Content="リセット" Command="{Binding Reset}" Margin="5,3"/>
+            <Button Content="キャンセル" Margin="5,3">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <ei:ChangePropertyAction TargetName="{Binding ElementName=editWindow}" PropertyName="DialogResult" Value="false"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Content="完了" Command="{Binding Apply}" Margin="5,3"/>
         </StackPanel>
     </Grid>
 </mah:MetroWindow>
