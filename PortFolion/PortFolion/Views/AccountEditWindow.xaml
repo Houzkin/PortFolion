@@ -41,12 +41,10 @@
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
          
         <l:InteractionMessageTrigger MessageKey="EditNodeName" Messenger="{Binding Messenger}">
-            <!--<l:LivetCallMethodAction MethodTarget="{x:Reference}" MethodName="OpenNameEditFlyout"/>-->
             <ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="true"/>
         </l:InteractionMessageTrigger>
          
         <l:InteractionMessageTrigger MessageKey="EditEndNodeName" Messenger="{Binding Messenger}">
-            <!--<l:LivetCallMethodAction MethodTarget="{x:Reference}" MethodName="CloseNameEditFlyout"/>-->
             <ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="false"/>
         </l:InteractionMessageTrigger>
          
@@ -54,9 +52,9 @@
             <ei:ChangePropertyAction TargetName="{Binding ElementName=editWindow}" PropertyName="DialogResult" Value="true"/>
         </l:InteractionMessageTrigger>
          
-        <l:InteractionMessageTrigger MessageKey="CloseAsFalse" Messenger="{Binding Messenger}">
+        <!--<l:InteractionMessageTrigger MessageKey="CloseAsFalse" Messenger="{Binding Messenger}">
             <ei:ChangePropertyAction TargetName="{Binding ElementName=editWindow}" PropertyName="DialogResult" Value="false"/>
-        </l:InteractionMessageTrigger>
+        </l:InteractionMessageTrigger>-->
 
     </i:Interaction.Triggers>
     <mah:MetroWindow.Flyouts>

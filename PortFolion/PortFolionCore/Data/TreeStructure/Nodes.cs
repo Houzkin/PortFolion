@@ -30,7 +30,7 @@ namespace PortFolion.Core {
 			if (this.ChildNodes.Any(a => a.Name == child.Name)) return false;
 			return base.CanAddChild(child);
 		}
-		string _name;
+		string _name = "";
 		public string Name {
 			get { return _name; }
 			set {

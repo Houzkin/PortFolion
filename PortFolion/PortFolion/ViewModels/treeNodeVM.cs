@@ -17,8 +17,8 @@ namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		protected CommonNodeVM(CommonNode model) : base(model) {
 			
-			listener = new PropertyChangedWeakEventListener(model, new PropertyChangedEventHandler((o,e)=> { ModelPropertyChanged(o, e); }));
-			ReCalc();
+			//listener = new PropertyChangedWeakEventListener(model, new PropertyChangedEventHandler((o,e)=> { ModelPropertyChanged(o, e); }));
+			//ReCalc();
 		}
 		IDisposable listener;
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
@@ -30,7 +30,7 @@ namespace PortFolion.ViewModels {
 			set { this.SetProperty(ref isExpand, value); }
 		}
 		public NodePath<string> Path => Model.Path;
-		public bool IsModel(CommonNode node) => this.Model == node;
+		public bool IsModelEquals(CommonNode node) => this.Model == node;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
@@ -41,7 +41,7 @@ namespace PortFolion.ViewModels {
 				reculcHistories();
 			}
 			if(e.PropertyName == nameof(Model.Amount)) {
-
+				reculcRate();
 			}
 		}
 		void reculcHistories() {
@@ -49,9 +49,21 @@ namespace PortFolion.ViewModels {
 			InvestmentTotal = CurrentPositionLine.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
 			InvestmentReturnTotal = CurrentPositionLine.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue) * -1;
 		}
+		void reculcRate() {
+			var amount = Model.Amount;
+			foreach(var c in this.Children) {
+				if(amount == 0) {
+					c.AmountRate = 0;
+				}else {
+					c.AmountRate = c.Model.Amount / amount * 100;
+				}
+			}
+			if (this.Parent == null) this.AmountRate = null;
+		}
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
 			reculcHistories();
+			reculcRate();
 		}
 
 		Dictionary<DateTime, CommonNode> _currentPositionLine;
@@ -84,6 +96,15 @@ namespace PortFolion.ViewModels {
 			set {
 				if (_invReturnTotal == value) return;
 				_invReturnTotal = value;
+				OnPropertyChanged();
+			}
+		}
+		double? amountRate;
+		public double? AmountRate {
+			get { return amountRate; }
+			set {
+				if (amountRate == value) return;
+				amountRate = value;
 				OnPropertyChanged();
 			}
 		}
@@ -130,7 +151,9 @@ namespace PortFolion.ViewModels {
 					var vm = new AccountEditVM(model as AccountNode);
 					var w = new Views.AccountEditWindow();
 					w.DataContext = vm;
-					if (w.ShowDialog() == true) this.ReCalcurate();
+					if (w.ShowDialog() == true) {
+						this.ReCalcurate();
+					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
 			}else if (ty == typeof(BrokerNode)) {

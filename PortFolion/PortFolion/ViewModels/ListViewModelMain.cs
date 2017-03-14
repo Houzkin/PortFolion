@@ -57,7 +57,7 @@ namespace PortFolion.ViewModels {
 		}
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
-			if (Root.Any(a => a.IsModel(root))) return;
+			if (Root.Any(a => a.IsModelEquals(root))) return;
 			Root.Clear();
 			if (root != null) {
 				Root.Add(CommonNodeVM.Create(root));
@@ -190,7 +190,7 @@ namespace PortFolion.ViewModels {
 				get { return _path; }
 				set {
 					value = value ?? Enumerable.Empty<string>();
-					if (_path.SequenceEqual(value)) return;
+					//if (_path.SequenceEqual(value)) return;
 					_path = value;
 					RaisePropertyChanged();
 					if (_path.Any()) {

@@ -143,14 +143,13 @@ namespace PortFolion.ViewModels {
 			ary.ForEach((ele, idx) => {
 				if (Model.Children.Contains(ele.Model)) {
 					int oidx = Model.Children.IndexOf(ele.Model);
-					if(oidx != idx)
+					if (oidx != idx)
 						Model.Children.Move(oidx, idx);
-				}else {
+				} else {
 					Model.Children.Insert(idx, ele.Model);
 				}
-			}
-			
-			);
+			});
+			this.Messenger.Raise(new InteractionMessage("CloseAsTrue"));
 		}
 
 		ViewModelCommand allSellCmd;
@@ -327,9 +326,10 @@ namespace PortFolion.ViewModels {
 		public override string InvestmentValue {
 			get { return base.InvestmentValue; }
 			set {
-				if (SetProperty(ref _InvestmentValue, value)) {
-					//Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
-				}
+				SetProperty(ref _InvestmentValue, value);
+				//if (SetProperty(ref _InvestmentValue, value)) {
+				//	Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
+				//}
 			}
 		}
 		public override bool IsReadOnlyTradeQuantity => false;
