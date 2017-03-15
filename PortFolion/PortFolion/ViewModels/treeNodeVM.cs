@@ -27,7 +27,9 @@ namespace PortFolion.ViewModels {
 		bool isExpand;
 		public bool IsExpand {
 			get { return isExpand; }
-			set { this.SetProperty(ref isExpand, value); }
+			set {
+				this.SetProperty(ref isExpand, value);
+			}
 		}
 		public NodePath<string> Path => Model.Path;
 		public bool IsModelEquals(CommonNode node) => this.Model == node;
@@ -53,12 +55,12 @@ namespace PortFolion.ViewModels {
 			var amount = Model.Amount;
 			foreach(var c in this.Children) {
 				if(amount == 0) {
-					c.AmountRate = 0;
+					c.AmountRate = "0";
 				}else {
-					c.AmountRate = c.Model.Amount / amount * 100;
+					c.AmountRate = (c.Model.Amount / amount * 100).ToString("0.#");
 				}
 			}
-			if (this.Parent == null) this.AmountRate = null;
+			if (this.Parent == null) this.AmountRate = "-";
 		}
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
@@ -82,27 +84,27 @@ namespace PortFolion.ViewModels {
 
 		#region DataViewColumn
 		long _invTotal;
-		public virtual long InvestmentTotal {
+		public long InvestmentTotal {
 			get { return _invTotal; }
-			set {
+			private set {
 				if (_invTotal == value) return;
 				_invTotal = value;
 				OnPropertyChanged();
 			}
 		}
 		long _invReturnTotal;
-		public virtual long InvestmentReturnTotal {
+		public long InvestmentReturnTotal {
 			get { return _invReturnTotal; }
-			set {
+			private set {
 				if (_invReturnTotal == value) return;
 				_invReturnTotal = value;
 				OnPropertyChanged();
 			}
 		}
-		double? amountRate;
-		public double? AmountRate {
+		string amountRate = "-";
+		public string AmountRate {
 			get { return amountRate; }
-			set {
+			private set {
 				if (amountRate == value) return;
 				amountRate = value;
 				OnPropertyChanged();

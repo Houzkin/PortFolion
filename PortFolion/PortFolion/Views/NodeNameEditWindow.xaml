@@ -39,10 +39,10 @@
     </i:Interaction.Triggers>
     
     <Grid>
-        <StackPanel Orientation="Vertical" FocusManager.FocusedElement="{Binding ElementName=editText}">
+        <StackPanel Orientation="Vertical" FocusManager.FocusedElement="{Binding ElementName=editText}" Margin="5">
             <TextBlock Text="名前を設定または変更します。" FontSize="20"/>
             <TextBlock Text="変更前:"/>
-            <TextBox x:Name="editText" Text="{Binding Name}"/>
+            <TextBox x:Name="editText" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel" Command="{Binding CancelCmd}"/>
                 <Button Content="OK" Command="{Binding ExecuteCmd}"/>

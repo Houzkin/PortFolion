@@ -1,16 +1,19 @@
 ﻿<UserControl x:Class="PortFolion.Views.ListTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PortFolion.Views"
              xmlns:model="clr-namespace:PortFolion.Models"
              xmlns:converter="clr-namespace:PortFolion.Views.Converter"
              xmlns:tree="clr-namespace:System.Windows.Controls;assembly=TreeListView"
-             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:ddmb="clr-namespace:DropDownMenuButton;assembly=DropDownMenuButton"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="900">
     <Grid>
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
@@ -21,7 +24,7 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
-        <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" Controls:ControlsHelper.ContentCharacterCasing="Normal">
+        <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Date" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
@@ -60,8 +63,8 @@
                         x:Name="PickedDate"
                         Margin="5, 3" Text="{Binding SelectedDateText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                         HorizontalAlignment="Right"
-                        Controls:TextBoxHelper.UseFloatingWatermark="True"
-                        Controls:TextBoxHelper.Watermark="Select a date" />
+                        mah:TextBoxHelper.UseFloatingWatermark="True"
+                        mah:TextBoxHelper.Watermark="Select a date" />
                     <Button Content="新規追加" HorizontalAlignment="Right"
                             Margin="5,3"
                             Command="{Binding AddNewRootCommand}"
@@ -75,8 +78,20 @@
             <Menu HorizontalAlignment="Left">
                 <!--<Button Content="開"/>
                 <Button Content="閉"/>-->
-                <MenuItem Header="開"/>
-                <MenuItem Header="閉"/>
+                <MenuItem Header="開">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="ExpandAllNode"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+                <MenuItem Header="閉">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="CloseAllNode"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
             </Menu>
             <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True"
                                ItemsSource="{Binding Root}" >
@@ -141,10 +156,10 @@
                     <GridViewColumn Header="項目" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" >
-                                    <tree:TreeListViewExpander/>
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                    <ddmb:DropDownMenuButton Style="{StaticResource MetroFlatToggleButton}">
+                                <StackPanel Orientation="Horizontal" ><!-- IsPressed="{Binding IsExpand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"-->
+                                    <tree:TreeListViewExpander Margin="3,0"/>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
+                                    <ddmb:DropDownMenuButton Style="{StaticResource MetroFlatToggleButton}" Margin="3,0">
                                         <!--<StackPanel Orientation="Horizontal ">-->
                                         <TextBlock Text="編"/>
                                         <!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->
@@ -164,10 +179,18 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="評価額" Width="auto">
+                    <GridViewColumn Header="評価額(比率)" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Amount}"/>
+                                <!--<TextBlock Text="{Binding Amount}"/>-->
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} ({1}%)">
+                                            <Binding Path="Amount"/>
+                                            <Binding Path="AmountRate"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

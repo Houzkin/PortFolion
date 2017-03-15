@@ -129,7 +129,6 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		protected virtual bool CanExecuteFunc() {
-			// there is a bug in this method.
 			var name = this.Name.Trim();
 			return !HasErrors && Model.Name != name && !string.IsNullOrEmpty(name);
 		}

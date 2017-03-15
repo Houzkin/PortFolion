@@ -26,14 +26,6 @@ namespace PortFolion.ViewModels {
 				x => false)) {
 				reculc();
 			}
-			//if(base.ModelPropertyChanged(sender,e) 
-			//	|| MaybeModelAs<FinancialProduct>().TrueOrNot(
-			//		o=> e.PropertyName == nameof(o.Quantity) || e.PropertyName == nameof(o.TradeQuantity), 
-			//		x => false)) {
-			//	reculc();
-			//	return true;
-			//}
-			//return false;
 		}
 		protected override void ReCalc() {
 			base.ReCalc();
