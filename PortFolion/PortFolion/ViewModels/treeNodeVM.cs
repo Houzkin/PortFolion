@@ -157,7 +157,8 @@ namespace PortFolion.ViewModels {
 					var vm = new AccountEditVM(model as AccountNode);
 					var w = new Views.AccountEditWindow();
 					w.DataContext = vm;
-					if (w.ShowDialog() == true) {
+					var rst = w.ShowDialog();
+					if (rst == true) {
 						this.ReCalcurate();
 					}
 				});

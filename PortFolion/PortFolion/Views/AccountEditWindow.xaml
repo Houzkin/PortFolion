@@ -49,7 +49,7 @@
         </l:InteractionMessageTrigger>
          
         <l:InteractionMessageTrigger MessageKey="CloseAsTrue" Messenger="{Binding Messenger}">
-            <ei:ChangePropertyAction TargetName="{Binding ElementName=editWindow}" PropertyName="DialogResult" Value="true"/>
+            <ei:ChangePropertyAction TargetName="editWindow" PropertyName="DialogResult" Value="true"/>
         </l:InteractionMessageTrigger>
          
         <!--<l:InteractionMessageTrigger MessageKey="CloseAsFalse" Messenger="{Binding Messenger}">
@@ -85,7 +85,7 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="200"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
@@ -167,7 +167,7 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="90"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>

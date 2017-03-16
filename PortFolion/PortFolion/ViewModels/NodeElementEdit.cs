@@ -19,6 +19,7 @@ using Livet.Messaging;
 namespace PortFolion.ViewModels {
 	public static class ExpParse {
 		public static double Try(string exp) {
+			if (string.IsNullOrEmpty(exp)) return 0;
 			return ResultWithValue.Of<double>(double.TryParse, exp).TrueOrNot(
 				o => o,
 				x => {
@@ -153,6 +154,7 @@ namespace PortFolion.ViewModels {
 					Model.Children.Insert(idx, ele.Model);
 				}
 			});
+			ary.ForEach(e => e.Apply());
 			this.Messenger.Raise(new InteractionMessage("CloseAsTrue"));
 		}
 
