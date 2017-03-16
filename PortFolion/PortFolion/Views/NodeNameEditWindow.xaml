@@ -11,8 +11,9 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                  mc:Ignorable="d" SaveWindowPosition="False"
-                 GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
-                 Title="{Binding Title}" Height="350" Width="525">
+                 GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" 
+                 FocusManager.FocusedElement="{Binding ElementName=editText}"
+                 Title="{Binding Title}" Height="150" Width="400" ResizeMode="NoResize">
     
      <i:Interaction.Triggers>
      
@@ -39,7 +40,7 @@
     </i:Interaction.Triggers>
     
     <Grid>
-        <StackPanel Orientation="Vertical" FocusManager.FocusedElement="{Binding ElementName=editText}" Margin="5">
+        <StackPanel Orientation="Vertical" Margin="5">
             <TextBlock Text="名前を設定または変更します。" FontSize="20"/>
             <TextBlock Text="変更前:"/>
             <TextBox x:Name="editText" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>

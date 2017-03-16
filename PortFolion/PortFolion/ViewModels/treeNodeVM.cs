@@ -37,7 +37,11 @@ namespace PortFolion.ViewModels {
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
 			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
+			this.Root().RaiseReCalcurated();
 		}
+		public event Action ReCalcurated;
+		private void RaiseReCalcurated() => ReCalcurated?.Invoke();
+
 		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			if (e.PropertyName == nameof(Model.InvestmentValue)) {
 				reculcHistories();

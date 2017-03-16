@@ -22,7 +22,6 @@ namespace PortFolion.ViewModels {
 		public ListviewModel() {
 			controler = new VmControler(this);
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
-			//RootCollection.Instance.CollectionChanged += controler.RootCollectionChanged;
 			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
 		}
 
@@ -58,12 +57,13 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
 			if (Root.Any(a => a.IsModelEquals(root))) return;
+			Root.ForEach(r => r.ReCalcurated -= RefreshHistory);
 			Root.Clear();
 			if (root != null) {
-				Root.Add(CommonNodeVM.Create(root));
-				this.ExpandCurrentNode();
+				var rt = CommonNodeVM.Create(root);
+				rt.ReCalcurated += RefreshHistory;
+				Root.Add(rt);
 			}
-			//RaisePropertyChanged(nameof(Root));
 		}
 
 		public IEnumerable<string> Path {
@@ -108,22 +108,22 @@ namespace PortFolion.ViewModels {
 		#endregion
 
 		#region tree
-		public void ExpandCurrentNode() {
-			if (!this.Path.Any()) return;
-			var c = Root.SelectMany(a=>a.Levelorder()).FirstOrDefault(a => a.Path.SequenceEqual(this.Path));
-			if(c != null)
-				foreach (var n in c.Upstream()) n.IsExpand = true;
-		}
-		public void ExpandAllNode() {
-			if (Root.Any())
-				foreach (var n in Root.SelectMany(a=>a.Levelorder()))
-					n.IsExpand = true;
-		}
-		public void CloseAllNode() {
-			if (Root.Any())
-				foreach (var n in Root.SelectMany(a=>a.Levelorder()))
-					n.IsExpand = false;
-		}
+		//public void ExpandCurrentNode() {
+		//	if (!this.Path.Any()) return;
+		//	var c = Root.SelectMany(a=>a.Levelorder()).FirstOrDefault(a => a.Path.SequenceEqual(this.Path));
+		//	if(c != null)
+		//		foreach (var n in c.Upstream()) n.IsExpand = true;
+		//}
+		//public void ExpandAllNode() {
+		//	if (Root.Any())
+		//		foreach (var n in Root.SelectMany(a=>a.Levelorder()))
+		//			n.IsExpand = true;
+		//}
+		//public void CloseAllNode() {
+		//	if (Root.Any())
+		//		foreach (var n in Root.SelectMany(a=>a.Levelorder()))
+		//			n.IsExpand = false;
+		//}
 		#endregion
 
 		#region Controler as inner class
@@ -194,7 +194,7 @@ namespace PortFolion.ViewModels {
 					_path = value;
 					RaisePropertyChanged();
 					if (_path.Any()) {
-						lvm.ExpandCurrentNode();
+						//lvm.ExpandCurrentNode();
 						lvm.RefreshHistory();
 					}
 				}

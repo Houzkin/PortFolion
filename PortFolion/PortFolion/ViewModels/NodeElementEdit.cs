@@ -70,6 +70,7 @@ namespace PortFolion.ViewModels {
 		public void ChangedTemporaryAmount()
 			=> OnPropertyChanged(nameof(TemporaryAmount));
 
+		#region add stock
 		StockEditVM _dummyStock;
 		public StockEditVM DummyStock {
 			get { return _dummyStock; }
@@ -97,7 +98,9 @@ namespace PortFolion.ViewModels {
 			DummyStock = new StockEditVM(this);
 			OnPropertyChanged(nameof(DummyStock));
 		}
+		#endregion add stock
 
+		#region add product
 		ProductEditVM _dummyProduct;
 		public ProductEditVM DummyProduct {
 			get { return _dummyProduct; }
@@ -125,6 +128,7 @@ namespace PortFolion.ViewModels {
 			DummyProduct = new ProductEditVM(this);
 			OnPropertyChanged(nameof(DummyProduct));
 		}
+		#endregion add product
 
 		ViewModelCommand applyCmd;
 		public ICommand Apply => applyCmd = applyCmd ?? new ViewModelCommand(apply, canApply);
@@ -268,7 +272,7 @@ namespace PortFolion.ViewModels {
 		public virtual bool IsRemoveElement => false;
 		public new FinancialValue Model => base.Model;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
-		string _name;
+		string _name="";
 		public string Name {
 			get { return _name; }
 			set { SetProperty(ref _name, value, nameVali); }
@@ -284,17 +288,18 @@ namespace PortFolion.ViewModels {
 			}
 			return null;
 		}
-		protected string _InvestmentValue;
+		protected string _InvestmentValue="";
 		protected double _investmentValue => ExpParse.Try(_InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, _InvestmentValue).Value;
 		public virtual string InvestmentValue {
 			get { return _InvestmentValue; }
 			set {
 				if(SetProperty(ref _InvestmentValue, value)) {
-					Amount = (Model.Amount + _investmentValue).ToString("#.##");
+					if(_amount == 0)
+						Amount = (Model.Amount + _investmentValue).ToString("#.##");
 				}
 			}
 		}
-		protected string _Amount;
+		protected string _Amount="";
 		protected double _amount => ExpParse.Try(_Amount);//ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
 		public virtual string Amount {
 			get { return _Amount; }
@@ -333,7 +338,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public override bool IsReadOnlyTradeQuantity => false;
-		protected string _TradeQuantity;
+		protected string _TradeQuantity="";
 		protected double _tradeQuantity => ExpParse.Try(_TradeQuantity);//ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
 		public virtual string TradeQuantity {
 			get { return _TradeQuantity; }
@@ -344,7 +349,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public override bool IsReadOnlyPerPrice => false;
-		protected string _CurrentPerPrice;
+		protected string _CurrentPerPrice="";
 		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);//ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
 		public virtual string CurrentPerPrice {
 			get { return _CurrentPerPrice; }
@@ -363,16 +368,6 @@ namespace PortFolion.ViewModels {
 				if(SetProperty(ref _Quantity, value)) 
 					Amount = (_quantity * _currentPerPrice).ToString();
 			}
-		}
-		string vali(string value) {
-			value = value.Trim();
-			if (string.IsNullOrEmpty(value)) return null;
-			if (ResultWithValue.Of<double>(double.TryParse, value).Result)
-				return null;
-			var dt = new System.Data.DataTable();
-			var r = dt.Compute(value, "");
-			if (r == null) return "入力値が不正です";
-			return null;
 		}
 	}
 	public class StockEditVM: ProductEditVM {
@@ -395,8 +390,8 @@ namespace PortFolion.ViewModels {
 			if (value.Count() != 4) return "4桁";
 			var d = this.AccountVM.CurrentDate;
 			this.AccountVM.SetStatusComment("コード: " + r.Value.ToString() + " の銘柄情報を取得開始します");
-			var cm = setNameAndPrice(r.Value, d);
-			this.AccountVM.SetStatusComment(cm);
+			//var cm = setNameAndPrice(r.Value, d);
+			//this.AccountVM.SetStatusComment(cm);
 			return null;
 		}
 		string setNameAndPrice(int r, DateTime d) {

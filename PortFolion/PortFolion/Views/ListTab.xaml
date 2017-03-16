@@ -75,9 +75,9 @@
 
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
-            <Menu HorizontalAlignment="Left">
-                <!--<Button Content="開"/>
-                <Button Content="閉"/>-->
+            <!--<Menu HorizontalAlignment="Left">
+                --><!--<Button Content="開"/>
+                <Button Content="閉"/>--><!--
                 <MenuItem Header="開">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
@@ -92,7 +92,7 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </MenuItem>
-            </Menu>
+            </Menu>-->
             <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True"
                                ItemsSource="{Binding Root}" >
                 <tree:TreeListView.Resources>
@@ -112,7 +112,7 @@
                                             VerticalAlignment="Center"
                                             Fill="Transparent"
                                             Stroke="{DynamicResource BlackBrush}"
-                                            Data="{StaticResource TreeArrow}">
+                                            Data="{DynamicResource TreeArrow}">
                                             <Path.RenderTransform>
                                                 <RotateTransform Angle="135" CenterX="3" CenterY="3" />
                                             </Path.RenderTransform>
@@ -156,10 +156,10 @@
                     <GridViewColumn Header="項目" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" ><!-- IsPressed="{Binding IsExpand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"-->
+                                <StackPanel Orientation="Horizontal">
                                     <tree:TreeListViewExpander Margin="3,0"/>
                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
-                                    <ddmb:DropDownMenuButton Style="{StaticResource MetroFlatToggleButton}" Margin="3,0">
+                                    <ddmb:DropDownMenuButton Style="{DynamicResource MetroFlatToggleButton}" Margin="3,0">
                                         <!--<StackPanel Orientation="Horizontal ">-->
                                         <TextBlock Text="編"/>
                                         <!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->

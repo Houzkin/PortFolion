@@ -12,7 +12,7 @@
         x:Name="editWindow"
         mc:Ignorable="d" SaveWindowPosition="False"
         GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
-        Title="AccountEdit" Height="500" Width="780">
+        Title="AccountEdit" Height="500" Width="800">
     
     <!--<Window.DataContext>
         <vm:AccountEditWindowViewModel/>
@@ -85,7 +85,7 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" MinWidth="200"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
@@ -93,9 +93,9 @@
         </StackPanel>
         <WrapPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                <TextBlock Text="{Binding CashElement.Name, StringFormat=”{0} :”}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
-                <TextBox Text="{Binding CashElement.Amount}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,30,0"><!--StringFormat=”{0} :”-->
+                <TextBlock Text="{Binding CashElement.Name, StringFormat={}{0} :}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
+                <TextBox Text="{Binding CashElement.Amount,UpdateSourceTrigger=PropertyChanged}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
                 <TextBlock Text="内、当日入(+)・出(-)金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
@@ -114,13 +114,15 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Margin="0,0,3,0">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0} {1}" UpdateSourceTrigger="PropertyChanged">
+                                <TextBlock Text="{Binding Code}" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Name}" Margin="5,0,0,0">
+                                    
+                                    <!--<TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} {1}">
                                             <Binding Path="Code"/>
                                             <Binding Path="Name"/>
                                         </MultiBinding>
-                                    </TextBlock.Text>
+                                    </TextBlock.Text>-->
                                 </TextBlock>
                                 <Button Content="▼"/>
                             </StackPanel>
@@ -182,30 +184,30 @@
                         </Style>
                     </Grid.Resources>
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Code : " HorizontalAlignment="Right" VerticalAlignment="Center" />
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DummyStock.Code}"
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DummyStock.Code,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DummyStock.Name}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DummyStock.Name,UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.TradeQuantity}"
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.TradeQuantity,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue}"
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice}"
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount}"
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="クリア" Margin="5,5,5,1"/>
-                        <Button Content="追加" Margin="5,5,1,1"/>
+                        <Button Content="追加" Margin="5,5,1,1" Command="{Binding AddStock}"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -230,26 +232,26 @@
                         </Style>
                     </Grid.Resources>
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DummyProduct.Name,UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Quantity}"
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DummyProduct.Quantity,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InvestmentValue}"
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyProduct.InvestmentValue,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentPerPrice}"
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyProduct.CurrentPerPrice,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Amount}"
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyProduct.Amount,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.PreferredImeState="On"
                              InputMethod.PreferredImeConversionMode="Alphanumeric"/>
                     <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="クリア" Margin="5,5,5,1"/>
-                        <Button Content="追加" Margin="5,5,1,1"/>
+                        <Button Content="追加" Margin="5,5,1,1" Command="{Binding AddProduct}"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
