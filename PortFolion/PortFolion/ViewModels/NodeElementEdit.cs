@@ -82,6 +82,7 @@ namespace PortFolion.ViewModels {
 				_dummyStock = value;
 				tmp = _dummyStock as INotifyDataErrorInfo;
 				if (tmp != null) tmp.ErrorsChanged += TempS_ErrorsChanged;
+				OnPropertyChanged(nameof(DummyStock));
 			}
 		}
 		private void TempS_ErrorsChanged(object sender, DataErrorsChangedEventArgs e)
@@ -97,8 +98,11 @@ namespace PortFolion.ViewModels {
 			DummyStock.Apply();
 			Elements.Add(DummyStock);
 			DummyStock = new StockEditVM(this);
-			OnPropertyChanged(nameof(DummyStock));
 		}
+		ViewModelCommand clearNewStockParams;
+		public ICommand ClearNewStockParams =>
+			clearNewStockParams = clearNewStockParams ?? new ViewModelCommand(() => DummyStock = new StockEditVM(this));
+
 		#endregion add stock
 
 		#region add product
@@ -112,6 +116,7 @@ namespace PortFolion.ViewModels {
 				_dummyProduct = value;
 				tmp = _dummyProduct;
 				if (tmp != null) tmp.ErrorsChanged += TmpP_ErrorsChanged;
+				OnPropertyChanged(nameof(DummyProduct));
 			}
 		}
 		private void TmpP_ErrorsChanged(object sender, DataErrorsChangedEventArgs e)
@@ -127,8 +132,10 @@ namespace PortFolion.ViewModels {
 			DummyProduct.Apply();
 			Elements.Add(DummyProduct);
 			DummyProduct = new ProductEditVM(this);
-			OnPropertyChanged(nameof(DummyProduct));
 		}
+		ViewModelCommand clearNewProductParams;
+		public ICommand ClearNewProductParams =>
+			clearNewProductParams = clearNewProductParams ?? new ViewModelCommand(() => DummyProduct = new ProductEditVM(this));
 		#endregion add product
 
 		ViewModelCommand applyCmd;
@@ -259,7 +266,7 @@ namespace PortFolion.ViewModels {
 				if(elems == null || (elems.Amount == 0 && elems.Quantity == 0)) {
 					AccountVM.Elements.Remove(this);
 				} else {
-					MessageBox.Show("前回記入時から継続するポジションは削除できません。\n数量と評価額を「０」にした場合、次回の書き込み時に消滅または削除が可能となります。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
+					MessageBox.Show("前回の記入項目から継続するポジションは削除できません。\n数量と評価額を「０」にした場合、次回の書き込み時に消滅または削除が可能となります。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
 				}
 			}
 		}
@@ -301,7 +308,7 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		protected string _Amount="";
+		protected string _Amount;
 		protected double _amount => ExpParse.Try(_Amount);//ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
 		public virtual string Amount {
 			get { return _Amount; }
@@ -319,7 +326,7 @@ namespace PortFolion.ViewModels {
 	public class ProductEditVM : CashEditVM {
 		public ProductEditVM(AccountEditVM ac, FinancialProduct fp) : base(ac, fp) {
 			_TradeQuantity = fp.TradeQuantity.ToString();
-			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString() : "";
+			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString() : "0";
 			_Quantity = fp.Quantity.ToString();
 		}
 		public override void Apply() {
@@ -351,7 +358,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public override bool IsReadOnlyPerPrice => false;
-		protected string _CurrentPerPrice="";
+		protected string _CurrentPerPrice="0";
 		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);//ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
 		public virtual string CurrentPerPrice {
 			get { return _CurrentPerPrice; }
@@ -362,7 +369,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public override bool IsReadOnlyQuantity => false;
-		protected string _Quantity;
+		protected string _Quantity="0";
 		protected double _quantity => ExpParse.Try(_Quantity);//ResultWithValue.Of<double>(double.TryParse, _Quantity).Value;
 		public virtual string Quantity {
 			get { return _Quantity; }
