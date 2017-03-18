@@ -46,7 +46,7 @@ namespace PortFolion.ViewModels {
 		public NodeNameEditerVM(CommonNode parent,CommonNode model) : base(model) {
 			if (parent == null || model == null) throw new ArgumentNullException();
 			Parent = parent;
-			this.Name = model.Name;
+			this._name = model.Name;
 			this.PresentName = model.Name;
 		}
 		string title;
@@ -74,7 +74,8 @@ namespace PortFolion.ViewModels {
 		}
 		protected virtual string NameValidate(string newName) {
 			newName = newName.Trim();
-			if (Parent != Model.Parent && Parent.Children.Any(a => a.Name == newName)) return "名前が重複するため追加できません";
+			if (Parent != Model.Parent && Parent.Children.Any(a => a.Name == newName))
+				return "名前が重複するため追加できません";
 			if(Parent == Model.Parent) {
 				if (Parent.Children.Where(a => a != Model).Any(a => a.Name == newName))
 					return "名前が重複するため変更できません";

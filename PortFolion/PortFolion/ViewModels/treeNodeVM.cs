@@ -20,7 +20,7 @@ namespace PortFolion.ViewModels {
 			//listener = new PropertyChangedWeakEventListener(model, new PropertyChangedEventHandler((o,e)=> { ModelPropertyChanged(o, e); }));
 			//ReCalc();
 		}
-		IDisposable listener;
+		//IDisposable listener;
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			return CommonNodeVM.Create(modelChildNode);
 		}
@@ -117,7 +117,7 @@ namespace PortFolion.ViewModels {
 
 		#endregion
 		protected override void Dispose(bool disposing) {
-			if (disposing) listener?.Dispose();
+			//if (disposing) listener?.Dispose();
 			base.Dispose(disposing);
 		}
 		public static CommonNodeVM Create(CommonNode node) {

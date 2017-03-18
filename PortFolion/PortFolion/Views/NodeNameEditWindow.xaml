@@ -10,7 +10,7 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                 mc:Ignorable="d" SaveWindowPosition="False"
+                 mc:Ignorable="d" SaveWindowPosition="true"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" 
                  FocusManager.FocusedElement="{Binding ElementName=editText}"
                  Title="{Binding Title}" Height="150" Width="400" ResizeMode="NoResize">
@@ -42,7 +42,7 @@
     <Grid>
         <StackPanel Orientation="Vertical" Margin="5">
             <TextBlock Text="名前を設定または変更します。" FontSize="20"/>
-            <TextBlock Text="変更前:"/>
+            <TextBlock Text="{Binding PresentName,StringFormat=変更前 : {0}}"/>
             <TextBox x:Name="editText" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel" Command="{Binding CancelCmd}"/>
