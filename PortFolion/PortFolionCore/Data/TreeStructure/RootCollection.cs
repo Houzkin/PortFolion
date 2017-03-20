@@ -144,7 +144,7 @@ namespace PortFolion.Core {
 			foreach (var t in GetNodeLine(path, current).Values) t.Tag = null;
 		}
 
-#region インスタンス
+		#region インスタンス
 		internal void DateTimeChange(DateTime date) {
 			var lst = new List<DateTime>(this.Keys);
 			var cur = lst.IndexOf(date);
@@ -214,6 +214,6 @@ namespace PortFolion.Core {
 		//IEnumerator<KeyValuePair<DateTime, TotalRiskFundNode>> IEnumerable<KeyValuePair<DateTime, TotalRiskFundNode>>.GetEnumerator() {
 		//	return Items.Select(a => new KeyValuePair<DateTime, TotalRiskFundNode>(a.CurrentDate, a)).GetEnumerator();
 		//}
-#endregion
+		#endregion
 	}
 }

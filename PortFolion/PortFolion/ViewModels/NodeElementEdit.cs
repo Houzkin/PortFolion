@@ -397,8 +397,8 @@ namespace PortFolion.ViewModels {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
 			if (!r) return "コードを入力してください";
 			if (value.Count() != 4) return "4桁";
-			var d = this.AccountVM.CurrentDate;
 			this.AccountVM.SetStatusComment("コード: " + r.Value.ToString() + " の銘柄情報を取得開始します");
+			//var d = this.AccountVM.CurrentDate;
 			//var cm = setNameAndPrice(r.Value, d);
 			//this.AccountVM.SetStatusComment(cm);
 			return null;
@@ -430,5 +430,14 @@ namespace PortFolion.ViewModels {
 			base.Apply();
 			Model.Code = ResultWithValue.Of<int>(int.TryParse, _Code).Value;
 		}
+		ViewModelCommand applySymbolCmd;
+		public ViewModelCommand ApplySymbol
+			=> applySymbolCmd = applySymbolCmd ?? new ViewModelCommand(applySymbol, canApplySymbol);
+		void applySymbol() {
+			ResultWithValue.Of<int>(int.TryParse, Code)
+				.TrueOrNot(o => AccountVM.SetStatusComment(setNameAndPrice(o, AccountVM.CurrentDate)));
+		}
+		bool canApplySymbol()
+			=> string.IsNullOrEmpty(codeValidate(this.Code));
 	}
 }

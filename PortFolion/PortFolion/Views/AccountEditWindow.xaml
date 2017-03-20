@@ -204,7 +204,7 @@
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"
-                                 mah:TextBoxHelper.ButtonCommand="{Binding ApplySymbol,Mode=OneWay}"/>
+                                 mah:TextBoxHelper.ButtonCommand="{Binding DummyStock.ApplySymbol,Mode=OneWay}"/>
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="1" Grid.Column="1" 
                                  Text="{Binding DummyStock.Name,UpdateSourceTrigger=PropertyChanged}"/>

@@ -13,6 +13,20 @@ using Houzkin;
 
 namespace PortFolion.IO {
 	public static class HistoryIO {
+		//static HashSet<DateTime> regiDate = new HashSet<DateTime>();
+		//public static void RegistorEdittingDate(DateTime date) {
+		//	regiDate.Add(date.Date);
+		//}
+		//public static void Save() {
+		//	if(regiDate.Any()) {
+		//		SaveRoots(regiDate.Min(), regiDate.Max());
+		//		regiDate.Clear();
+		//	}
+		//}
+		//public static void ClearRegistor() {
+		//	regiDate.Clear();
+		//}
+
 		public static void SaveRoots() {
 			SaveRoots(DateTime.MinValue, DateTime.MaxValue);
 		}
