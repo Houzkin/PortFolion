@@ -157,9 +157,14 @@ namespace PortFolion.ViewModels {
 					var vm = new AccountEditVM(model as AccountNode);
 					var w = new Views.AccountEditWindow();
 					w.DataContext = vm;
-					var rst = w.ShowDialog();
-					if (rst == true) {
+					var r = w.ShowDialog();
+					if (vm.EdittingList.Any()) {
 						this.ReCalcurate();
+						//save or not
+						if (r == true)
+							IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+						else
+							RootCollection.Instance.Refresh();
 					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
@@ -168,7 +173,10 @@ namespace PortFolion.ViewModels {
 					var vm = new NodeNameEditerVM(model, new AccountNode(AccountClass.General));
 					var w = new Views.NodeNameEditWindow();
 					w.DataContext = vm;
-					w.ShowDialog();
+					if(w.ShowDialog() == true && vm.EdittingList.Any()) {
+						//save
+						IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "アカウント追加" });
 			}else if(ty == typeof(TotalRiskFundNode)) {
@@ -176,7 +184,10 @@ namespace PortFolion.ViewModels {
 					var vm = new NodeNameEditerVM(model, new BrokerNode());
 					var w = new Views.NodeNameEditWindow();
 					w.DataContext = vm;
-					w.ShowDialog();
+					if(w.ShowDialog() == true && vm.EdittingList.Any()) {
+						//save
+						IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "ブローカー追加" });
 			}
@@ -185,7 +196,10 @@ namespace PortFolion.ViewModels {
 				var vm = new NodeNameEditerVM(model.Parent, model);
 				var w = new Views.NodeNameEditWindow();
 				w.DataContext = vm;
-				w.ShowDialog();
+				if(w.ShowDialog()==true && vm.EdittingList.Any()) {
+					//save
+					IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+				}
 			}, () => model.Parent != null);
 			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
 			

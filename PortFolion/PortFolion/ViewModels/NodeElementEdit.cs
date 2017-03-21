@@ -30,6 +30,7 @@ namespace PortFolion.ViewModels {
 				});
 		}
 	}
+
 	public class AccountEditVM : DynamicViewModel<AccountNode> {
 		private InteractionMessenger _messenger;
 		public InteractionMessenger Messenger {
@@ -137,6 +138,8 @@ namespace PortFolion.ViewModels {
 		public ICommand ClearNewProductParams =>
 			clearNewProductParams = clearNewProductParams ?? new ViewModelCommand(() => DummyProduct = new ProductEditVM(this));
 		#endregion add product
+
+		public HashSet<DateTime> EdittingList { get; } = new HashSet<DateTime>();
 
 		ViewModelCommand applyCmd;
 		public ICommand Apply => applyCmd = applyCmd ?? new ViewModelCommand(apply, canApply);

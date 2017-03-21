@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Houzkin.Tree;
 using PortFolion.IO;
 using Houzkin.Collections;
+using System.Collections.Specialized;
 
 namespace PortFolion.Core {
 	public static class ExtBugs {
@@ -30,10 +31,6 @@ namespace PortFolion.Core {
 	}
 	public class RootCollection : ObservableCollection<TotalRiskFundNode> {//,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
 
-		private RootCollection() :base() {
-			var itm = HistoryIO.ReadRoots().OrderBy(a => a.CurrentDate);
-			foreach (var i in itm) this.Items.Add(i);
-		}
 
 		public static RootCollection Instance { get; } = new RootCollection();
 
@@ -78,32 +75,6 @@ namespace PortFolion.Core {
 			var nn = GetNodeLine(path);//.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate);
 			return nn.LastOrDefault(a => a.Key <= date).Value;
 		}
-		//public static IEnumerable<CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
-			
-		//	var lne = GetNodeLine(path)
-		//		.ToDictionary(a => ((TotalRiskFundNode)a.Root()).CurrentDate);
-		//	var ttl = Instance
-		//		.Keys.ToArray();
-
-		//	var aft = lne.Keys.Where(a => currentTenure <= a);
-		//	var aftSel = ttl.Where(a => currentTenure <= a);
-
-		//	var bef = lne.Keys.Where(a => a < currentTenure);
-		//	var befSel = ttl.Where(a => a < currentTenure);
-
-		//	var lst = aft.Zip(aftSel, (a, b) => new { Aft = a, AftSel = b })
-		//		.LastOrDefault(a => a.Aft == a.AftSel);
-
-		//	var fst = bef.Reverse()
-		//		.Zip(befSel.Reverse(), (a, b) => new { Bef = a, BefSel = b })
-		//		.LastOrDefault(a => a.Bef == a.BefSel);
-
-		//	var result = lne.AsEnumerable();
-		//	if (fst != null) result = result.SkipWhile(a => a.Key < fst.Bef);
-		//	if (lst != null) result = result.TakeWhile(a => lst.Aft <= a.Key);
-
-		//	return result.Select(a => a.Value);
-		//}
 		
 		/// <summary>指定した時間を含む指定位置のポジション単位のノードを取得する</summary>
 		public static Dictionary<DateTime,CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
@@ -145,6 +116,19 @@ namespace PortFolion.Core {
 		}
 
 		#region インスタンス
+		private RootCollection() :base() {
+			var itm = HistoryIO.ReadRoots().OrderBy(a => a.CurrentDate);
+			foreach (var i in itm) this.Items.Add(i);
+		}
+		public void Refresh() {
+			
+			this.Items.Clear();
+			
+			var itm = HistoryIO.ReadRoots().OrderBy(a => a.CurrentDate);
+			foreach (var i in itm) this.Items.Add(i);
+
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+		}
 		internal void DateTimeChange(DateTime date) {
 			var lst = new List<DateTime>(this.Keys);
 			var cur = lst.IndexOf(date);

@@ -36,6 +36,8 @@ namespace PortFolion.ViewModels {
 		ViewModelCommand _cancelCmd;
 		public override ViewModelCommand CancelCmd
 			=> _cancelCmd = _cancelCmd ?? new ViewModelCommand(() => acc.NodeNameEditer = null);
+
+		public override HashSet<DateTime> EdittingList => acc.EdittingList;
 	}
 		
 	public class NodeNameEditerVM : DynamicViewModel<CommonNode> {
@@ -106,6 +108,8 @@ namespace PortFolion.ViewModels {
 		void AddExecute() {
 			Model.Name = Name.Trim();
 			Parent.AddChild(Model);
+			var d = Model.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
+			if (d != null) EdittingList.Add((DateTime)d);
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
 		void EditExecute() {
@@ -119,6 +123,8 @@ namespace PortFolion.ViewModels {
 			}
 			foreach(var n in RootCollection.GetNodeLine(Model.Path).Values) {
 				n.Name = name;
+				var d = n.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
+				if (d != null) EdittingList.Add((DateTime)d);
 			}
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
@@ -133,6 +139,9 @@ namespace PortFolion.ViewModels {
 			var name = this.Name.Trim();
 			return !HasErrors && Model.Name != name && !string.IsNullOrEmpty(name);
 		}
+
+		public virtual HashSet<DateTime> EdittingList { get; } = new HashSet<DateTime>();
+		
 		ViewModelCommand execute;
 		public ViewModelCommand ExecuteCmd
 			=> execute = execute ?? new ViewModelCommand(ExecuteFunc, CanExecuteFunc);
