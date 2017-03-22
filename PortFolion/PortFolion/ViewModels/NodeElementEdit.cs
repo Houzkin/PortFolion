@@ -258,16 +258,19 @@ namespace PortFolion.ViewModels {
 				return;
 			}
 			if (Model.IsRoot()) {
-				if (this.IsRemoveElement)
+				if (this.IsRemoveElement) {
 					AccountVM.Elements.Remove(this);
-				else
-					MessageBox.Show("ポジションが解消されていないため削除できません。\n数量と評価額が「０」の状態で有効です。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
+					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
+				} else {
+					MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
+				}
 			}else {
 				var elems = RootCollection.GetNodeLine(Model.Path, AccountVM.CurrentDate)
 					.Select(a => new { Key = a.Key, Value = a.Value as FinancialProduct })
 					.LastOrDefault(a => a.Value != null && a.Key < AccountVM.CurrentDate)?.Value;
-				if(elems == null || (elems.Amount == 0 && elems.Quantity == 0)) {
+				if(elems == null || (elems.Amount == 0 && elems.Quantity == 0 && elems.TradeQuantity == 0 && elems.InvestmentValue == 0)) {
 					AccountVM.Elements.Remove(this);
+					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
 				} else {
 					MessageBox.Show("前回の記入項目から継続するポジションは削除できません。\n数量と評価額を「０」にした場合、次回の書き込み時に消滅または削除が可能となります。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
 				}
@@ -306,6 +309,7 @@ namespace PortFolion.ViewModels {
 			get { return _InvestmentValue; }
 			set {
 				if(SetProperty(ref _InvestmentValue, value)) {
+					OnPropertyChanged(nameof(IsRemoveElement));
 					if(_amount == 0)
 						Amount = (Model.Amount + _investmentValue).ToString("#.##");
 				}
@@ -316,9 +320,10 @@ namespace PortFolion.ViewModels {
 		public virtual string Amount {
 			get { return _Amount; }
 			set {
-				SetProperty(ref _Amount, value);
-				OnPropertyChanged(nameof(IsRemoveElement));
-				if (AccountVM.Elements.Contains(this)) AccountVM.ChangedTemporaryAmount();
+				if (SetProperty(ref _Amount, value)) {
+					OnPropertyChanged(nameof(IsRemoveElement));
+					if (AccountVM.Elements.Contains(this)) AccountVM.ChangedTemporaryAmount();
+				}
 			}
 		}
 		
@@ -338,12 +343,14 @@ namespace PortFolion.ViewModels {
 			Model.SetQuantity((long)_quantity);
 		}
 		public ProductEditVM(AccountEditVM ac) : base(ac, new FinancialValue()) { }
-		public override bool IsRemoveElement => _amount == 0 && _quantity == 0;
+		public override bool IsRemoveElement => _amount == 0 && _quantity == 0 && _investmentValue == 0 && _tradeQuantity == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
 		public override string InvestmentValue {
 			get { return base.InvestmentValue; }
 			set {
-				SetProperty(ref _InvestmentValue, value);
+				if (SetProperty(ref _InvestmentValue, value)) {
+					OnPropertyChanged(nameof(IsRemoveElement));
+				}
 				//if (SetProperty(ref _InvestmentValue, value)) {
 				//	Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
 				//}
@@ -356,6 +363,7 @@ namespace PortFolion.ViewModels {
 			get { return _TradeQuantity; }
 			set {
 				if(SetProperty(ref _TradeQuantity, value)) {
+					OnPropertyChanged(nameof(IsRemoveElement));
 					Quantity = (Model.Quantity + _tradeQuantity).ToString("#.##");
 				}
 			}
@@ -377,8 +385,10 @@ namespace PortFolion.ViewModels {
 		public virtual string Quantity {
 			get { return _Quantity; }
 			set {
-				if(SetProperty(ref _Quantity, value)) 
+				if (SetProperty(ref _Quantity, value)) {
+					OnPropertyChanged(nameof(IsRemoveElement));
 					Amount = (_quantity * _currentPerPrice).ToString();
+				}
 			}
 		}
 	}

@@ -12,6 +12,7 @@ using Livet.Commands;
 using Houzkin;
 using System.ComponentModel;
 using Livet.EventListeners.WeakEvents;
+using System.Windows;
 
 namespace PortFolion.ViewModels {
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
@@ -203,6 +204,23 @@ namespace PortFolion.ViewModels {
 			}, () => model.Parent != null);
 			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
 			
+			if(ty == typeof(BrokerNode) || ty == typeof(AccountNode)) {
+				var vc = new ViewModelCommand(() => {
+					
+					var lst = new double[] { model.Amount, model.InvestmentValue }
+						.Concat(model.Levelorder().OfType<FinancialProduct>().Select(a => (double)a.Quantity))
+						.Concat(model.Levelorder().OfType<FinancialProduct>().Select(a => (double)a.TradeQuantity));
+					if (lst.All(a => a == 0)) {
+						var d = this.Model.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
+						this.Model.Parent.RemoveChild(this.Model);
+						IO.HistoryIO.SaveRoots((DateTime)d);
+					}else {
+						MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません","削除不可",MessageBoxButton.OK,MessageBoxImage.Information);
+					}
+
+				});
+				MenuList.Add(new MenuItemVm(vc) { Header = "削除" });
+			}
 		}
 		protected override void ReCalc() {
 			base.ReCalc();
