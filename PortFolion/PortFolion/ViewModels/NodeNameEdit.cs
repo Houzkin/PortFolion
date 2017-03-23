@@ -135,7 +135,7 @@ namespace PortFolion.ViewModels {
 				EditExecute();
 			}
 		}
-		protected virtual bool CanExecuteFunc() {
+		protected bool CanExecuteFunc() {
 			var name = this.Name.Trim();
 			return !HasErrors && Model.Name != name && !string.IsNullOrEmpty(name);
 		}
