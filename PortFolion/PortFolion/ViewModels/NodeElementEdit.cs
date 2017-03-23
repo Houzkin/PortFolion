@@ -48,7 +48,7 @@ namespace PortFolion.ViewModels {
 		public NodeNameEditerVM NodeNameEditer {
 			get { return nne; }
 			set {
-				if (SetProperty(ref nne, value) && nne != null) {
+				if (SetProperty(ref nne, value)) {
 					if (nne == null)
 						Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 					else
@@ -304,7 +304,7 @@ namespace PortFolion.ViewModels {
 			return null;
 		}
 		protected string _InvestmentValue="";
-		protected double _investmentValue => ExpParse.Try(_InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, _InvestmentValue).Value;
+		protected double _investmentValue => ExpParse.Try(_InvestmentValue);
 		public virtual string InvestmentValue {
 			get { return _InvestmentValue; }
 			set {
@@ -316,7 +316,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		protected string _Amount;
-		protected double _amount => ExpParse.Try(_Amount);//ResultWithValue.Of<double>(double.TryParse, _Amount).Value;
+		protected double _amount => ExpParse.Try(_Amount);
 		public virtual string Amount {
 			get { return _Amount; }
 			set {
@@ -334,7 +334,7 @@ namespace PortFolion.ViewModels {
 	public class ProductEditVM : CashEditVM {
 		public ProductEditVM(AccountEditVM ac, FinancialProduct fp) : base(ac, fp) {
 			_TradeQuantity = fp.TradeQuantity.ToString();
-			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString() : "0";
+			_CurrentPerPrice = fp.Quantity != 0 ? (fp.Amount / fp.Quantity).ToString("#.##") : "0";
 			_Quantity = fp.Quantity.ToString();
 		}
 		public override void Apply() {
@@ -358,7 +358,7 @@ namespace PortFolion.ViewModels {
 		}
 		public override bool IsReadOnlyTradeQuantity => false;
 		protected string _TradeQuantity="";
-		protected double _tradeQuantity => ExpParse.Try(_TradeQuantity);//ResultWithValue.Of<double>(double.TryParse, _TradeQuantity).Value;
+		protected double _tradeQuantity => ExpParse.Try(_TradeQuantity);
 		public virtual string TradeQuantity {
 			get { return _TradeQuantity; }
 			set {
@@ -370,7 +370,7 @@ namespace PortFolion.ViewModels {
 		}
 		public override bool IsReadOnlyPerPrice => false;
 		protected string _CurrentPerPrice="0";
-		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);//ResultWithValue.Of<double>(double.TryParse, _CurrentPerPrice).Value;
+		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);
 		public virtual string CurrentPerPrice {
 			get { return _CurrentPerPrice; }
 			set {
@@ -381,7 +381,7 @@ namespace PortFolion.ViewModels {
 		}
 		public override bool IsReadOnlyQuantity => false;
 		protected string _Quantity="0";
-		protected double _quantity => ExpParse.Try(_Quantity);//ResultWithValue.Of<double>(double.TryParse, _Quantity).Value;
+		protected double _quantity => ExpParse.Try(_Quantity);
 		public virtual string Quantity {
 			get { return _Quantity; }
 			set {
@@ -446,10 +446,11 @@ namespace PortFolion.ViewModels {
 		ViewModelCommand applySymbolCmd;
 		public ViewModelCommand ApplySymbol
 			=> applySymbolCmd = applySymbolCmd ?? new ViewModelCommand(applySymbol, canApplySymbol);
-		void applySymbol() {
-			ResultWithValue.Of<int>(int.TryParse, Code)
+
+		void applySymbol() 
+			=> ResultWithValue.Of<int>(int.TryParse, Code)
 				.TrueOrNot(o => AccountVM.SetStatusComment(setNameAndPrice(o, AccountVM.CurrentDate)));
-		}
+
 		bool canApplySymbol()
 			=> string.IsNullOrEmpty(codeValidate(this.Code));
 	}

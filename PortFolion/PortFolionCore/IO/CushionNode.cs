@@ -32,7 +32,7 @@ namespace PortFolion.IO {
 		public int Levarage { get; set; }
 		public string Tag { get; set; }
 		public long InvestmentValue { get; set; }
-		public long InvestmentReturnValue { get; set; }
+		//public long InvestmentReturnValue { get; set; }
 		public AccountClass Account { get; set; }
 		public DateTime Date { get; set; }
 

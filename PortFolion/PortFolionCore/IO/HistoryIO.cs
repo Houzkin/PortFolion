@@ -49,7 +49,9 @@ namespace PortFolion.IO {
 			var serializer = new XmlSerializer(typeof(SerializableNodeMap<CushionNode>));
 			foreach (var r in list) {
 				var sri = (r as CommonNode).ToSerializableNodeMap(a => a.ToSerialCushion());
-				var curPath = _path + r.CurrentDate.Year.ToString() + Path.DirectorySeparatorChar + r.CurrentDate.ToString("yyyy-MM-dd") + ".xml";
+				var curP = _path + r.CurrentDate.Year.ToString();
+				var curPath = curP + Path.DirectorySeparatorChar + r.CurrentDate.ToString("yyyy-MM-dd") + ".xml";
+				if (!Directory.Exists(curP)) Directory.CreateDirectory(curP);
 				using (FileStream fs = new FileStream(curPath, FileMode.Create)) {
 					serializer.Serialize(fs,sri);
 					log.Add(curPath);

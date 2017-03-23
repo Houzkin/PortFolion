@@ -37,7 +37,8 @@ namespace PortFolion.Core {
 		static TagInfo _default = null;
 		public static TagInfo GetDefault() {
 			if(_default == null) {
-				_default = GetWithAdd(_defaultStr);
+				_default = new TagInfo() { _tagName = _defaultStr };
+				//_default = GetWithAdd(_defaultStr);
 			}
 			return _default;
 		}
@@ -56,7 +57,7 @@ namespace PortFolion.Core {
 			return GetWithAdd(GetOrCreate(tagName));
 		}
 		public static TagInfo GetWithAdd(TagInfo newTag) {
-			if (tagList.Any(a => a.TagName != newTag.TagName)) tagList.Add(newTag);
+			if (!tagList.Any(a => a.TagName == newTag.TagName)) tagList.Add(newTag);
 			return tagList.First(a => a.TagName == newTag.TagName);
 		}
 		public static bool EditTagName(string oldName,string newName) {

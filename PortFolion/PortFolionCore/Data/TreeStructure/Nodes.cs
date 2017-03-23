@@ -15,7 +15,7 @@ namespace PortFolion.Core {
 			_name = cushion.Name;
 			_tag = TagInfo.GetWithAdd(cushion.Tag);
 			_investmentValue = cushion.InvestmentValue;
-			_investmentReturnValue = cushion.InvestmentReturnValue;
+			//_investmentReturnValue = cushion.InvestmentReturnValue;
 		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		protected void RaisePropertyChanged([CallerMemberName] string name=null) {
@@ -61,7 +61,7 @@ namespace PortFolion.Core {
 			RootCollection.RemoveNodeTag(Path);
 		}
 		/// <summary>投資対象となるかどうか</summary>
-		public virtual bool IsInvestmentTarget { get { return true; } }
+		//public virtual bool IsInvestmentTarget { get { return true; } }
 
 		long _investmentValue;
 		/// <summary>投資</summary>
@@ -75,17 +75,17 @@ namespace PortFolion.Core {
 			get { return _investmentValue; }
 		}
 
-		long _investmentReturnValue;
-		/// <summary>回収額</summary>
-		public virtual void SetInvestmentReturnValue(long value) {
-			if (_investmentReturnValue == value) return;
-			_investmentReturnValue = value;
-			RaisePropertyChanged(nameof(InvestmentReturnValue));
-		}
-		/// <summary>回収(出金)額</summary>
-		public virtual long InvestmentReturnValue {
-			get { return _investmentReturnValue; }
-		}
+		//long _investmentReturnValue;
+		///// <summary>回収額</summary>
+		//public virtual void SetInvestmentReturnValue(long value) {
+		//	if (_investmentReturnValue == value) return;
+		//	_investmentReturnValue = value;
+		//	RaisePropertyChanged(nameof(InvestmentReturnValue));
+		//}
+		///// <summary>回収(出金)額</summary>
+		//public virtual long InvestmentReturnValue {
+		//	get { return _investmentReturnValue; }
+		//}
 		
 		public abstract long Amount { get; }
 		/// <summary>リスク資産としてのポジションを持つかどうか示す値を取得する。</summary>
@@ -107,8 +107,8 @@ namespace PortFolion.Core {
 			return new CushionNode() {
 				Name = _name,
 				Tag = Tag.TagName,
-				InvestmentValue = _investmentValue,
-				InvestmentReturnValue = _investmentReturnValue,
+				//InvestmentValue = _investmentValue,
+				//InvestmentReturnValue = _investmentReturnValue,
 			};
 		}
 	}
@@ -212,11 +212,10 @@ namespace PortFolion.Core {
 				break;
 			}
 			var n = new FinancialValue() { Name = name };
-			//this.AddChild(n);
-			this.InsertChild(0, n);
+			this.AddChild(n);
 			return n;
 		}
-		public override bool IsInvestmentTarget => true;
+		//public override bool IsInvestmentTarget => true;
 		public override long InvestmentValue 
 			=> GetOrCreateNuetral().InvestmentValue;
 		public override void SetInvestmentValue(long value) {
@@ -224,12 +223,12 @@ namespace PortFolion.Core {
 			ntr.SetInvestmentValue(value);
 		}
 
-		public override long InvestmentReturnValue 
-			=> GetOrCreateNuetral().InvestmentReturnValue;
-		public override void SetInvestmentReturnValue(long value) {
-			var ntr = GetOrCreateNuetral();
-			ntr.SetInvestmentReturnValue(value);
-		}
+		//public override long InvestmentReturnValue 
+		//	=> GetOrCreateNuetral().InvestmentReturnValue;
+		//public override void SetInvestmentReturnValue(long value) {
+		//	var ntr = GetOrCreateNuetral();
+		//	ntr.SetInvestmentReturnValue(value);
+		//}
 		protected override CommonNode Clone(CommonNode nd) {
 			var n = nd as AccountNode;
 			n.Account = Account;
@@ -256,26 +255,24 @@ namespace PortFolion.Core {
 			base.ChildrenPropertyChanged(sender, e);
 			if (e.PropertyName == nameof(InvestmentValue))
 				RaisePropertyChanged(nameof(InvestmentValue));
-			else if (e.PropertyName == nameof(InvestmentReturnValue))
-				RaisePropertyChanged(nameof(InvestmentReturnValue));
+			//else if (e.PropertyName == nameof(InvestmentReturnValue))
+			//	RaisePropertyChanged(nameof(InvestmentReturnValue));
 		}
-		public override bool IsInvestmentTarget {
-			get { return false; }
-		}
+		//public override bool IsInvestmentTarget {
+		//	get { return false; }
+		//}
 		public override void SetInvestmentValue(long value) {
 			throw new NotSupportedException();
 		}
 		public override long InvestmentValue {
 			get { return ChildNodes.Sum(a => a.InvestmentValue); }
 		}
-		public override void SetInvestmentReturnValue(long value) {
-			throw new NotSupportedException();
-			//base.SetInvestmentReturnValue(value);
-		}
-		public override long InvestmentReturnValue {
-			get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
-			//get { return ChildNodes.Any() ? ChildNodes.Sum(a => a.InvestmentReturnValue) : base.InvestmentReturnValue; }
-		}
+		//public override void SetInvestmentReturnValue(long value) {
+		//	throw new NotSupportedException();
+		//}
+		//public override long InvestmentReturnValue {
+		//	get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
+		//}
 		public override CommonNode Clone() {
 			return Clone(new BrokerNode());
 		}

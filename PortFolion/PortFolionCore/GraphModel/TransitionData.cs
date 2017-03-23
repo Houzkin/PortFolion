@@ -154,7 +154,7 @@ namespace PortFolion.Core {
 
 			if (!src.Any()) return p;
 			var nd = src.SelectMany(a => a);
-			return p + nd.Sum(a => a.Node.InvestmentValue) - nd.Sum(a => a.Node.InvestmentReturnValue);
+			return p + nd.Sum(a => a.Node.InvestmentValue);// - nd.Sum(a => a.Node.InvestmentReturnValue);
 		}
 		public IEnumerable<long> InvestmentElement {
 			get {
