@@ -44,7 +44,7 @@
       <HintPath>.\DropDownMenuButton.dll</HintPath>
     </Reference>
     <Reference Include="Houzkin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Houzkin.1.0.7\lib\Houzkin.dll</HintPath>
+      <HintPath>..\packages\Houzkin.1.0.8\lib\Houzkin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Houzkin.Architecture, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -52,7 +52,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Houzkin.Tree, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Houzkin.Tree.1.0.8\lib\Houzkin.Tree.dll</HintPath>
+      <HintPath>..\packages\Houzkin.Tree.1.0.9\lib\Houzkin.Tree.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LiveCharts, Version=0.9.3.0, Culture=neutral, PublicKeyToken=c5935629d38af058, processorArchitecture=MSIL">

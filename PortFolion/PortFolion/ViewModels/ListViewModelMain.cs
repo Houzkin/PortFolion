@@ -21,6 +21,7 @@ namespace PortFolion.ViewModels {
 		VmControler controler;
 		public ListviewModel() {
 			controler = new VmControler(this);
+			controler.CurrentDate = DateTime.Today;
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
 			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
 		}
@@ -131,7 +132,6 @@ namespace PortFolion.ViewModels {
 			ListviewModel lvm;
 			public VmControler(ListviewModel vm) {
 				lvm = vm;
-				this.CurrentDate = DateTime.Today;
 			}
 
 			public void RootCollectionChanged(object s, NotifyCollectionChangedEventArgs e) {
