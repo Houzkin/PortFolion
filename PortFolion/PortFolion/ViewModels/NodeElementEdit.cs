@@ -165,6 +165,7 @@ namespace PortFolion.ViewModels {
 				}
 			});
 			ary.ForEach(e => e.Apply());
+			this.EdittingList.Add(CurrentDate);
 			this.Messenger.Raise(new InteractionMessage("CloseAsTrue"));
 		}
 
@@ -190,7 +191,8 @@ namespace PortFolion.ViewModels {
 				e.Quantity = "0";
 				e.Amount = "0";
 			}
-			if(canApply()) apply();
+			//this.EdittingList.Add(CurrentDate);
+			//if(canApply()) apply();
 		}
 
 		ViewModelCommand resetCmd;
@@ -233,6 +235,7 @@ namespace PortFolion.ViewModels {
 				var m = dic.Aggregate(msg, (seed, ele) => seed + "\n" + ele.Item1 + " - " + ele.Item2);
 				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
 			}
+			//this.EdittingList.Add(CurrentDate);
 		}
 		bool canApplyCurrentPrice()
 			=> Elements.Where(a => a.IsStock).All(a => !a.HasErrors);

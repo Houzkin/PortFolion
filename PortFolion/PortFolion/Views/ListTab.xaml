@@ -185,7 +185,7 @@
                                 <!--<TextBlock Text="{Binding Amount}"/>-->
                                 <TextBlock>
                                     <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0} ({1}%)">
+                                        <MultiBinding StringFormat="{}{0:N0} ({1}%)">
                                             <Binding Path="Amount"/>
                                             <Binding Path="AmountRate"/>
                                         </MultiBinding>
@@ -197,35 +197,35 @@
                     <GridViewColumn Header="取引数" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding TradeQuantity}"/>
+                                <TextBlock Text="{Binding TradeQuantity,StringFormat={}{0:N0}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="保有数" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Quantity}"/>
+                                <TextBlock Text="{Binding Quantity,StringFormat={}{0:N0}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="平均取得単価" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PerBuyPriceAverage}"/>
+                                <TextBlock Text="{Binding PerBuyPriceAverage,StringFormat={}{0:N2}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="現在単価" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PerPrice}"/>
+                                <TextBlock Text="{Binding PerPrice,StringFormat={}{0:N0}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="含み損益" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding UnrealizedProfitLoss}"/>
+                                <TextBlock Text="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

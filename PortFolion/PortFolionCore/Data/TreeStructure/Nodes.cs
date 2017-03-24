@@ -107,7 +107,7 @@ namespace PortFolion.Core {
 			return new CushionNode() {
 				Name = _name,
 				Tag = Tag.TagName,
-				//InvestmentValue = _investmentValue,
+				InvestmentValue = _investmentValue,
 				//InvestmentReturnValue = _investmentReturnValue,
 			};
 		}
@@ -222,7 +222,12 @@ namespace PortFolion.Core {
 			var ntr = GetOrCreateNuetral();
 			ntr.SetInvestmentValue(value);
 		}
-
+		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
+			base.ChildrenPropertyChanged(sender, e);
+			if(e.PropertyName == nameof(InvestmentValue) && sender.GetType() == typeof(FinancialValue)) {
+				RaisePropertyChanged(nameof(InvestmentValue));
+			}
+		}
 		//public override long InvestmentReturnValue 
 		//	=> GetOrCreateNuetral().InvestmentReturnValue;
 		//public override void SetInvestmentReturnValue(long value) {
@@ -255,24 +260,14 @@ namespace PortFolion.Core {
 			base.ChildrenPropertyChanged(sender, e);
 			if (e.PropertyName == nameof(InvestmentValue))
 				RaisePropertyChanged(nameof(InvestmentValue));
-			//else if (e.PropertyName == nameof(InvestmentReturnValue))
-			//	RaisePropertyChanged(nameof(InvestmentReturnValue));
 		}
-		//public override bool IsInvestmentTarget {
-		//	get { return false; }
-		//}
 		public override void SetInvestmentValue(long value) {
 			throw new NotSupportedException();
 		}
 		public override long InvestmentValue {
 			get { return ChildNodes.Sum(a => a.InvestmentValue); }
 		}
-		//public override void SetInvestmentReturnValue(long value) {
-		//	throw new NotSupportedException();
-		//}
-		//public override long InvestmentReturnValue {
-		//	get { return ChildNodes.Sum(a => a.InvestmentReturnValue); }
-		//}
+		
 		public override CommonNode Clone() {
 			return Clone(new BrokerNode());
 		}

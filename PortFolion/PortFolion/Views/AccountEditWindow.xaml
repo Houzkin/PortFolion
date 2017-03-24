@@ -150,7 +150,7 @@
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserSort="False">
+                <DataGridTextColumn Binding="{Binding InvestmentValue,Mode=TwoWay}" CanUserSort="False">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
                             <Grid>

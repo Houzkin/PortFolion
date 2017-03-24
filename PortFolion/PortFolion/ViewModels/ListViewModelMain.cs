@@ -63,6 +63,7 @@ namespace PortFolion.ViewModels {
 			if (root != null) {
 				var rt = CommonNodeVM.Create(root);
 				rt.ReCalcurated += RefreshHistory;
+				rt.ReCalcurate();
 				Root.Add(rt);
 			}
 		}

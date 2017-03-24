@@ -35,7 +35,7 @@ namespace PortFolion.ViewModels {
 			PerPrice = MaybeModelAs<FinancialProduct>().TrueOrNot(
 					o => o.Amount / o.Quantity,
 					x => 0D);
-			var m = this.CurrentPositionLine.OfType<FinancialProduct>();
+			var m = this.CurrentPositionLine.Select(a=>a.Value).OfType<FinancialProduct>();
 			if (m.Any()) {
 				var nml = m.Zip(m.Skip(1), (a, b) => a.Quantity == 0 ? 1D : (b.Quantity - b.TradeQuantity) / a.Quantity)
 						.Concat(new double[] { 1.0 })

@@ -58,14 +58,18 @@ namespace PortFolion.ViewModels {
 		}
 		void reculcRate() {
 			var amount = Model.Amount;
+			if (this.Parent == null) {
+				this.AmountRate = "-";
+				return;
+			}
 			foreach(var c in this.Children) {
 				if(amount == 0) {
 					c.AmountRate = "0";
 				}else {
-					c.AmountRate = (c.Model.Amount / amount * 100).ToString("0.#");
+					var aa = (((double)c.Model.Amount / (double)amount) * 100).ToString("0.#");
+					c.AmountRate = aa;
 				}
 			}
-			if (this.Parent == null) this.AmountRate = "-";
 		}
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
@@ -124,7 +128,7 @@ namespace PortFolion.ViewModels {
 		public static CommonNodeVM Create(CommonNode node) {
 			if (node == null) return null;
 			var mcn = node.GetType();
-			if (typeof(FinancialProduct)== mcn) {
+			if (typeof(FinancialProduct)== mcn || typeof(StockValue) == mcn) {
 				return new FinancialProductVM(node as FinancialProduct);
 			}else if (typeof(FinancialValue)== mcn) {
 				return new FinancialValueVM(node as FinancialValue);
@@ -160,12 +164,12 @@ namespace PortFolion.ViewModels {
 					w.DataContext = vm;
 					var r = w.ShowDialog();
 					if (vm.EdittingList.Any()) {
-						this.ReCalcurate();
 						//save or not
 						if (r == true)
 							IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 						else
 							RootCollection.Instance.Refresh();
+						this.ReCalcurate();
 					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
@@ -251,6 +255,6 @@ namespace PortFolion.ViewModels {
 
 		/// <summary>含み損益率</summary>
 		public double UnrealizedPLRatio
-			=> Model.Amount != 0 ? UnrealizedProfitLoss / Model.Amount * 100 : 0;
+			=> Model.Amount != 0 ? ((double)UnrealizedProfitLoss / (double)(Model.Amount)) * 100 : 0;
 	}
 }
