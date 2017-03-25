@@ -58,10 +58,10 @@ namespace PortFolion.ViewModels {
 		}
 		void reculcRate() {
 			var amount = Model.Amount;
-			if (this.Parent == null) {
-				this.AmountRate = "-";
-				return;
-			}
+			//if (this.Parent == null) {
+			//	this.AmountRate = "-";
+			//	return;
+			//}
 			foreach(var c in this.Children) {
 				if(amount == 0) {
 					c.AmountRate = "0";

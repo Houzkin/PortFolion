@@ -148,16 +148,24 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Background" Value="Purple"/>
+                    </Style>
                 </tree:TreeListView.Resources>
                 <tree:TreeListView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Children}"/>
                 </tree:TreeListView.ItemTemplate>
+                <!--<tree:TreeListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                    </Style>
+                </tree:TreeListView.ItemContainerStyle>-->
                 <tree:TreeListView.Columns>
-                    <GridViewColumn Header="項目" Width="auto">
+                    <GridViewColumn Header="項目" Width="160">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <tree:TreeListViewExpander Margin="3,0"/>
+                                    <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
                                     <ddmb:DropDownMenuButton Style="{DynamicResource MetroToggleButton}" Margin="3,0">
                                         <!--<StackPanel Orientation="Horizontal ">-->
@@ -175,11 +183,22 @@
                                             </ContextMenu>
                                         </ddmb:DropDownMenuButton.DropDownContextMenu>
                                     </ddmb:DropDownMenuButton>
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu ItemsSource="{Binding MenuList}">
+                                            <ContextMenu.ItemContainerStyle>
+                                                <Style TargetType="MenuItem">
+                                                        <Setter Property="Header" Value="{Binding Header}"/>
+                                                        <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                                                </Style>
+                                            </ContextMenu.ItemContainerStyle>
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
+                        
                     </GridViewColumn>
-                    <GridViewColumn Header="評価額(比率)" Width="auto">
+                    <GridViewColumn Header="評価額(比率)" Width="110">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <!--<TextBlock Text="{Binding Amount}"/>-->
@@ -211,7 +230,7 @@
                     <GridViewColumn Header="平均取得単価" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PerBuyPriceAverage,StringFormat={}{0:N2}}"/>
+                                <TextBlock Text="{Binding PerBuyPriceAverage,StringFormat={}{0:N1}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
