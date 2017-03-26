@@ -25,7 +25,7 @@ namespace PortFolion.ViewModels {
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			return CommonNodeVM.Create(modelChildNode);
 		}
-		bool isExpand;
+		bool isExpand = true;
 		public bool IsExpand {
 			get { return isExpand; }
 			set {

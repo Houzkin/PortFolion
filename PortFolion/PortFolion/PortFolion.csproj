@@ -134,6 +134,7 @@
     <Compile Include="Views\NodeNameEditWindow.xaml.cs">
       <DependentUpon>NodeNameEditWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Selector\Selectors.cs" />
     <Page Include="Views\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

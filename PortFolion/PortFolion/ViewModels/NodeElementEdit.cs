@@ -61,6 +61,7 @@ namespace PortFolion.ViewModels {
 			StatusComment = comment;
 			OnPropertyChanged(nameof(StatusComment));
 		}
+		public new AccountNode Model => base.Model;
 		public CashEditVM CashElement => Elements.First(a => a.IsCash);
 		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
 		public DateTime CurrentDate
@@ -97,7 +98,7 @@ namespace PortFolion.ViewModels {
 		}
 		void executeAddStock() {
 			DummyStock.Apply();
-			Elements.Add(DummyStock);
+			Elements.Insert(0, DummyStock);
 			DummyStock = new StockEditVM(this);
 		}
 		ViewModelCommand clearNewStockParams;
@@ -131,7 +132,7 @@ namespace PortFolion.ViewModels {
 		}
 		void executeAddProduct() {
 			DummyProduct.Apply();
-			Elements.Add(DummyProduct);
+			Elements.Insert(0, DummyProduct);
 			DummyProduct = new ProductEditVM(this);
 		}
 		ViewModelCommand clearNewProductParams;
@@ -151,7 +152,7 @@ namespace PortFolion.ViewModels {
 			var stc = elems.Where(a => a.IsStock).OfType<StockEditVM>().OrderBy(a => a.Code);
 			var prd = elems.Where(a => a.IsProduct).OrderBy(a => a.Name);
 
-			var ary = csh.Concat(stc).Concat(prd).ToArray();
+			var ary = stc.Concat(prd).Concat(csh);//csh.Concat(stc).Concat(prd).ToArray();
 			var rmv = Model.Children.Except(ary.Select(a => a.Model));
 
 			rmv.ForEach(a => Model.Children.Remove(a));
@@ -252,7 +253,7 @@ namespace PortFolion.ViewModels {
 			MenuList.Add(new MenuItemVm(del) { Header = "削除" });
 		}
 		void editName() {
-			var edi = new FromAccountEditerNameEditVM(AccountVM, Model.Parent, Model);// new NodeNameEditerVM(Model.Parent, Model);
+			var edi = new FromAccountEditerNameEditVM(AccountVM, Model);// new NodeNameEditerVM(Model.Parent, Model);
 			AccountVM.NodeNameEditer = edi;
 		}
 		void del() {
@@ -291,6 +292,7 @@ namespace PortFolion.ViewModels {
 		public new FinancialValue Model => base.Model;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		string _name="";
+		[ReflectReferenceValue]
 		public string Name {
 			get { return _name; }
 			set { SetProperty(ref _name, value, nameVali); }

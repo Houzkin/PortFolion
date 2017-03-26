@@ -13,10 +13,11 @@ using System.Windows;
 namespace PortFolion.ViewModels {
 	public class FromAccountEditerNameEditVM : NodeNameEditerVM {
 		AccountEditVM acc;
-		public FromAccountEditerNameEditVM(AccountEditVM account, CommonNode parent,CommonNode model)
-			: base(parent, model) {
+		public FromAccountEditerNameEditVM(AccountEditVM account, CommonNode model)
+			: base(account.Model, model) {
 			acc = account;
 		}
+		//public FromAccountEditerNameEditVM(AccountEditVM account, CommonNode model) :base(account.Mo)
 		public override InteractionMessenger Messenger => acc.Messenger;
 		protected override string NameValidate(string newName) {
 			newName = newName.Trim();
@@ -89,10 +90,10 @@ namespace PortFolion.ViewModels {
 		protected string NameValidateHistory(string newName) {
 			if(Parent == Model.Parent) {
 				var his = RootCollection.GetNodeLine(Parent.Path);
-				Func<KeyValuePair<DateTime, CommonNode>, bool> fun = 
+				Func<KeyValuePair<DateTime, CommonNode>, bool> fun =
 					a => a.Value.Children
 						.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
-						.Any(c => c.Name == newName);
+						.Any(c => !c.CanChangeName(newName));//.Any(c => c.Name == newName);
 
 				if (his.Any(fun)) {
 					DateTime since = his.First(fun).Key;
@@ -121,7 +122,8 @@ namespace PortFolion.ViewModels {
 				var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
 				if (r == MessageBoxResult.Cancel) return;
 			}
-			foreach(var n in RootCollection.GetNodeLine(Model.Path).Values) {
+			var s = Parent.Path.Concat(new string[] { this.PresentName });
+			foreach(var n in RootCollection.GetNodeLine(new NodePath<string>(s)).Values) {
 				n.Name = name;
 				var d = n.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
 				if (d != null) EdittingList.Add((DateTime)d);
@@ -139,8 +141,13 @@ namespace PortFolion.ViewModels {
 			var name = this.Name.Trim();
 			return !HasErrors && Model.Name != name && !string.IsNullOrEmpty(name);
 		}
-
-		public virtual HashSet<DateTime> EdittingList { get; } = new HashSet<DateTime>();
+		HashSet<DateTime> _edit;
+		public virtual HashSet<DateTime> EdittingList {
+			get {
+				if (_edit == null) _edit = new HashSet<DateTime>();
+				return _edit;
+			}
+		}
 		
 		ViewModelCommand execute;
 		public ViewModelCommand ExecuteCmd

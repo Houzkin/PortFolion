@@ -88,13 +88,13 @@ namespace PortFolion.Core {
 
 			return bef.Concat(aft).OrderBy(a => a.Key).ToDictionary(a => a.Key, b => b.Value);
 		}
-		internal static bool CanChangeNodeName(NodePath<string> path,string name) {
+		public static bool CanChangeNodeName(NodePath<string> path,string name) {
 			return GetNodeLine(path)
 				.Values
 				.Select(a => a.Siblings())
 				.All(a => a.All(b => b.Name != name));
 		}
-		internal static void ChangeNodeName(NodePath<string> path,string newName) {
+		public static void ChangeNodeName(NodePath<string> path,string newName) {
 			foreach (var t in GetNodeLine(path).Values) {
 				if (t.Siblings().All(a => a.Name != newName))
 					t.Name = newName;

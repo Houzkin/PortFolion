@@ -24,6 +24,12 @@ namespace PortFolion.ViewModels {
 			controler.CurrentDate = DateTime.Today;
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
 			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
+			var d = new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>,DateTimeSelectedEventArgs>(
+				h => h,
+				h=>dtr.DateTimeSelected += h,
+				h=>dtr.DateTimeSelected -= h,
+				(s, e) => this.CurrentDate = e.SelectedDateTime);
+			this.CompositeDisposable.Add(d);
 		}
 
 		//private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {

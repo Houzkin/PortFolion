@@ -22,6 +22,23 @@ namespace PortFolion.Views {
 		public ListTab() {
 			InitializeComponent();
 			this.DataContext = new ListviewModel();
+			//var tr = this.LocationTree;
+			//foreach (var itm in tr.Items) {
+			//	var ii = itm as TreeViewItem;
+			//	if (ii == null) {
+
+			//	}
+			//}
 		}
+		//private void StackPanel_ContextMenuOpening(object sender, ContextMenuEventArgs e) {
+
+		//	var tr = this.LocationTree;
+		//	foreach (var itm in tr.Items) {
+		//		var ii = itm as TreeViewItem;
+		//		if (ii == null) {
+
+		//		}
+		//	}
+		//}
 	}
 }
