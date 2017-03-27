@@ -13,7 +13,9 @@
                  x:Name="editWindow"
                  mc:Ignorable="d" SaveWindowPosition="False"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
-                 Title="AccountEdit" Height="500" Width="800">
+                 TitleCaps="False"
+                 Icon="/Portfolion;component/PortFolion.ico"
+                 Title="{Binding Name, StringFormat={}{0} - AccountEdit}" Height="500" Width="850">
     
     <!--<Window.DataContext>
         <vm:AccountEditWindowViewModel/>
@@ -98,7 +100,7 @@
                 <TextBlock Text="{Binding CashElement.Name, StringFormat={}{0} :}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.Amount,UpdateSourceTrigger=PropertyChanged}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
-                <TextBlock Text="内、当日入(+)・出(-)金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
+                <TextBlock Text="内、当日(+)入・(-)出金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -114,7 +116,7 @@
                 <DataGridTemplateColumn Header="銘柄・ポジション" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                 <TextBlock Text="{Binding Code}" Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding Name}" Margin="5,0,0,0"/>
                                 <ddmb:DropDownMenuButton Margin="3" Style="{DynamicResource MetroToggleButton}">
@@ -139,28 +141,21 @@
                 <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyTradeQuantity}">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="取引数量" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Row="1" Text="買付(+) / 売却(-)" FontSize="8"/>
-                            </Grid>
+                            <StackPanel>
+                                <TextBlock Text="取引数量" HorizontalAlignment="Center"/>
+                                <TextBlock Text="(+)買付 / (-)売却" FontSize="8" HorizontalAlignment="Center"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding InvestmentValue,Mode=TwoWay}" CanUserSort="False">
                     <DataGridTextColumn.HeaderTemplate>
                         <DataTemplate>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="取引額" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Row="1" Text="買付・入金(+) / 売却・出金(-)" FontSize="8"/>
-                            </Grid>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="取引額" HorizontalAlignment="Center"/>
+                                <TextBlock Text="(+)買付・入金" FontSize="8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="(-)売却・出金" FontSize="8" HorizontalAlignment="Center"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
                 </DataGridTextColumn>
@@ -170,7 +165,7 @@
         </DataGrid>
         <Expander IsExpanded="True" Margin="5,5,10,5" Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="新規追加" TextAlignment="Left">
+                <TextBlock Text="New Addition" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="90"/>
                     </TextBlock.LayoutTransform>

@@ -15,7 +15,7 @@
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:ddmb="clr-namespace:DropDownMenuButton;assembly=DropDownMenuButton"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="900">
+             d:DesignHeight="300" d:DesignWidth="1180">
     <Grid>
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
@@ -23,7 +23,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
@@ -40,9 +40,9 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <TreeView Grid.Row="0" x:Name="DateLists" ItemsSource="{Binding DateList}">
+                <TreeView Grid.Row="0" x:Name="DateLists" ItemsSource="{Binding DateList}" Style="{StaticResource VirtualisedMetroTreeView}">
                     <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}">
+                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
                             <Setter Property="IsSelected" Value="{Binding IsSelected,Mode=TwoWay}"/>
                             <Setter Property="IsExpanded" Value="{Binding IsExpand,Mode=TwoWay}"/>
                             <Setter Property="FontWeight" Value="Normal" />
@@ -77,9 +77,9 @@
 
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
-            <!--<Menu HorizontalAlignment="Left">
-                --><!--<Button Content="開"/>
-                <Button Content="閉"/>--><!--
+            <Menu HorizontalAlignment="Left">
+                <!--<Button Content="開"/>
+                <Button Content="閉"/>-->
                 <MenuItem Header="開">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
@@ -94,8 +94,8 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </MenuItem>
-            </Menu>-->
-            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}" >
+            </Menu>
+            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}">
                 <tree:TreeListView.Resources>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Focusable" Value="False" />
@@ -149,7 +149,66 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Gray"/>
+                    <Style TargetType="TreeViewItem" BasedOn="{StaticResource MetroTreeViewItem}">
+                       <Setter Property="IsExpanded" Value="{Binding Path=IsExpand, Mode=TwoWay}" />
+                       <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TreeViewItem">
+                                    <!--Grid containing the current information and the subnodes.-->
+                                    <StackPanel>
+                                        <!--Border wrapping the content presenter.-->
+                                        <Border x:Name="Bd">
+                                            <!--GridViewRowPrsenter containing the current information.-->
+                                            <GridViewRowPresenter Content="{TemplateBinding Header}"
+                                                                  Columns="{Binding Columns, 
+                                                                  RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                  AncestorType=tree:TreeListView}}"/>
+                                        </Border>
+                                        <!--ItemsPresenter containing the subnodes-->
+                                        <ItemsPresenter x:Name="ItemsPresenter" Visibility="Collapsed"/>
+                                    </StackPanel>
+                                    <ControlTemplate.Triggers>
+                                        <!--Trigger used to show the sub items-->
+                                        <Trigger Property="IsExpanded" Value="True">
+                                            <Setter TargetName="ItemsPresenter" Property="Visibility" Value="Visible"/>
+                                        </Trigger>
+                                        
+                                        <Trigger SourceName="Bd" Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource BlackColorBrush}" />
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentColorBrush3}" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentSelectedColorBrush}" />
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentColorBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Foreground" Value="{DynamicResource GrayBrush7}" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="False" />
+                                                <Condition Property="IsSelected" Value="True" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource GrayBrush7}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentSelectedColorBrush}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="True" />
+                                                <Condition Property="Selector.IsSelectionActive" Value="True" />
+                                            </MultiTrigger.Conditions>
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentColorBrush2}" />
+                                        </MultiTrigger>
+                                        
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>                                
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    
+                    <!--<SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Gray"/>-->
                     <!--<Style TargetType="TreeView" BasedOn="{StaticResource tree:TreeListView}"></Style>-->
                     <!--Select elements-->
                     <selector:NodeTemplateSelector x:Key="NodeTemplateSelector"/>

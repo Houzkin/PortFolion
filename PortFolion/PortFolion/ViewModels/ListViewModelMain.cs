@@ -112,26 +112,26 @@ namespace PortFolion.ViewModels {
 
 		DateTreeRoot dtr = new DateTreeRoot();
 		public ObservableCollection<DateTree> DateList => dtr.Children;
-		
+
 		#endregion
 
 		#region tree
-		//public void ExpandCurrentNode() {
-		//	if (!this.Path.Any()) return;
-		//	var c = Root.SelectMany(a=>a.Levelorder()).FirstOrDefault(a => a.Path.SequenceEqual(this.Path));
-		//	if(c != null)
-		//		foreach (var n in c.Upstream()) n.IsExpand = true;
-		//}
-		//public void ExpandAllNode() {
-		//	if (Root.Any())
-		//		foreach (var n in Root.SelectMany(a=>a.Levelorder()))
-		//			n.IsExpand = true;
-		//}
-		//public void CloseAllNode() {
-		//	if (Root.Any())
-		//		foreach (var n in Root.SelectMany(a=>a.Levelorder()))
-		//			n.IsExpand = false;
-		//}
+		public void ExpandCurrentNode() {
+			if (!this.Path.Any()) return;
+			var c = Root.SelectMany(a => a.Levelorder()).FirstOrDefault(a => a.Path.SequenceEqual(this.Path));
+			if (c != null)
+				foreach (var n in c.Upstream()) n.IsExpand = true;
+		}
+		public void ExpandAllNode() {
+			if (Root.Any())
+				foreach (var n in Root.SelectMany(a => a.Levelorder()))
+					n.IsExpand = true;
+		}
+		public void CloseAllNode() {
+			if (Root.Any())
+				foreach (var n in Root.SelectMany(a => a.Levelorder()))
+					n.IsExpand = false;
+		}
 		#endregion
 
 		#region Controler as inner class
