@@ -8,6 +8,7 @@ using Houzkin.Tree;
 using PortFolion.IO;
 using Houzkin.Collections;
 using System.Collections.Specialized;
+using Houzkin;
 
 namespace PortFolion.Core {
 	public static class ExtBugs {
@@ -61,7 +62,7 @@ namespace PortFolion.Core {
 			}
 			return Instance[date];
 		}
-		public static Dictionary<DateTime,CommonNode> GetNodeLine(NodePath<string> path) {
+		public static Dictionary<DateTime,CommonNode> GetNodeLine(IEnumerable<string> path) {
 			return Instance//.Values
 				.SelectMany(
 					a => a.Evolve(
@@ -88,17 +89,38 @@ namespace PortFolion.Core {
 
 			return bef.Concat(aft).OrderBy(a => a.Key).ToDictionary(a => a.Key, b => b.Value);
 		}
-		public static bool CanChangeNodeName(NodePath<string> path,string name) {
-			return GetNodeLine(path)
-				.Values
-				.Select(a => a.Siblings())
-				.All(a => a.All(b => b.Name != name));
-		}
-		public static void ChangeNodeName(NodePath<string> path,string newName) {
-			foreach (var t in GetNodeLine(path).Values) {
-				if (t.Siblings().All(a => a.Name != newName))
-					t.Name = newName;
+		/// <summary>指定したパスに該当する全てのノードの名前を変更可能かどうか示す値を取得する。</summary>
+		/// <param name="path">変更対象を示すパス</param>
+		/// <param name="name">新しい名前</param>
+		/// <returns>重複があった日付</returns>
+		public static ResultWithValue<IEnumerable<DateTime>> CanChangeNodeName(NodePath<string> path,string name) {
+			var src = GetNodeLine(path)
+				.Select(a => new { Date = a.Key, Sigls = a.Value.Siblings().Except(new CommonNode[] { a.Value }) })
+				.Select(a => new { Date = a.Date, Rst = a.Sigls.All(b => b.Name != name) })
+				.ToArray();
+			if (src.All(a => a.Rst)) {
+				return new ResultWithValue<IEnumerable<DateTime>>(true, Enumerable.Empty<DateTime>());
+			}else {
+				return new ResultWithValue<IEnumerable<DateTime>>(false, src.Where(a => !a.Rst).Select(a => a.Date));
 			}
+			//return GetNodeLine(path)
+			//	.Values
+			//	.Select(a => a.Siblings())
+			//	.All(a => a.All(b => b.Name != name));
+		}
+		/// <summary>指定したパスに該当する全てのノード名を変更する</summary>
+		/// <param name="path">変更対象を示すパス</param>
+		/// <param name="newName">新しい名前</param>
+		/// <returns>変更を行った日付</returns>
+		public static IEnumerable<DateTime> ChangeNodeName(NodePath<string> path,string newName) {
+			List<DateTime> lst = new List<DateTime>();
+			foreach (var t in GetNodeLine(path)) {
+				if (t.Value.Siblings().All(a => a.Name != newName)) {
+					t.Value.Name = newName;
+					lst.Add(t.Key);
+				}
+			}
+			return lst;
 		}
 		internal static void ChangeNodeTag(NodePath<string> path,string newTag) {
 			var tg = TagInfo.GetWithAdd(newTag);

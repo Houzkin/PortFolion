@@ -95,8 +95,7 @@
                     </i:Interaction.Triggers>
                 </MenuItem>
             </Menu>-->
-            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True"
-                               ItemsSource="{Binding Root}" >
+            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}" >
                 <tree:TreeListView.Resources>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Focusable" Value="False" />

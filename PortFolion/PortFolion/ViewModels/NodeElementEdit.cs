@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Collections.Specialized;
 using Livet.Messaging;
+using System.Data;
 
 namespace PortFolion.ViewModels {
 	public static class ExpParse {
@@ -23,11 +24,72 @@ namespace PortFolion.ViewModels {
 			return ResultWithValue.Of<double>(double.TryParse, exp).TrueOrNot(
 				o => o,
 				x => {
-					var dt = new System.Data.DataTable();
-					var r = dt.Compute(exp, "");
-					if (r == null) return 0;
-					else return (double)r;
+					var fm = new Formula();
+					return fm.comp(exp) ? fm.calc<double>(exp) : 0;
+					//var dt = new DataTable();
+					//var r = dt.Compute(exp, "");
+					//if (r == null) return 0;
+					//else return (double)r;
 				});
+		}
+		/// <summary>
+		/// 文字列の計算式の計算、真偽の判断
+		/// </summary>
+		class Formula{
+			/// <summary>
+			/// 計算に使用するDataset。
+			/// DUAL:OracleのDualテーブルみたいなもん。
+			/// CALC:式の計算に使うテーブル。
+			/// </summary>
+			private DataSet _formulaBase = null;
+
+			/// <summary>
+			/// 内部変数の初期化
+			/// </summary>
+			public Formula()
+			{
+				_formulaBase = new DataSet("FORMULA");
+				// DUALテーブルを構築
+				_formulaBase.Tables.Add("DUAL");
+				_formulaBase.Tables["DUAL"].Columns.Add("KDUMMY", typeof(string));
+				_formulaBase.Tables["DUAL"].Rows.Add(new object[] { "X" });
+				// CALCテーブルを構築
+				_formulaBase.Tables.Add("CALC");
+			}
+
+			/// <summary>
+			/// 式を判定し、真偽を返す
+			/// </summary>
+			/// <param name="formula">
+			/// 計算式
+			/// 例）「1 = 2 - 1」「3 ＜ 4」「"test" like "t%"」など
+			/// </param>
+			/// <returns></returns>
+			public bool comp(string formula)
+			{
+				DataRow[] rows = _formulaBase.Tables["DUAL"].Select(formula);
+				if (0 < rows.Length)
+					return true;
+				else
+					return false;
+			}
+
+			/// <summary>
+			/// 計試算した結果を取得
+			/// </summary>
+			/// <typeparam name="T">数字であること！</typeparam>
+			/// <param name="formula">
+			/// 計算式
+			/// 例）「(1 + 2) * (4 - 3)」など
+			/// </param>
+			/// <returns></returns>
+			public T calc<T>(string formula)
+			{
+				_formulaBase.Tables["CALC"].Reset();
+				_formulaBase.Tables["CALC"].Columns.Add("RESULT", typeof(T), formula);
+				_formulaBase.Tables["CALC"].Rows.Add(new object[] { DBNull.Value });
+				return (T)_formulaBase.Tables["CALC"].Rows[0]["RESULT"];
+			}
 		}
 	}
 
@@ -68,7 +130,7 @@ namespace PortFolion.ViewModels {
 			=> (Model.Root() as TotalRiskFundNode).CurrentDate;
 
 		public string TemporaryAmount
-			=> Elements.Sum(a => ExpParse.Try(a.Amount)).ToString("#.##");
+			=> Elements.Sum(a => ExpParse.Try(a.Amount)).ToString("#,#.##");
 
 		public void ChangedTemporaryAmount()
 			=> OnPropertyChanged(nameof(TemporaryAmount));
@@ -436,6 +498,7 @@ namespace PortFolion.ViewModels {
 				si = siis.OrderBy(a => a.Turnover).Last();
 			}
 			this.Name = si.Name;
+			this.OnPropertyChanged(nameof(Name));
 			if(si.Turnover != 0) {
 				this.CurrentPerPrice = si.Close.ToString("#.##");
 				return this.Name + "の終値を適用しました";

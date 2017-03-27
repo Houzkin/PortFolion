@@ -88,21 +88,30 @@ namespace PortFolion.ViewModels {
 			return null;
 		}
 		protected string NameValidateHistory(string newName) {
+			if (Model.Name == newName) return null;
 			if(Parent == Model.Parent) {
-				var his = RootCollection.GetNodeLine(Parent.Path);
-				Func<KeyValuePair<DateTime, CommonNode>, bool> fun =
-					a => a.Value.Children
-						.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
-						.Any(c => !c.CanChangeName(newName));//.Any(c => c.Name == newName);
-
-				if (his.Any(fun)) {
-					DateTime since = his.First(fun).Key;
-					DateTime until = his.Last(fun).Key;
+				var r = RootCollection.CanChangeNodeName(Model.Path, newName);
+				if (!r) {
+					DateTime since = r.Value.First();
+					DateTime until = r.Value.Last();
 					if (since == until)
 						return since.ToString("yyyy/MM/dd") + " において名前が重複するため変更できません";
 					else
 						return since.ToString("yyyy/MM/dd") + " から " + until.ToString("yyyy/MM/dd") + " の期間において名前が重複するため変更できません";
 				}
+				//var his = RootCollection.GetNodeLine(Parent.Path);
+				//Func<KeyValuePair<DateTime, CommonNode>, bool> fun =
+				//	a => a.Value.Children
+				//		.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
+				//		.Any(c => !c.CanChangeName(newName));//.Any(c => c.Name == newName);
+				//if (his.Any(fun)) {
+				//	DateTime since = his.First(fun).Key;
+				//	DateTime until = his.Last(fun).Key;
+				//	if (since == until)
+				//		return since.ToString("yyyy/MM/dd") + " において名前が重複するため変更できません";
+				//	else
+				//		return since.ToString("yyyy/MM/dd") + " から " + until.ToString("yyyy/MM/dd") + " の期間において名前が重複するため変更できません";
+				//}
 			}
 			return null;
 		}
@@ -115,19 +124,45 @@ namespace PortFolion.ViewModels {
 		}
 		void EditExecute() {
 			var name = this.Name.Trim();
-			var his = RootCollection.GetNodeLine(Parent.Path).Values;
-			if(his.Any(a=>a.Children.Any(b=>b.Name == name))) {
+			//変更先のノード名で検索
+			var hst = RootCollection.GetNodeLine(new NodePath<string>(Parent.Path.Concat(new string[] { name })));
+			var s = new NodePath<string>(Parent.Path.Concat(new string[] { this.PresentName }));
+			//現在(変更前)のノード名で検索
+			var hso = RootCollection.GetNodeLine(s);
+			//重複する日付
+			var isc = hst.Keys.Intersect(hso.Keys);
+
+			if (isc.Any()) {
+				string msg = "重複があるため変更できません";
+				MessageBox.Show(msg, "Caption", MessageBoxButton.OK);
+				return;
+			}
+			if (hst.Any()) {
 				string msg = "[" + name + "] は別の時系列に既に存在します。\n["
-					+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。\nこの操作は元に戻せません。";
+					+ Model.Name + "] は変更後、既存の [" + name + "] と同一のものとして扱われます。";
 				var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-				if (r == MessageBoxResult.Cancel) return;
+				switch (r) {
+				case MessageBoxResult.Cancel:
+				case MessageBoxResult.No:
+				case MessageBoxResult.None:
+					return;
+				}
 			}
-			var s = Parent.Path.Concat(new string[] { this.PresentName });
-			foreach(var n in RootCollection.GetNodeLine(new NodePath<string>(s)).Values) {
-				n.Name = name;
-				var d = n.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
-				if (d != null) EdittingList.Add((DateTime)d);
-			}
+			//var his = RootCollection.GetNodeLine(Parent.Path).Values;
+			//if(his.Any(a=>a.Children.Any(b=>b.Name == name))) {
+			//	string msg = "[" + name + "] は別の時系列に既に存在します。\n["
+			//		+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。";
+			//	var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+			//	if (r == MessageBoxResult.Cancel) return;
+			//}
+
+			//foreach(var n in RootCollection.GetNodeLine(s).Values) {
+			//	n.Name = name;
+			//	var d = n.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
+			//	if (d != null) EdittingList.Add((DateTime)d);
+			//}
+			var d = RootCollection.ChangeNodeName(s, name);
+			foreach (var dd in d) EdittingList.Add(dd);
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));
 		}
 		protected virtual void ExecuteFunc() {

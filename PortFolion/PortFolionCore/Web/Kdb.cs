@@ -82,12 +82,17 @@ namespace PortFolion.Web {
 				CacheManager.SaveCache(_download(date,type), path);
 				fi.Refresh();
 			}
-			using (StreamReader str = new StreamReader(fi.FullName))
-			using (var csv = new CsvReader(str)) {
-				csv.Configuration.RegisterClassMap<KdbMap>();
-				
-				csv.Configuration.WillThrowOnMissingField = false;
-				return csv.GetRecords<StockInfo>().ToArray();
+			try {
+				using (StreamReader str = new StreamReader(fi.FullName))
+				using (var csv = new CsvReader(str)) {
+					csv.Configuration.RegisterClassMap<KdbMap>();
+
+					csv.Configuration.WillThrowOnMissingField = false;
+					return csv.GetRecords<StockInfo>().ToArray();
+				}
+			} catch {
+				fi.Delete();
+				return Enumerable.Empty<StockInfo>();
 			}
 		}
 		static WebClient wc = new WebClient() { Encoding = Encoding.Default };

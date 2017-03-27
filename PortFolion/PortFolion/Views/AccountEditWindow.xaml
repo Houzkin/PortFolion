@@ -204,7 +204,7 @@
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"
-                                 mah:TextBoxHelper.ButtonCommand="{Binding DummyStock.ApplySymbol,Mode=OneWay}"/>
+                                 mah:TextBoxHelper.ButtonCommand="{Binding DummyStock.ApplySymbol}"/>
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="1" Grid.Column="1" 
                                  Text="{Binding DummyStock.Name,UpdateSourceTrigger=PropertyChanged}"/>
@@ -212,21 +212,25 @@
                         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.TradeQuantity,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
+                                 mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
+                                 mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
                         <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
+                                 mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
                         <TextBlock Grid.Row="5" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
+                                 mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
                         <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="クリア" Margin="5,5,5,1" Command="{Binding ClearNewStockParams}"/>
