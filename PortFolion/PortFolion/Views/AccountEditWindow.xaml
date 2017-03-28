@@ -86,6 +86,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -101,7 +102,7 @@
                 <TextBox Text="{Binding CashElement.Amount,UpdateSourceTrigger=PropertyChanged}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
                 <TextBlock Text="内、当日(+)入・(-)出金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
-                <TextBox Text="{Binding CashElement.InvestmentValue}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
+                <TextBox Text="{Binding CashElement.InvestmentValue,UpdateSourceTrigger=PropertyChanged}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="120"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="総評価額 :" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
@@ -171,7 +172,15 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
+            <Expander.Resources>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+            </Expander.Resources>
             <TabControl mah:TabControlHelper.IsUnderlined="True">
+                <TabControl.Resources>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Setter Property="Margin" Value="0,1"/>
+                    </Style>
+                </TabControl.Resources>
                 <TabItem Header="株式">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -187,12 +196,7 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
-                        <Grid.Resources>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="DarkGray"/>
-                            </Style>
-                        </Grid.Resources>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Code : " HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="証券コード : " HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Grid.Row="0" Grid.Column="1" 
                                  Style="{DynamicResource SearchMetroTextBox}"
                                  Text="{Binding DummyStock.Code, UpdateSourceTrigger=PropertyChanged}"
@@ -200,28 +204,28 @@
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"
                                  mah:TextBoxHelper.ButtonCommand="{Binding DummyStock.ApplySymbol}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="銘柄名 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="1" Grid.Column="1" 
                                  Text="{Binding DummyStock.Name,UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="取引数量 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyStock.TradeQuantity,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="取引額 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyStock.InvestmentValue,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="現在単価 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyStock.CurrentPerPrice,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.Watermark="数値または式"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="時価評価額 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding DummyStock.Amount,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
@@ -248,31 +252,26 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
-                        <Grid.Resources>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="DarkGray"/>
-                            </Style>
-                        </Grid.Resources>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Name : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="銘柄・ファンド名 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding DummyProduct.Name,UpdateSourceTrigger=PropertyChanged}"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Quantity : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="取引数量 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DummyProduct.Quantity,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Invest : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="取引額 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DummyProduct.InvestmentValue,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="CurrentPrice : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="現在単価 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DummyProduct.CurrentPerPrice,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
                                  mah:TextBoxHelper.SelectAllOnFocus="True"/>
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="CurrentAmount : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="時価評価額 : " HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DummyProduct.Amount,UpdateSourceTrigger=PropertyChanged}"
                                  InputMethod.PreferredImeState="On"
                                  InputMethod.PreferredImeConversionMode="Alphanumeric"
@@ -296,5 +295,10 @@
             </Button>
             <Button Content="完了" Command="{Binding Apply}" Margin="5,3"/>
         </StackPanel>
+        <StatusBar Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+            <StatusBarItem Height="25">
+                <TextBlock Text="{Binding StatusComment}"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </mah:MetroWindow>

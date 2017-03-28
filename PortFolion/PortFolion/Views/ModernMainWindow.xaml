@@ -55,7 +55,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition x:Name="ContentSpace" Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.Resources>
             <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
@@ -86,7 +86,7 @@
                 <v:GraphTab/>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="_Edit">
-                <v:ListTab/>
+                <v:ListTab />
             </Controls:MetroTabItem>
         </TabControl>
     </Grid>

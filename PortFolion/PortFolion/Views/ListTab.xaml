@@ -15,15 +15,16 @@
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:ddmb="clr-namespace:DropDownMenuButton;assembly=DropDownMenuButton"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="1180">
+             d:DesignHeight="300" d:DesignWidth="1100">
     <Grid>
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="60*" MinWidth="10"/>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="45*" MinWidth="5"/>
         </Grid.ColumnDefinitions>
 
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
@@ -75,9 +76,15 @@
             </Grid>
         </Expander>
 
-        <StackPanel Orientation="Vertical" Grid.Column="1">
-            <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
-            <Menu HorizontalAlignment="Left">
+        <Grid Grid.Column="1" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
+            <Menu Grid.Row="1" HorizontalAlignment="Left">
                 <!--<Button Content="開"/>
                 <Button Content="閉"/>-->
                 <MenuItem Header="開">
@@ -95,7 +102,7 @@
                     </i:Interaction.Triggers>
                 </MenuItem>
             </Menu>
-            <tree:TreeListView x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}">
+            <tree:TreeListView Grid.Row="2" x:Name="LocationTree" AllowsColumnReorder="True" ItemsSource="{Binding Root}">
                 <tree:TreeListView.Resources>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Focusable" Value="False" />
@@ -263,20 +270,6 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>-->
                     </GridViewColumn>
-                    <GridViewColumn Header="評価額(比率)" Width="120">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock>
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0:N0} ({1}%)">
-                                            <Binding Path="Amount"/>
-                                            <Binding Path="AmountRate"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
                     <GridViewColumn Header="取引数" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -305,6 +298,20 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    <GridViewColumn Header="評価額 (比率)" Width="120">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0:N0} ({1}%)">
+                                            <Binding Path="Amount"/>
+                                            <Binding Path="AmountRate"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Header="含み損益" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -314,21 +321,28 @@
                     </GridViewColumn>
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
-            <Grid x:Name="PortFolioResult"></Grid>
-        </StackPanel>
-        <GridSplitter Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="5"/>
-        <StackPanel Orientation="Vertical" Grid.Column="2" Margin="5,0,0,0">
-            <TextBlock Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
+            <Grid Grid.Row="3" x:Name="PortFolioResult">
+                <!--<TextBlock Text="dumy"/>-->
+            </Grid>
+        </Grid>
+        <GridSplitter Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="5"/>
+        <Grid Grid.Column="3" Margin="5,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
 
-            <DataGrid Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
+            <DataGrid Grid.Row="1" MinWidth="100" Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate}" CanUserReorder="True" CanUserResize="True"/>
+                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/MM/dd}" CanUserReorder="True" CanUserResize="True"/>
                     <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserReorder="True" CanUserResize="True">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Text="取引額" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="買付・入金(+) / 売却・出金(-)" FontSize="8" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="(+)買付・入金" FontSize="8" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="(-)売却・出金" FontSize="8" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTextColumn.HeaderTemplate>
@@ -338,7 +352,7 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Text="取引数量" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="買付(+) / 売却(-)" FontSize="8" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="(+)買付 / (-)売却" FontSize="8" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTextColumn.HeaderTemplate>
@@ -348,6 +362,6 @@
                     <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}" CanUserReorder="True" CanUserResize="True"/>
                 </DataGrid.Columns>
             </DataGrid>
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

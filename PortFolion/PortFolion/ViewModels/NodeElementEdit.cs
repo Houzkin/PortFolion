@@ -421,13 +421,13 @@ namespace PortFolion.ViewModels {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
 			if (!r) return "コードを入力してください";
 			if (value.Count() != 4) return "4桁";
-			this.AccountVM.SetStatusComment("コード: " + r.Value.ToString() + " の銘柄情報を取得開始します");
 			//var d = this.AccountVM.CurrentDate;
 			//var cm = setNameAndPrice(r.Value, d);
 			//this.AccountVM.SetStatusComment(cm);
 			return null;
 		}
 		string setNameAndPrice(int r, DateTime d) {
+			this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
 				siis = Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray();
