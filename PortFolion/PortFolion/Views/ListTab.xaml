@@ -84,7 +84,7 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
-            <Menu Grid.Row="1" HorizontalAlignment="Left">
+            <Menu Grid.Row="1" HorizontalAlignment="Stretch" >
                 <!--<Button Content="開"/>
                 <Button Content="閉"/>-->
                 <MenuItem Header="開">
