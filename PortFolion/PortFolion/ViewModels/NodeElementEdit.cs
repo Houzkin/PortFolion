@@ -445,7 +445,7 @@ namespace PortFolion.ViewModels {
 			this.OnPropertyChanged(nameof(Name));
 			if(si.Turnover != 0) {
 				this.CurrentPerPrice = si.Close.ToString("#.##");
-				return this.Name + "の終値を適用しました";
+				return d.ToString("M月dd日")+ "時点における " + this.Name + " の終値を適用しました";
 			}else {
 				return this.Name + "は出来高がないため終値を取得できませんでした";
 			}

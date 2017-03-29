@@ -264,44 +264,44 @@
                     <HierarchicalDataTemplate ItemsSource="{Binding Children}"/>
                 </tree:TreeListView.ItemTemplate>
                 <tree:TreeListView.Columns>
-                    <GridViewColumn Header="項目" Width="160" CellTemplateSelector="{StaticResource NodeTemplateSelector}">
+                    <GridViewColumn Header="項目" Width="auto" CellTemplateSelector="{StaticResource NodeTemplateSelector}">
                         <!--<GridViewColumn.CellTemplate>
                             <DataTemplate>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>-->
                     </GridViewColumn>
-                    <GridViewColumn Header="取引数" Width="auto">
+                    <GridViewColumn Header="現在単価" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding TradeQuantity,StringFormat={}{0:N0}}"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="保有数" Width="auto">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Quantity,StringFormat={}{0:N0}}"/>
+                                <TextBlock Text="{Binding PerPrice,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="平均取得単価" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PerBuyPriceAverage,StringFormat={}{0:N0}}"/>
+                                <TextBlock Text="{Binding PerBuyPriceAverage,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="現在単価" Width="auto">
+                    <GridViewColumn Header="取引数" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PerPrice,StringFormat={}{0:N0}}"/>
+                                <TextBlock Text="{Binding TradeQuantity,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="評価額 (比率)" Width="120">
+                    <GridViewColumn Header="保有数" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock>
+                                <TextBlock Text="{Binding Quantity,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="評価額 (比率)" Width="auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Right">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0:N0} ({1}%)">
                                             <Binding Path="Amount"/>
@@ -315,7 +315,7 @@
                     <GridViewColumn Header="含み損益" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"/>
+                                <TextBlock Text="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -335,8 +335,18 @@
 
             <DataGrid Grid.Row="1" MinWidth="100" Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/MM/dd}" CanUserReorder="True" CanUserResize="True"/>
-                    <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserReorder="True" CanUserResize="True">
+                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/MM/dd}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
+                        <DataGridTextColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="取引数量" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="(+)買付 / (-)売却" FontSize="8" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTextColumn.HeaderTemplate>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
@@ -347,19 +357,9 @@
                             </DataTemplate>
                         </DataGridTextColumn.HeaderTemplate>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserReorder="True" CanUserResize="True">
-                        <DataGridTextColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="取引数量" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="(+)買付 / (-)売却" FontSize="8" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTextColumn.HeaderTemplate>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="保有数" Binding="{Binding Quantity}" CanUserReorder="True" CanUserResize="True"/>
-                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserReorder="True" CanUserResize="True"/>
-                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}" CanUserReorder="True" CanUserResize="True"/>
+                    <DataGridTextColumn Header="保有数" Binding="{Binding Quantity}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
