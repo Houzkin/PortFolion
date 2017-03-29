@@ -124,6 +124,7 @@
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
+    <Compile Include="Views\Converter\TransableComment.cs" />
     <Compile Include="Views\GraphContents.xaml.cs">
       <DependentUpon>GraphContents.xaml</DependentUpon>
     </Compile>

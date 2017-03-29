@@ -8,6 +8,7 @@
                  xmlns:vm="clr-namespace:PortFolion.ViewModels"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:converter="clr-namespace:PortFolion.Views.Converter"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                  xmlns:ddmb="clr-namespace:DropDownMenuButton;assembly=DropDownMenuButton"
                  x:Name="editWindow"
@@ -297,7 +298,13 @@
         </StackPanel>
         <StatusBar Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
             <StatusBarItem Height="25">
-                <TextBlock Text="{Binding StatusComment}"/>
+                <StatusBarItem.Resources>
+                    <converter:StringToTextBlockConverter x:Key="CommentConv"/>
+                </StatusBarItem.Resources>
+                <!--<TextBlock Text="{Binding StatusComment}"/>-->
+                <mah:TransitioningContentControl Transition="Left"
+                                                 Content="{Binding StatusComment,Converter={StaticResource CommentConv}}">
+                </mah:TransitioningContentControl>
             </StatusBarItem>
         </StatusBar>
     </Grid>

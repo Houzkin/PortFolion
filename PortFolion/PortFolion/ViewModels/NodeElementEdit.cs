@@ -427,7 +427,7 @@ namespace PortFolion.ViewModels {
 			return null;
 		}
 		string setNameAndPrice(int r, DateTime d) {
-			this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
+			//this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
 				siis = Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray();
