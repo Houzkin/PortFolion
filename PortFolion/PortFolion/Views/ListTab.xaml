@@ -224,11 +224,11 @@
                             <tree:TreeListViewExpander x:Name="TreeExpander" Margin="3,0"/>
                             <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
-                            <ddmb:DropDownMenuButton Style="{DynamicResource MetroToggleButton}" Margin="3,0">
-                                <!--<StackPanel Orientation="Horizontal ">-->
+                            <!--<ddmb:DropDownMenuButton Style="{DynamicResource MetroToggleButton}" Margin="3,0">
+                                --><!--<StackPanel Orientation="Horizontal ">--><!--
                                 <TextBlock Text="編"/>
-                                <!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->
-                                <!--</StackPanel>-->
+                                --><!--<Path Width="8" Height="6" Margin="0,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ddmb:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>-->
+                                <!--</StackPanel>--><!--
                                 <ddmb:DropDownMenuButton.DropDownContextMenu>
                                     <ContextMenu ItemsSource="{Binding MenuList}">
                                         <ContextMenu.ItemContainerStyle>
@@ -239,7 +239,16 @@
                                         </ContextMenu.ItemContainerStyle>
                                     </ContextMenu>
                                 </ddmb:DropDownMenuButton.DropDownContextMenu>
-                            </ddmb:DropDownMenuButton>
+                            </ddmb:DropDownMenuButton>-->
+                            <mah:DropDownButton VerticalContentAlignment="Center"
+                                                Content="" ItemsSource="{Binding MenuList}" >
+                                    <mah:DropDownButton.ItemContainerStyle>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="Header" Value="{Binding Header}"/>
+                                                <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                                            </Style>
+                                    </mah:DropDownButton.ItemContainerStyle>
+                            </mah:DropDownButton>
                             <StackPanel.ContextMenu>
                                 <ContextMenu ItemsSource="{Binding MenuList}">
                                     <ContextMenu.ItemContainerStyle>
