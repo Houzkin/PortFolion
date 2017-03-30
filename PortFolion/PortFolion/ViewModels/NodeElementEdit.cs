@@ -338,9 +338,9 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		
-		public virtual bool IsReadOnlyTradeQuantity => true;
-		public virtual bool IsReadOnlyQuantity => true;
-		public virtual bool IsReadOnlyPerPrice => true;
+		public virtual bool IsTradeQuantityEditable => false;
+		public virtual bool IsQuantityEditable => false;
+		public virtual bool IsPerPriceEditable => false;
 	}
 	public class ProductEditVM : CashEditVM {
 		public ProductEditVM(AccountEditVM ac, FinancialProduct fp) : base(ac, fp) {
@@ -367,7 +367,7 @@ namespace PortFolion.ViewModels {
 				//}
 			}
 		}
-		public override bool IsReadOnlyTradeQuantity => true;// false;
+		public override bool IsTradeQuantityEditable => true;// false;
 		protected string _TradeQuantity="";
 		protected double _tradeQuantity => ExpParse.Try(_TradeQuantity);
 		public virtual string TradeQuantity {
@@ -379,7 +379,7 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		public override bool IsReadOnlyPerPrice => true;// false;
+		public override bool IsPerPriceEditable => true;// false;
 		protected string _CurrentPerPrice="0";
 		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);
 		public virtual string CurrentPerPrice {
@@ -390,7 +390,7 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		public override bool IsReadOnlyQuantity => true;// false;
+		public override bool IsQuantityEditable => true;// false;
 		protected string _Quantity="0";
 		protected double _quantity => ExpParse.Try(_Quantity);
 		public virtual string Quantity {

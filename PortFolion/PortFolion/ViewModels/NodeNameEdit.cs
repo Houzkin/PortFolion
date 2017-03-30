@@ -57,10 +57,7 @@ namespace PortFolion.ViewModels {
 			get { return title; }
 			set { SetProperty(ref title, value); }
 		}
-		//AccountEditVM acc;
-		//public NodeNameEditerVM(AccountEditVM account, CommonNode parent, CommonNode model) : this(parent, model) {
-		//	acc = account;
-		//}
+		
 		InteractionMessenger _messenger;
 		public virtual InteractionMessenger Messenger
 			=> _messenger = _messenger ?? new InteractionMessenger(); 

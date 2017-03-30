@@ -63,12 +63,9 @@
     </i:Interaction.Triggers>
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
-            <mah:Flyout x:Name="NameEditFlyout"
-                        IsModal="True"
-                        Header="名前の変更"
-                        Position="Right"
-                        CloseCommand="{Binding NodeNameEditer.CancelCmd}"
-                        AnimateOpacity="True">
+            <mah:Flyout x:Name="NameEditFlyout" IsModal="True" Header="名前の変更"
+                        Position="Right" AnimateOpacity="True"
+                        CloseCommand="{Binding NodeNameEditer.CancelCmd}">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="{Binding NodeNameEditer.PresentName}" HorizontalAlignment="Center"/>
                     <TextBox  Text="{Binding NodeNameEditer.Name,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"/>
@@ -114,6 +111,10 @@
             <Button Content="単価更新" Margin="5,10,5,0" Command="{Binding ApplyCurrentPerPrice}"/>
         </Grid>
         <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Elements}" AutoGenerateColumns="False">
+            <DataGrid.Resources>
+                <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+                <converter:TryStringToNumberConverter x:Key="StringToNumber"/>
+            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="銘柄" >
                     <DataGridTemplateColumn.CellTemplate>
@@ -139,31 +140,43 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <!--<DataGridTextColumn Header="現在単価" Binding="{Binding CurrentPerPrice}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyPerPrice}"/>-->
+                
                 <DataGridTemplateColumn Header="現在単価" CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding CurrentPerPrice}" />
+                            <TextBlock Text="{Binding CurrentPerPrice,Converter={StaticResource StringToNumber}}" HorizontalAlignment="Right"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox IsEnabled="{Binding Path=IsReadOnlyPerPrice}" Text="{Binding CurrentPerPrice, Mode=TwoWay}" />
+                            <TextBox Visibility="{Binding IsPerPriceEditable, Converter={StaticResource BoolToVisibility}}" Text="{Binding CurrentPerPrice, Mode=TwoWay}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyTradeQuantity}">
-                    <DataGridTextColumn.HeaderTemplate>
+
+                <DataGridTemplateColumn CanUserSort="False">
+                    <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
                             <StackPanel>
                                 <TextBlock Text="取引数量" HorizontalAlignment="Center"/>
                                 <TextBlock Text="(+)買付 / (-)売却" FontSize="8" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
-                    </DataGridTextColumn.HeaderTemplate>
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding InvestmentValue,Mode=TwoWay}" CanUserSort="False">
-                    <DataGridTextColumn.HeaderTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding TradeQuantity,Converter={StaticResource StringToNumber}}" HorizontalAlignment="Right"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Visibility="{Binding IsTradeQuantityEditable,Converter={StaticResource BoolToVisibility}}" Text="{Binding TradeQuantity}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                
+                <DataGridTemplateColumn CanUserSort="False">
+                    <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="取引額" HorizontalAlignment="Center"/>
@@ -171,10 +184,45 @@
                                 <TextBlock Text="(-)売却・出金" FontSize="8" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
-                    </DataGridTextColumn.HeaderTemplate>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity}" CanUserSort="False" IsReadOnly="{Binding IsReadOnlyQuantity}"/>
-                <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserSort="False"/>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding InvestmentValue,Converter={StaticResource StringToNumber}}" HorizontalAlignment="Right"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding InvestmentValue}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="保有数量" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Quantity,Converter={StaticResource StringToNumber}}" HorizontalAlignment="Right"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Visibility="{Binding IsQuantityEditable,Converter={StaticResource BoolToVisibility}}" Text="{Binding Quantity}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="時価評価額" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Amount,Converter={StaticResource StringToNumber}}" HorizontalAlignment="Right"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Amount}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                
             </DataGrid.Columns>
         </DataGrid>
         <Expander IsExpanded="True" Margin="5,5,10,5" Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">

@@ -22,9 +22,9 @@
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="60*" MinWidth="10"/>
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="45*" MinWidth="5"/>
+            <ColumnDefinition Width="60*" MinWidth="50"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="45*" MinWidth="50"/>
         </Grid.ColumnDefinitions>
 
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
@@ -333,9 +333,16 @@
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
 
-            <DataGrid Grid.Row="1" MinWidth="100" Margin="5" ItemsSource="{Binding History}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
+            <DataGrid Grid.Row="1" MinWidth="100" Margin="5" ItemsSource="{Binding History}"
+                      IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MetroDataGridCell}">
+                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                    </Style>
+                </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/MM/dd}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/MM/dd}"
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
@@ -357,9 +364,13 @@
                             </DataTemplate>
                         </DataGridTextColumn.HeaderTemplate>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="保有数" Binding="{Binding Quantity}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}" CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity}" 
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserReorder="True"
+                                        CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}"
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False">
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
