@@ -274,10 +274,6 @@
                 </tree:TreeListView.ItemTemplate>
                 <tree:TreeListView.Columns>
                     <GridViewColumn Header="項目" Width="auto" CellTemplateSelector="{StaticResource NodeTemplateSelector}">
-                        <!--<GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>-->
                     </GridViewColumn>
                     <GridViewColumn Header="現在単価" Width="auto">
                         <GridViewColumn.CellTemplate>

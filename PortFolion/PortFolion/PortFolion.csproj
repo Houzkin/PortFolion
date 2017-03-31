@@ -115,12 +115,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ViewModels\DateTree.cs" />
-    <Compile Include="ViewModels\ListViewModelMain.cs" />
-    <Compile Include="ViewModels\NodeElementEdit.cs" />
-    <Compile Include="ViewModels\NodeNameEdit.cs" />
-    <Compile Include="ViewModels\TreeLeafVM.cs" />
-    <Compile Include="ViewModels\TreeNodeVM.cs" />
-    <Compile Include="Views\AccountEditWindow.xaml.cs">
+    <Compile Include="EditComponent\ListViewModelMain.cs" />
+    <Compile Include="EditComponent\AccountEditVM.cs" />
+    <Compile Include="EditComponent\NodeNameEdit.cs" />
+    <Compile Include="EditComponent\TreeLeafVM.cs" />
+    <Compile Include="EditComponent\TreeNodeVM.cs" />
+    <Compile Include="EditComponent\AccountEditWindow.xaml.cs">
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
@@ -135,17 +135,17 @@
     <Compile Include="Views\ListContents.xaml.cs">
       <DependentUpon>ListContents.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ListTab.xaml.cs">
+    <Compile Include="EditComponent\ListTab.xaml.cs">
       <DependentUpon>ListTab.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NodeNameEditWindow.xaml.cs">
+    <Compile Include="EditComponent\NodeNameEditWindow.xaml.cs">
       <DependentUpon>NodeNameEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Selector\Selectors.cs" />
-    <Page Include="Views\AccountEditWindow.xaml">
+    <Page Include="EditComponent\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -161,7 +161,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ListTab.xaml">
+    <Page Include="EditComponent\ListTab.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -183,7 +183,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeNameEditWindow.xaml">
+    <Page Include="EditComponent\NodeNameEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -235,7 +235,7 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="EditComponent\" />
+    <Folder Include="GraphComponent\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

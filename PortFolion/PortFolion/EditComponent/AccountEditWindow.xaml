@@ -66,12 +66,13 @@
             <mah:Flyout x:Name="NameEditFlyout" IsModal="True" Header="名前の変更"
                         Position="Right" AnimateOpacity="True"
                         CloseCommand="{Binding NodeNameEditer.CancelCmd}">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Text="{Binding NodeNameEditer.PresentName}" HorizontalAlignment="Center"/>
-                    <TextBox  Text="{Binding NodeNameEditer.Name,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Cancel" Command="{Binding NodeNameEditer.CancelCmd}" HorizontalAlignment="Right"/>
-                        <Button Content="OK" Command="{Binding NodeNameEditer.ExecuteCmd}" HorizontalAlignment="Right"/>
+                <StackPanel Orientation="Vertical" Margin="5">
+                    <TextBlock Text="名前を変更します" FontSize="20" Margin="0,3"/>
+                    <TextBlock Text="{Binding NodeNameEditer.PresentName,StringFormat=変更前 : {0}}" Margin="0,3"/>
+                    <TextBox  Text="{Binding NodeNameEditer.Name,UpdateSourceTrigger=PropertyChanged}" Margin="0.3"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
+                        <Button Content="Cancel" Command="{Binding NodeNameEditer.CancelCmd}" HorizontalAlignment="Right" Margin="3,0"/>
+                        <Button Content="OK" Command="{Binding NodeNameEditer.ExecuteCmd}" HorizontalAlignment="Right" Margin="3,0"/>
                     </StackPanel>
                 </StackPanel>
             </mah:Flyout>

@@ -80,7 +80,7 @@ namespace PortFolion.ViewModels {
 		}
 
 		public void RefreshHistory() {
-			_history = RootCollection.GetNodeLine(new NodePath<string>(Path)).Select(a => CommonNodeVM.Create(a.Value));
+			_history = RootCollection.GetNodeLine(Path).Select(a => CommonNodeVM.Create(a.Value));
 			this.RaisePropertyChanged(nameof(History));
 		}
 		IEnumerable<CommonNodeVM> _history = null;
@@ -185,7 +185,7 @@ namespace PortFolion.ViewModels {
 					lvm.dtr.SelectAt(r.CurrentDate);
 
 					if (Path.Any()) {
-						Path = r.SearchNodeOf(Path)?.Path ?? r.Path;
+						Path = r.SearchNodeOf(Path).Path;
 					}else {
 						Path = r.Path;
 					}

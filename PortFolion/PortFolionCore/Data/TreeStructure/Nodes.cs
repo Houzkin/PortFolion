@@ -305,18 +305,17 @@ namespace PortFolion.Core {
 			}
 			return true;
 		}
+		/// <summary>
+		/// 指定したパスのノード、存在しなかった場合はその祖先にあたるノードを返す。
+		/// 一致するパスが見つからなかった場合は現在のノードを返す。
+		/// </summary>
+		/// <param name="path">パス</param>
 		public CommonNode SearchNodeOf(IEnumerable<string> path) {
-			var p = this.Levelorder()
-				.Select(a => a.Path.Zip(path, (b, d) => new { b, d })
-					.TakeWhile(e => e.b == e.d)
-					.Select(f => f.b))
-				.LastOrDefault();
-			//return this.Levelorder()
-			//	.FirstOrDefault(a => a.Path.SequenceEqual(p));
-			return this.Evolve(
-					a => a.Path.Except(p).Any() ? null : a.Children,
-					(c, d) => c.Concat(d))
-				.LastOrDefault();
+			var pp = this.Evolve(
+				a => Children.Where(
+					b => !b.Path.Except(path.Take(b.Path.Count())).Any()),
+				(a, b) => a.Concat(b));
+			return pp.LastOrDefault();
 		}
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();

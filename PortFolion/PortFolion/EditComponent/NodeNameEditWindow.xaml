@@ -13,7 +13,7 @@
                  mc:Ignorable="d" SaveWindowPosition="true"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" 
                  FocusManager.FocusedElement="{Binding ElementName=editText}"
-                 Title="{Binding Title}" Height="150" Width="400" ResizeMode="NoResize">
+                 Title="{Binding Title}" Height="180" Width="400" ResizeMode="NoResize">
     
      <i:Interaction.Triggers>
      
@@ -41,12 +41,12 @@
     
     <Grid>
         <StackPanel Orientation="Vertical" Margin="5">
-            <TextBlock Text="名前を設定または変更します。" FontSize="20"/>
-            <TextBlock Text="{Binding PresentName,StringFormat=変更前 : {0}}"/>
-            <TextBox x:Name="editText" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Cancel" Command="{Binding CancelCmd}"/>
-                <Button Content="OK" Command="{Binding ExecuteCmd}"/>
+            <TextBlock Text="名前を設定または変更します" FontSize="20" Margin="0,3"/>
+            <TextBlock Text="{Binding PresentName,StringFormat=変更前 : {0}}" Margin="0,3"/>
+            <TextBox x:Name="editText" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,3"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
+                <Button Content="Cancel" Command="{Binding CancelCmd}" Margin="3,0"/>
+                <Button Content="OK" Command="{Binding ExecuteCmd}" Margin="3,0"/>
             </StackPanel>
         </StackPanel>
     </Grid>
