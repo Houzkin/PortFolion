@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using Houzkin.Tree;
 
 namespace PortFolion.Core {
-	public class Breakdown : INotifyPropertyChanged {
-		internal Breakdown(TransitionData transition) {
+	public class _Breakdown : INotifyPropertyChanged {
+		internal _Breakdown(_TransitionData transition) {
 			_data = transition;
 			_data.PropertyChanged += transitionPropertyChanged;
 		}
@@ -25,8 +25,8 @@ namespace PortFolion.Core {
 			}
 		}
 
-		TransitionData _data;
-		public DividePattern Divide => _data.Divide;
+		_TransitionData _data;
+		public _DividePattern Divide => _data.Divide;
 		public int TargetLevel => _data.TargetLevel;
 
 		

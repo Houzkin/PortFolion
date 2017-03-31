@@ -17,7 +17,7 @@ namespace PortFolion.Core {
 	}
 
 	/// <summary>表示用に補正された時系列を管理する</summary>
-	public class TransitionData : INotifyPropertyChanged {
+	public class _TransitionData : INotifyPropertyChanged {
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged([CallerMemberName] string name = "") {
 			var e = new PropertyChangedEventArgs(name);
@@ -35,7 +35,7 @@ namespace PortFolion.Core {
 				setCurrentMap();
 			}
 		}
-		public DividePattern Divide {
+		public _DividePattern Divide {
 			get { return _param.Divide; }
 			set {
 				if (_param.Divide == value) return;
@@ -53,7 +53,7 @@ namespace PortFolion.Core {
 				setCurrentMap();
 			}
 		}
-		public CalculationUnit InvestmentUnit {
+		public _CalculationUnit InvestmentUnit {
 			get { return _param.InvestmentUnit; }
 			set {
 				if (_param.InvestmentUnit == value) return;
@@ -62,7 +62,7 @@ namespace PortFolion.Core {
 				setCurrentMap();
 			}
 		}
-		public Ratio Ratio {
+		public _Ratio Ratio {
 			get { return _param.Ratio; }
 			set {
 				if (_param.Ratio == value) return;
@@ -71,9 +71,9 @@ namespace PortFolion.Core {
 			}
 		}
 
-		TransitionParametor _param = new TransitionParametor();
-		public TransitionParametor GetParametor() {
-			return new TransitionParametor() {
+		_TransitionParametor _param = new _TransitionParametor();
+		public _TransitionParametor GetParametor() {
+			return new _TransitionParametor() {
 				Divide = this.Divide,
 				TimePeriod = this.TimePeriod,
 				TargetLevel = this.TargetLevel,
@@ -82,7 +82,7 @@ namespace PortFolion.Core {
 			};
 		}
 
-		public void SetParametor(TransitionParametor param) {
+		public void SetParametor(_TransitionParametor param) {
 			var prv = _param;
 			_param = param;
 			var r = new List<Tuple<bool, Action>>() {
@@ -128,7 +128,7 @@ namespace PortFolion.Core {
 
 		internal string segmentSep(NodeMap map) {
 			switch (Divide) {
-			case DividePattern.Tag:
+			case _DividePattern.Tag:
 				return map.Tag.TagName;
 			default:
 				return map.Node.Name;
@@ -149,7 +149,7 @@ namespace PortFolion.Core {
 
 		long selInv(long pre, IEnumerable<IGrouping<DateTime,NodeMap>> src) {
 			long p;
-			if (InvestmentUnit == CalculationUnit.Total) p = pre;
+			if (InvestmentUnit == _CalculationUnit.Total) p = pre;
 			else p = 0;
 
 			if (!src.Any()) return p;
@@ -164,10 +164,10 @@ namespace PortFolion.Core {
 					.SelectMany(a => a);
 			}
 		}
-		Breakdown _details;
-		public Breakdown Details {
+		_Breakdown _details;
+		public _Breakdown Details {
 			get {
-				if (_details == null) _details = new Breakdown(this);
+				if (_details == null) _details = new _Breakdown(this);
 				return _details;
 			}
 		}

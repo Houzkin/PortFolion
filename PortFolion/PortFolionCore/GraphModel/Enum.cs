@@ -11,15 +11,15 @@ namespace PortFolion.Core {
 		Monthly,
 		Weekly,
 	}
-	public enum DividePattern {
+	public enum _DividePattern {
 		Tag,
 		Location,
 	}
-	public enum CalculationUnit {
+	public enum _CalculationUnit {
 		Single,
 		Total,
 	}
-	public enum Ratio {
+	public enum _Ratio {
 		/// <summary>対数変化率</summary>
 		Volatility,
 		/// <summary>損益率</summary>
@@ -27,11 +27,11 @@ namespace PortFolion.Core {
 		/// <summary>パフォーマンス</summary>
 		Index,
 	}
-	public class TransitionParametor {
-		public DividePattern Divide { get; set; }
+	public class _TransitionParametor {
+		public _DividePattern Divide { get; set; }
 		public Period TimePeriod { get; set; }
 		public int TargetLevel { get; set; }
-		public CalculationUnit InvestmentUnit { get; set; }
-		public Ratio Ratio { get; set; }
+		public _CalculationUnit InvestmentUnit { get; set; }
+		public _Ratio Ratio { get; set; }
 	}
 }

@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace PortFolion.Core {
 	public class RateData : INotifyPropertyChanged {
-		internal RateData(TransitionData transition) {
+		internal RateData(_TransitionData transition) {
 			_data = transition;
 			_data.PropertyChanged += transitionPropertyChanged;
 			initialPoint = (_data.TimeAxis.Any()) ? _data.TimeAxis.First() : DateTime.Today;
 		}
-		TransitionData _data;
+		_TransitionData _data;
 		public Period TimePeriod => _data.TimePeriod;
-		public DividePattern Divide => _data.Divide;
+		public _DividePattern Divide => _data.Divide;
 		public int TargetLevel => _data.TargetLevel;
-		public Ratio Ratio => _data.Ratio;
+		public _Ratio Ratio => _data.Ratio;
 
 		DateTime initialPoint;
 		public DateTime InitialPoint {
