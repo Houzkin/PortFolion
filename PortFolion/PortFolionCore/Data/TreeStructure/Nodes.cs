@@ -109,8 +109,10 @@ namespace PortFolion.Core {
 				Tag = Tag.TagName,
 				InvestmentValue = _investmentValue,
 				//InvestmentReturnValue = _investmentReturnValue,
+				Node = this.GetNodeType(),
 			};
 		}
+		public abstract NodeType GetNodeType();
 	}
 	public class AnonymousNode : CommonNode {
 		CushionNode _cushion;
@@ -125,6 +127,9 @@ namespace PortFolion.Core {
 
 		public override CommonNode Clone() {
 			throw new NotImplementedException();
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Unknown;
 		}
 	}
 	/// <summary>User,ブローカーまたはアカウントのベースクラス</summary>
@@ -246,9 +251,11 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Account = Account;
-			obj.Node = NodeType.Account;
 			obj.Levarage = Levarage;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Account;
 		}
 	}
 	/// <summary>ブローカー</summary>
@@ -273,8 +280,10 @@ namespace PortFolion.Core {
 		}
 		internal override CushionNode ToSerialCushion() {
 			var obj =  base.ToSerialCushion();
-			obj.Node = NodeType.Broker;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Broker;
 		}
 	}
 	/// <summary>ルートとなる総リスクファンド</summary>
@@ -320,8 +329,10 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Date = _currentDate;
-			obj.Node = NodeType.Total;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Total;
 		}
 	}
 

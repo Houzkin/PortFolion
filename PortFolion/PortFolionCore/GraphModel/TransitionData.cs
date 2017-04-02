@@ -8,13 +8,9 @@ using System.Threading.Tasks;
 using Houzkin.Tree;
 using System.Runtime.CompilerServices;
 using static PortFolion.Core.Utility;
+using PortFolion.Core;
 
-namespace PortFolion.Core {
-	public class NodeMap {
-		public DateTime Time { get; set; }
-		public TagInfo Tag { get { return Node.Tag; } }
-		public CommonNode Node { get; set; }
-	}
+namespace PortFolion._Core {
 
 	/// <summary>表示用に補正された時系列を管理する</summary>
 	public class _TransitionData : INotifyPropertyChanged {

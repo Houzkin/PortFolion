@@ -6,8 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Houzkin.Tree;
+using PortFolion.Core;
 
-namespace PortFolion.Core {
+namespace PortFolion._Core {
 	public class _Breakdown : INotifyPropertyChanged {
 		internal _Breakdown(_TransitionData transition) {
 			_data = transition;

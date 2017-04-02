@@ -1,14 +1,18 @@
 ﻿using Houzkin.Tree;
+using PortFolion.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+//using PortFolion._Core;
 
 namespace PortFolion.Core {
-	public class TransitionValue<T> {
-		public T Value { get; set; }
-		public DateTime Date { get; set; }
+	
+	public class NodeMap {
+		public DateTime Time { get; set; }
+		public TagInfo Tag { get { return Node.Tag; } }
+		public CommonNode Node { get; set; }
 	}
 	internal static class Utility {
 
@@ -18,7 +22,8 @@ namespace PortFolion.Core {
 				.Where(a => a.NodeIndex().CurrentDepth == targetLevel)
 				.ToDictionary(k => k.Name);
 		}
-		internal static Tuple<IEnumerable<IGrouping<DateTime, NodeMap>>, IEnumerable<IGrouping<DateTime, NodeMap>>> split(IEnumerable<IGrouping<DateTime, NodeMap>> self, DateTime split) {
+		internal static Tuple<IEnumerable<IGrouping<DateTime, NodeMap>>, IEnumerable<IGrouping<DateTime, NodeMap>>> 
+			split(IEnumerable<IGrouping<DateTime, NodeMap>> self, DateTime split) {
 			return Tuple.Create(
 				self.TakeWhile(a => a.Key <= split),
 				self.SkipWhile(a => a.Key <= split));

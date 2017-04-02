@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PortFolion.Core {
+namespace PortFolion._Core {
 	public class RateData : INotifyPropertyChanged {
 		internal RateData(_TransitionData transition) {
 			_data = transition;

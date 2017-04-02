@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PortFolion.Core {
+namespace PortFolion._Core {
 	public enum Period {
 		Yearly,
 		Quarterly,

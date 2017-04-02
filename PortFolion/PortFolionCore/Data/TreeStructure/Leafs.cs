@@ -41,8 +41,10 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Amount = _amount;
-			obj.Node = NodeType.Cash;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Cash;
 		}
 	}
 	/// <summary>金融商品</summary>
@@ -83,8 +85,10 @@ namespace PortFolion.Core {
 			var obj = base.ToSerialCushion();
 			obj.Quantity = _quantity;
 			obj.TradeQuantity = _tradeQuantity;
-			obj.Node = NodeType.OtherProduct;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.OtherProduct;
 		}
 	}
 	public class StockValue : FinancialProduct {
@@ -112,8 +116,10 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Code = _code.ToString();
-			obj.Node = NodeType.Stock;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Stock;
 		}
 	}
 	public class ForexValue : FinancialProduct {
@@ -140,8 +146,10 @@ namespace PortFolion.Core {
 		internal override CushionNode ToSerialCushion() {
 			var obj = base.ToSerialCushion();
 			obj.Code = Pair;
-			obj.Node = NodeType.Forex;
 			return obj;
+		}
+		public override NodeType GetNodeType() {
+			return NodeType.Forex;
 		}
 	}
 }
