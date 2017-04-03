@@ -200,8 +200,14 @@ namespace PortFolion.ViewModels {
 				get { return (CurrentNode?.Root() as TotalRiskFundNode)?.CurrentDate; }
 				set {
 					if (CurrentDate == value) return;
-					RaisePropertyChanged();
 					// set currentNode
+					if (value == null) {
+						CurrentNode = null;
+					}else {
+						var nn = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= value)
+							?? RootCollection.Instance.FirstOrDefault(a => value <= a.CurrentDate);
+					}
+					RaisePropertyChanged();
 				}
 			}
 			CommonNode _commonNode;
@@ -241,17 +247,17 @@ namespace PortFolion.ViewModels {
 					RefreshHistoryList();
 				}
 			}
-			int? _displayItemsCount;
-			public int? DisplayItemsCount {
-				get { return _displayItemsCount; }
-				set {
-					if (_displayItemsCount == value) return;
-					_displayItemsCount = value;
-					RaisePropertyChanged();
-					RefreshBrakeDownList();
-					RefreshHistoryList();
-				}
-			}
+			//int? _displayItemsCount;
+			//public int? DisplayItemsCount {
+			//	get { return _displayItemsCount; }
+			//	set {
+			//		if (_displayItemsCount == value) return;
+			//		_displayItemsCount = value;
+			//		RaisePropertyChanged();
+			//		RefreshBrakeDownList();
+			//		RefreshHistoryList();
+			//	}
+			//}
 			DividePattern _divide;
 			public DividePattern Divide {
 				get { return _divide; }
@@ -311,19 +317,25 @@ namespace PortFolion.ViewModels {
 					= (this.Divide == DividePattern.Location)
 						? new Func<CommonNode, string>(c => c.Name)
 						: c => c.Tag.TagName;
+				var Posis = new HashSet<string>();
+				var Cashs = new HashSet<string>();
 				rc.Values
 					.Select(a => a
 						.TargetLevels(this.TargetLevel)
 						.MargeNodes(this.Divide))
 					.Select(a=> new { Posi = a.Where(b => b.Type != NodeType.Cash), NonRisk = a.Where(b => b.Type == NodeType.Cash) })
-					.ForEach(a => a.ForEach(b => OrderList.Add(b.Title)));
+					.ForEach(a => {
+						a.Posi.ForEach(b => Posis.Add(b.Title));
+						a.NonRisk.ForEach(b => Cashs.Add(b.Title));
+					});
 				var tx = RootCollection.Instance.GetTimeAx(this.TimePeriod);
 
 				// _______________________________________ Transition initialize
 				gdm.Transition.Clear();
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					gdm.Transition.AddRange(
-						OrderList.Select(a => new StackedAreaSeries {
+						Posis.Union(Cashs)
+						.Select(a => new StackedAreaSeries {
 							Title = a,
 							Values = new ChartValues<DateTimePoint>(),
 							LineSmoothness = 0,
