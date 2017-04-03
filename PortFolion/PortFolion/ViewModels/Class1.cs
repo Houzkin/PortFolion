@@ -40,17 +40,114 @@ namespace PortFolion.ViewModels {
 		public double Invest { get; set; }
 		public NodeType Type { get; set; }
 	}
-	public static class Extension {
-		/// <summary>
-		/// 指定した項目種別で括る。
-		/// </summary>
-		public static IEnumerable<TempValue> MargeNodes(this CommonNode current, int tgtLv,DividePattern div) {
-			var cd = current.NodeIndex().CurrentDepth;
-			var ch = current.Height();
-			var tg = Math.Min(ch, tgtLv);
-			return current.Levelorder().Where(a => a.NodeIndex().CurrentDepth == cd + tg).MargeNodes(div);
+	public class RowValue : TempValue {
+		public DateTime Date { get; set; }
+	}
+	public class DateSpan {
+		public DateSpan(DateTime date1, DateTime date2) {
+			if (date1 <= date2) {
+				Start = date1;
+				End = date2;
+			} else {
+				Start = date2;
+				End = date1;
+			}
 		}
-		private static IEnumerable<TempValue> MargeNodes(this IEnumerable<CommonNode> collection, DividePattern div) {
+		public DateTime Start { get; set; }
+		public DateTime End { get; set; }
+	}
+	public static class Ext {
+		public static IEnumerable<DateSpan> GetTimeAx(this IEnumerable<TotalRiskFundNode> self, Period period) {
+			if (RootCollection.Instance.Any()) {
+				var ds = RootCollection.Instance.Keys.ToArray();
+				return Ext.GetTimeAxis(period, ds.Min(), ds.Max());
+			}else {
+				return Enumerable.Empty<DateSpan>();
+			}
+		}
+		static IEnumerable<DateSpan> GetTimeAxis(Period period, DateTime start, DateTime end) {
+			switch (period) {
+			case Period.Weekly:
+				var wkax = Ext.weeklyAxis(start, end).ToArray();
+				return wkax.Zip(wkax.Select(b => b.AddDays(-7)), (a, b) => new DateSpan(a,b));
+			case Period.Monthly:
+				var mtax = Ext.monthlyAxis(start, end).ToArray();
+				return mtax.Zip(
+					mtax.Select(a => new DateTime(a.Year, a.Month, 1)), (a, b) => new DateSpan(a, b));
+			case Period.Quarterly:
+				var qtax = Ext.quarterlyAxis(start, end).ToArray();
+				return qtax.Zip(
+					qtax.Select(a => new DateTime(a.Year,a.Month,1).AddMonths(-2)), (a, b) => new DateSpan(a, b));
+			case Period.Yearly:
+				var yrax = Ext.yearlyAxis(start, end).ToArray();
+				return yrax.Zip(yrax.Select(a => new DateTime(a.Year, 1, 1)), (a, b) => new DateSpan(a, b));
+			default:
+				return Enumerable.Empty<DateSpan>();
+			}
+		}
+		#region date axis static method
+		/// <summary>週末日</summary>
+		internal static IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {
+			DateTime cur = start.DayOfWeek == DayOfWeek.Sunday ? start : start.AddDays(7 - (int)start.DayOfWeek);
+			yield return cur;
+			while (cur <= end) {
+				cur = cur.AddDays(7);
+				yield return cur;
+			}
+		}
+		/// <summary>月末日</summary>
+		internal static IEnumerable<DateTime> monthlyAxis(DateTime start, DateTime end) {
+			var c = EndOfMonth(start);
+			yield return c;
+			while (c <= end) {
+				c = NextEndOfMonth(c, 1);
+				yield return c;
+			}
+		}
+		/// <summary>四半期末日</summary>
+		internal static IEnumerable<DateTime> quarterlyAxis(DateTime start, DateTime end) {
+			int q = start.Month / 3;
+			var c = EndOfMonth(new DateTime(start.Year, (q + 1) * 3, 1));
+			yield return c;
+			while (c <= end) {
+				c = NextEndOfMonth(c, 3);
+				yield return c;
+			}
+		}
+		/// <summary>年末日</summary>
+		internal static IEnumerable<DateTime> yearlyAxis(DateTime start, DateTime end) {
+			var c = new DateTime(start.Year, 12, 31);
+			yield return c;
+			while (c <= end) {
+				c = c.AddYears(1);
+				yield return c;
+			}
+		}
+		static int DaysInMonth(DateTime dt) {
+			return DateTime.DaysInMonth(dt.Year, dt.Month);
+		}
+		static DateTime EndOfMonth(DateTime dt) {
+			return new DateTime(dt.Year, dt.Month, DaysInMonth(dt));
+		}
+		static DateTime NextEndOfMonth(DateTime dt, int month) {
+			var d = new DateTime(dt.Year, dt.Month, 1).AddMonths(month);
+			return EndOfMonth(d);
+		}
+		#endregion
+		/// <summary>現在のノードから指定した階層だけ下位のノードを返す。</summary>
+		public static IEnumerable<CommonNode> TargetLevels(this CommonNode cur, int tgtLv) {
+			var cd = cur.NodeIndex().CurrentDepth;
+			var ch = cur.Height();
+			var tg = Math.Min(ch, tgtLv) + cd;
+			return cur.Levelorder()
+				.SkipWhile(a => a.NodeIndex().CurrentDepth < tg)
+				.TakeWhile(a => a.NodeIndex().CurrentDepth == tg);
+		}
+		/// <summary>指定した項目種別で括る。</summary>
+		public static IEnumerable<TempValue> MargeNodes(this CommonNode current, int tgtLv,DividePattern div) {
+			return current.TargetLevels(tgtLv).MargeNodes(div);
+		}
+		public static IEnumerable<TempValue> MargeNodes(this IEnumerable<CommonNode> collection, DividePattern div) {
 			Func<CommonNode, string> DivFunc;
 			switch (div) {
 			case DividePattern.Location:
@@ -190,16 +287,14 @@ namespace PortFolion.ViewModels {
 			public void Refresh() {
 
 			}
-			string[] OrderList;
-			void SetOrderList() {
-				var hs = new HashSet<string>();
+			HashSet<string> OrderList;
+			//void SetOrderList() {
+			//	var hs = new HashSet<string>();
 
-			}
+			//	this.CurrentNode.TargetLevels(this.TargetLevel)
+			//}
 			void RefreshBrakeDownList() {
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
-				//var tgnss = tgns.Where(a => a.Type != NodeType.Cash)
-				//	.OrderByDescending(a=>a.Rate)
-				//	.Concat(tgns.Where(a => a.Type == NodeType.Cash));
 				gdm.BrakeDown.Clear();
 				foreach (var data in tgnss) {
 					gdm.BrakeDown.Add(
@@ -211,16 +306,48 @@ namespace PortFolion.ViewModels {
 				}
 			}
 			void RefreshHistoryList() {
-				var b = RootCollection.GetNodeLine(CurrentNode.Path);
+				var rc = RootCollection.GetNodeLine(CurrentNode.Path);
+				Func<CommonNode, string> DivFunc 
+					= (this.Divide == DividePattern.Location)
+						? new Func<CommonNode, string>(c => c.Name)
+						: c => c.Tag.TagName;
+				rc.Values
+					.Select(a => a
+						.TargetLevels(this.TargetLevel)
+						.MargeNodes(this.Divide))
+					.Select(a=> new { Posi = a.Where(b => b.Type != NodeType.Cash), NonRisk = a.Where(b => b.Type == NodeType.Cash) })
+					.ForEach(a => a.ForEach(b => OrderList.Add(b.Title)));
+				var tx = RootCollection.Instance.GetTimeAx(this.TimePeriod);
+
+				// _______________________________________ Transition initialize
+				gdm.Transition.Clear();
+				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
+					gdm.Transition.AddRange(
+						OrderList.Select(a => new StackedAreaSeries {
+							Title = a,
+							Values = new ChartValues<DateTimePoint>(),
+							LineSmoothness = 0,
+						}));
+				}else if(this.TransitionStatus == TransitionStatus.StackCashFlow) {
+				}else if(this.TransitionStatus == TransitionStatus.ProfitLossOnly) {
+				}else if(this.TransitionStatus == TransitionStatus.HideCashFlow) { }
+				// _______________________________________ Volatility initialize
+				gdm.Volatility.Clear();
+				// _______________________________________ Index initialize
 			}
 			void InvestmentUnitChanged() { }
 			void VolatilityTypeChanged() { }
 		}
 	}
 	public class BrakeDownList : SeriesCollection { }
-	public class TransitionList : SeriesCollection { }
+	public class TransitionList : TokenSeriesCollection { }
 	public class IndexList : SeriesCollection { }
 	public class VolatilityList : SeriesCollection { }
 
-	
+	public class TokenSeriesCollection : SeriesCollection {
+		public Dictionary<string,Action<object>> GetTokens() {
+			return this.ToDictionary(a => a.Title, a => new Action<object>(b => a.Values.Add(b)));
+		}
+		
+	}
 }
