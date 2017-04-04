@@ -24,7 +24,7 @@ namespace PortFolion.ViewModels {
 		Location,
 	}
 	public enum TransitionStatus {
-		HideCashFlow,
+		BalanceOnly,
 		SingleCashFlow,
 		StackCashFlow,
 		ProfitLossOnly,
@@ -40,7 +40,13 @@ namespace PortFolion.ViewModels {
 		public double Invest { get; set; }
 		public NodeType Type { get; set; }
 	}
-	public class RowValue : TempValue {
+	public class GraphValue {
+		/// <summary>残高</summary>
+		public double Amount { get; set; }
+		/// <summary>外部キャッシュフロー</summary>
+		public double Flow { get; set; }
+		/// <summary>修正ディーツ法による変動比率</summary>
+		public double Dietz { get; set; }
 		public DateTime Date { get; set; }
 	}
 	public class DateSpan {
@@ -57,6 +63,14 @@ namespace PortFolion.ViewModels {
 		public DateTime End { get; set; }
 	}
 	public static class Ext {
+		public static IEnumerable<T> Dequeue<T>(this Queue<T> self,Func<T,bool> pred) {
+			if (!self.Any()) return Enumerable.Empty<T>();
+			var lst = new List<T>();
+			while (pred(self.Peek())) {
+				lst.Add(self.Dequeue());
+			}
+			return lst;
+		}
 		public static IEnumerable<DateSpan> GetTimeAx(this IEnumerable<TotalRiskFundNode> self, Period period) {
 			if (RootCollection.Instance.Any()) {
 				var ds = RootCollection.Instance.Keys.ToArray();
@@ -64,6 +78,23 @@ namespace PortFolion.ViewModels {
 			}else {
 				return Enumerable.Empty<DateSpan>();
 			}
+		}
+		public static IEnumerable<GraphValue> ToGraphValues(this Dictionary<DateTime,CommonNode> src, Period period) {
+			if (src == null || !src.Any()) return Enumerable.Empty<GraphValue>();
+			var ax = Ext.GetTimeAxis(period, src.Keys.Min(), src.Keys.Max());
+			var srcs = new Queue<KeyValuePair<DateTime, CommonNode>>(src);
+			//var lst = new List<GraphValue>();
+
+			var rslt = ax.Scan(new GraphValue(),(prev, ds) => {
+				var gv = new GraphValue() { Date = ds.End };
+				var tmp = srcs.Dequeue(a => ds.Start <= a.Key && a.Key <= ds.End);
+				if (!tmp.Any()) {
+					gv.Amount = prev.Amount;
+					return gv;
+				}
+				return gv;
+			});
+			return rslt.ToArray();
 		}
 		static IEnumerable<DateSpan> GetTimeAxis(Period period, DateTime start, DateTime end) {
 			switch (period) {
@@ -206,6 +237,7 @@ namespace PortFolion.ViewModels {
 					}else {
 						var nn = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= value)
 							?? RootCollection.Instance.FirstOrDefault(a => value <= a.CurrentDate);
+						CurrentNode = nn;
 					}
 					RaisePropertyChanged();
 				}
@@ -293,12 +325,6 @@ namespace PortFolion.ViewModels {
 			public void Refresh() {
 
 			}
-			HashSet<string> OrderList;
-			//void SetOrderList() {
-			//	var hs = new HashSet<string>();
-
-			//	this.CurrentNode.TargetLevels(this.TargetLevel)
-			//}
 			void RefreshBrakeDownList() {
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
 				gdm.BrakeDown.Clear();
@@ -330,25 +356,35 @@ namespace PortFolion.ViewModels {
 					});
 				var tx = RootCollection.Instance.GetTimeAx(this.TimePeriod);
 
+				//
+				var graphValues = RootCollection.GetNodeLine(this.CurrentNode.Path);
+
 				// _______________________________________ Transition initialize
 				gdm.Transition.Clear();
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
-					gdm.Transition.AddRange(
-						Posis.Union(Cashs)
-						.Select(a => new StackedAreaSeries {
-							Title = a,
-							Values = new ChartValues<DateTimePoint>(),
-							LineSmoothness = 0,
-						}));
+					
 				}else if(this.TransitionStatus == TransitionStatus.StackCashFlow) {
 				}else if(this.TransitionStatus == TransitionStatus.ProfitLossOnly) {
-				}else if(this.TransitionStatus == TransitionStatus.HideCashFlow) { }
+				}else if(this.TransitionStatus == TransitionStatus.BalanceOnly) {
+					
+				}
 				// _______________________________________ Volatility initialize
 				gdm.Volatility.Clear();
 				// _______________________________________ Index initialize
 			}
 			void InvestmentUnitChanged() { }
 			void VolatilityTypeChanged() { }
+
+			// Graph drawing
+			void drawBalanceLine(Dictionary<DateTime,CommonNode> nodes) {
+				gdm.Transition.Add(new LineSeries {
+						Title = CurrentNode.Name,
+						Values = new ChartValues<double>(nodes.Select(a => (double)a.Value.Amount)),
+					});
+			}
+			void dwawSingleCashFlow(Dictionary<DateTime,CommonNode> nodes) {
+
+			}
 		}
 	}
 	public class BrakeDownList : SeriesCollection { }
