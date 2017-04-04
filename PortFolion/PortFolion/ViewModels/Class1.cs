@@ -71,14 +71,14 @@ namespace PortFolion.ViewModels {
 			}
 			return lst;
 		}
-		public static IEnumerable<DateSpan> GetTimeAx(this IEnumerable<TotalRiskFundNode> self, Period period) {
-			if (RootCollection.Instance.Any()) {
-				var ds = RootCollection.Instance.Keys.ToArray();
-				return Ext.GetTimeAxis(period, ds.Min(), ds.Max());
-			}else {
-				return Enumerable.Empty<DateSpan>();
-			}
-		}
+		//public static IEnumerable<DateSpan> GetTimeAx(this IEnumerable<TotalRiskFundNode> self, Period period) {
+		//	if (RootCollection.Instance.Any()) {
+		//		var ds = RootCollection.Instance.Keys.ToArray();
+		//		return Ext.GetTimeAxis(period, ds.Min(), ds.Max());
+		//	}else {
+		//		return Enumerable.Empty<DateSpan>();
+		//	}
+		//}
 		public static IEnumerable<GraphValue> ToGraphValues(this Dictionary<DateTime,CommonNode> src, Period period) {
 			if (src == null || !src.Any()) return Enumerable.Empty<GraphValue>();
 			var ax = Ext.GetTimeAxis(period, src.Keys.Min(), src.Keys.Max());
@@ -88,9 +88,26 @@ namespace PortFolion.ViewModels {
 			var rslt = ax.Scan(new GraphValue(),(prev, ds) => {
 				var gv = new GraphValue() { Date = ds.End };
 				var tmp = srcs.Dequeue(a => ds.Start <= a.Key && a.Key <= ds.End);
-				if (!tmp.Any()) {
+				if (tmp.IsEmpty()) {
 					gv.Amount = prev.Amount;
-					return gv;
+				}else {
+					//期初時価総額
+					var st = prev.Amount != 0 ? prev.Amount : tmp.First().Value.Amount;
+					//期末時価総額
+					gv.Amount = tmp.Last().Value.Amount;
+					//キャッシュフローを持つ要素
+					var fl = tmp.Where(a => a.Value.InvestmentValue != 0).ToArray();
+					//キャッシュフロー合計
+					gv.Flow = fl.Sum(a => a.Value.InvestmentValue);
+
+					var vc = gv.Amount - st - gv.Flow;
+
+					var cf = fl.Aggregate(0D,
+						(pr, cu) => pr + cu.Value.InvestmentValue * (ds.End - cu.Key).Days / (ds.End - ds.Start).Days);
+
+					var rst = st + cf;
+					if (rst == 0) gv.Dietz = 1;
+					else gv.Dietz = vc / rst;
 				}
 				return gv;
 			});
@@ -251,7 +268,7 @@ namespace PortFolion.ViewModels {
 					RaisePropertyChanged();
 					RaisePropertyChanged(() => TargetLevel);
 					RefreshBrakeDownList();
-					//RefreshHistoryList();
+					RefreshHistoryList();
 				}
 			}
 			Period _timePeriod;
@@ -276,7 +293,7 @@ namespace PortFolion.ViewModels {
 					_targetLevel = Math.Max(0, value);
 					RaisePropertyChanged();
 					RefreshBrakeDownList();
-					RefreshHistoryList();
+					//RefreshHistoryList();
 				}
 			}
 			//int? _displayItemsCount;
@@ -298,7 +315,7 @@ namespace PortFolion.ViewModels {
 					_divide = value;
 					RaisePropertyChanged();
 					RefreshBrakeDownList();
-					RefreshHistoryList();
+					//RefreshHistoryList();
 				}
 			}
 			TransitionStatus _investmentUnit;
@@ -308,7 +325,8 @@ namespace PortFolion.ViewModels {
 					if (_investmentUnit == value) return;//transition も比較して設定
 					_investmentUnit = value;
 					RaisePropertyChanged();
-					InvestmentUnitChanged();
+					//InvestmentUnitChanged();
+					DrowTransitionGraph(_investmentUnit);
 				}
 			}
 			VolatilityType _volatilityType;
@@ -337,29 +355,27 @@ namespace PortFolion.ViewModels {
 						});
 				}
 			}
+			IEnumerable<GraphValue> _GraphRowData = Enumerable.Empty<GraphValue>();
 			void RefreshHistoryList() {
-				var rc = RootCollection.GetNodeLine(CurrentNode.Path);
-				Func<CommonNode, string> DivFunc 
-					= (this.Divide == DividePattern.Location)
-						? new Func<CommonNode, string>(c => c.Name)
-						: c => c.Tag.TagName;
-				var Posis = new HashSet<string>();
-				var Cashs = new HashSet<string>();
-				rc.Values
-					.Select(a => a
-						.TargetLevels(this.TargetLevel)
-						.MargeNodes(this.Divide))
-					.Select(a=> new { Posi = a.Where(b => b.Type != NodeType.Cash), NonRisk = a.Where(b => b.Type == NodeType.Cash) })
-					.ForEach(a => {
-						a.Posi.ForEach(b => Posis.Add(b.Title));
-						a.NonRisk.ForEach(b => Cashs.Add(b.Title));
-					});
-				var tx = RootCollection.Instance.GetTimeAx(this.TimePeriod);
-
-				//
-				var graphValues = RootCollection.GetNodeLine(this.CurrentNode.Path);
+				if (CurrentDate == null || CurrentNode == null) {
+					_GraphRowData = Enumerable.Empty<GraphValue>();
+				}else {
+					_GraphRowData = RootCollection
+						.GetNodeLine(this.CurrentNode.Path, (DateTime)CurrentDate)
+						.ToGraphValues(this.TimePeriod);
+				}
 
 				// _______________________________________ Transition initialize
+				DrowTransitionGraph(this.TransitionStatus);
+
+				// _______________________________________ Volatility initialize
+				gdm.Volatility.Clear();
+				// _______________________________________ Index initialize
+			}
+			void VolatilityTypeChanged() { }
+
+			#region Graph drawing
+			void DrowTransitionGraph(TransitionStatus status) {
 				gdm.Transition.Clear();
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					
@@ -368,14 +384,7 @@ namespace PortFolion.ViewModels {
 				}else if(this.TransitionStatus == TransitionStatus.BalanceOnly) {
 					
 				}
-				// _______________________________________ Volatility initialize
-				gdm.Volatility.Clear();
-				// _______________________________________ Index initialize
 			}
-			void InvestmentUnitChanged() { }
-			void VolatilityTypeChanged() { }
-
-			// Graph drawing
 			void drawBalanceLine(Dictionary<DateTime,CommonNode> nodes) {
 				gdm.Transition.Add(new LineSeries {
 						Title = CurrentNode.Name,
@@ -385,6 +394,7 @@ namespace PortFolion.ViewModels {
 			void dwawSingleCashFlow(Dictionary<DateTime,CommonNode> nodes) {
 
 			}
+			#endregion
 		}
 	}
 	public class BrakeDownList : SeriesCollection { }
