@@ -326,7 +326,7 @@ namespace PortFolion.ViewModels {
 					_investmentUnit = value;
 					RaisePropertyChanged();
 					//InvestmentUnitChanged();
-					DrowTransitionGraph(_investmentUnit);
+					DrowTransitionGraph();
 				}
 			}
 			VolatilityType _volatilityType;
@@ -356,56 +356,120 @@ namespace PortFolion.ViewModels {
 				}
 			}
 			IEnumerable<GraphValue> _GraphRowData = Enumerable.Empty<GraphValue>();
+			/// <summary>累計キャッシュフローとその時点での評価総額</summary>
+			IEnumerable<Tuple<double,double>> _GraphRowPL {
+				get {
+					return _GraphRowData
+						.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
+							   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
+				}
+			}
 			void RefreshHistoryList() {
 				if (CurrentDate == null || CurrentNode == null) {
 					_GraphRowData = Enumerable.Empty<GraphValue>();
 				}else {
 					_GraphRowData = RootCollection
-						.GetNodeLine(this.CurrentNode.Path, (DateTime)CurrentDate)
+						.GetNodeLine(this.CurrentNode.Path)
 						.ToGraphValues(this.TimePeriod);
 				}
 
 				// _______________________________________ Transition initialize
-				DrowTransitionGraph(this.TransitionStatus);
+				DrowTransitionGraph();
 
 				// _______________________________________ Volatility initialize
 				gdm.Volatility.Clear();
 				// _______________________________________ Index initialize
 			}
-			void VolatilityTypeChanged() { }
 
-			#region Graph drawing
-			void DrowTransitionGraph(TransitionStatus status) {
+			#region Draw Transition Graph
+			void DrowTransitionGraph() {
 				gdm.Transition.Clear();
+				gdm.Transition.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
-					
+					drawBalanceLine();
+					drawCashFlowColumn();
 				}else if(this.TransitionStatus == TransitionStatus.StackCashFlow) {
+					drawFlowAndProfitLoss();
 				}else if(this.TransitionStatus == TransitionStatus.ProfitLossOnly) {
+					drawProfitLoss();
 				}else if(this.TransitionStatus == TransitionStatus.BalanceOnly) {
-					
+					drawBalanceLine();
 				}
 			}
-			void drawBalanceLine(Dictionary<DateTime,CommonNode> nodes) {
-				gdm.Transition.Add(new LineSeries {
-						Title = CurrentNode.Name,
-						Values = new ChartValues<double>(nodes.Select(a => (double)a.Value.Amount)),
+			void drawBalanceLine() {
+				gdm.Transition.Add(new LineSeries() {
+					Title = CurrentNode.Name,
+					//Values = new ChartValues<DateTimePoint>(_GraphRowData.Select(a=>new DateTimePoint(a.Date,a.Amount))),
+					Values = new ChartValues<double>(_GraphRowData.Select(a => a.Amount)),
+				});
+			}
+			void drawCashFlowColumn() {
+				gdm.Transition.Add(new ColumnSeries() {
+					Title = "Cash Flow",
+					Values = new ChartValues<double>(_GraphRowData.Select(a=>a.Flow)),
+				});
+			}
+			void drawProfitLoss() {
+				gdm.Transition.Add(new LineSeries() {
+					Title = "Profit and Loss",
+					Values = new ChartValues<double>(_GraphRowPL.Select(a => a.Item2 - a.Item1)),
+				});
+			}
+			void drawFlowAndProfitLoss() {
+				gdm.Transition.Add(
+					new StackedAreaSeries() {
+						Title = "Profit and Loss",
+						Values = new ChartValues<double>(_GraphRowPL.Select(a=>a.Item2 - a.Item1)),
+					});
+				gdm.Transition.Add(
+					new StackedAreaSeries() {
+						Title = "Cash Flow",
+						Values = new ChartValues<double>(_GraphRowPL.Select(a=>a.Item1)),
 					});
 			}
-			void dwawSingleCashFlow(Dictionary<DateTime,CommonNode> nodes) {
+			#endregion
 
+			#region Draw Index Graph
+			void DrawIndexGraph() {
+				gdm.Index.Clear();
+				gdm.Index.Labels = _GraphRowData.Select(a => a.Date.ToShortDateString());
+				gdm.Index.Add(new LineSeries() {
+					Title = "Index",
+					Values = new ChartValues<double>(
+						_GraphRowData
+							.Scan(1d, (pr, cu) => pr * cu.Dietz)
+							.Select(a => a * 100)),
+				});
+			}
+			#endregion
+
+			#region Draw Volatility Graph
+			void VolatilityTypeChanged() {
+				gdm.Volatility.Clear();
+				gdm.Volatility.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
+				gdm.Volatility.Add(new LineSeries() {
+					Title = "Volatility",
+					Values = new ChartValues<double>(_GraphRowData.Select(a => a.Dietz * 100)),
+				});
 			}
 			#endregion
 		}
 	}
 	public class BrakeDownList : SeriesCollection { }
 	public class TransitionList : TokenSeriesCollection { }
-	public class IndexList : SeriesCollection { }
-	public class VolatilityList : SeriesCollection { }
+	public class IndexList : TokenSeriesCollection { }
+	public class VolatilityList : TokenSeriesCollection { }
 
 	public class TokenSeriesCollection : SeriesCollection {
-		public Dictionary<string,Action<object>> GetTokens() {
-			return this.ToDictionary(a => a.Title, a => new Action<object>(b => a.Values.Add(b)));
-		}
 		
+		IEnumerable<string> _labels = Enumerable.Empty<string>();
+		public IEnumerable<string> Labels {
+			get { return _labels; }
+			set {
+				if (_labels.SequenceEqual(value)) return;
+				_labels = value;
+				base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(Labels)));
+			}
+		}
 	}
 }
