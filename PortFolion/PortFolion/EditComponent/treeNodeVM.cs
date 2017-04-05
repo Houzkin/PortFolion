@@ -37,7 +37,7 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
-			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc();
+			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc(this);
 			this.Root().RaiseReCalcurated();
 		}
 		public event Action ReCalcurated;
@@ -70,6 +70,10 @@ namespace PortFolion.ViewModels {
 					c.AmountRate = aa;
 				}
 			}
+		}
+		private void ReCalc(CommonNodeVM sender) {
+			if(sender == this || this.IsAncestorOf(sender) || this.IsDescendantOf(sender))
+			ReCalc();
 		}
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
