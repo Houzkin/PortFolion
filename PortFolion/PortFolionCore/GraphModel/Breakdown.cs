@@ -9,48 +9,48 @@ using Houzkin.Tree;
 using PortFolion.Core;
 
 namespace PortFolion._Core {
-	public class _Breakdown : INotifyPropertyChanged {
-		internal _Breakdown(_TransitionData transition) {
-			_data = transition;
-			_data.PropertyChanged += transitionPropertyChanged;
-		}
+	//public class _Breakdown : INotifyPropertyChanged {
+	//	internal _Breakdown(_TransitionData transition) {
+	//		_data = transition;
+	//		_data.PropertyChanged += transitionPropertyChanged;
+	//	}
 
-		private void transitionPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			switch (e.PropertyName) {
-			case nameof(_data.CurrentDate):
-			case nameof(_data.CurrentNode):
-			case nameof(_data.TargetLevel):
-			case nameof(_data.Divide):
-				OnPropertyChanged(nameof(this.BreakDownItems));
-				break;
-			}
-		}
+	//	private void transitionPropertyChanged(object sender, PropertyChangedEventArgs e) {
+	//		switch (e.PropertyName) {
+	//		case nameof(_data.CurrentDate):
+	//		case nameof(_data.CurrentNode):
+	//		case nameof(_data.TargetLevel):
+	//		case nameof(_data.Divide):
+	//			OnPropertyChanged(nameof(this.BreakDownItems));
+	//			break;
+	//		}
+	//	}
 
-		_TransitionData _data;
-		public _DividePattern Divide => _data.Divide;
-		public int TargetLevel => _data.TargetLevel;
+	//	_TransitionData _data;
+	//	public _DividePattern Divide => _data.Divide;
+	//	public int TargetLevel => _data.TargetLevel;
 
 		
-		public IEnumerable<CommonNode> BreakDownItems {
-			get {
-				var cur = _data.CurrentNode;
-				if ((cur as FinancialValue) != null) return cur.Siblings();
-				return _data.CurrentMap
-					.ToLookup(a => a.Time)
-					.LastOrDefault(a => a.Key <= _data.CurrentDate)
-					.Select(a => a.Node);
-			}
-		}
+	//	public IEnumerable<CommonNode> BreakDownItems {
+	//		get {
+	//			var cur = _data.CurrentNode;
+	//			if ((cur as FinancialValue) != null) return cur.Siblings();
+	//			return _data.CurrentMap
+	//				.ToLookup(a => a.Time)
+	//				.LastOrDefault(a => a.Key <= _data.CurrentDate)
+	//				.Select(a => a.Node);
+	//		}
+	//	}
 
 
 
 
 
-		public event PropertyChangedEventHandler PropertyChanged;
-		private void OnPropertyChanged([CallerMemberName] string name = "") {
-			var e = new PropertyChangedEventArgs(name);
-			PropertyChanged?.Invoke(this, e);
-		}
+	//	public event PropertyChangedEventHandler PropertyChanged;
+	//	private void OnPropertyChanged([CallerMemberName] string name = "") {
+	//		var e = new PropertyChangedEventArgs(name);
+	//		PropertyChanged?.Invoke(this, e);
+	//	}
 
-	}
+	//}
 }

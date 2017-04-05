@@ -74,18 +74,6 @@ namespace PortFolion.Core {
 		public virtual long InvestmentValue {
 			get { return _investmentValue; }
 		}
-
-		//long _investmentReturnValue;
-		///// <summary>回収額</summary>
-		//public virtual void SetInvestmentReturnValue(long value) {
-		//	if (_investmentReturnValue == value) return;
-		//	_investmentReturnValue = value;
-		//	RaisePropertyChanged(nameof(InvestmentReturnValue));
-		//}
-		///// <summary>回収(出金)額</summary>
-		//public virtual long InvestmentReturnValue {
-		//	get { return _investmentReturnValue; }
-		//}
 		
 		public abstract long Amount { get; }
 		/// <summary>リスク資産としてのポジションを持つかどうか示す値を取得する。</summary>

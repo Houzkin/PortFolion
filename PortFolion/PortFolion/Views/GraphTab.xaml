@@ -6,23 +6,72 @@
              xmlns:local="clr-namespace:PortFolion.Views"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="300" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
+        
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="Location" TextAlignment="Left">
+                <TextBlock Text="Setting &amp; Parametor" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="90"/>
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-             <!--ここにコンテンツ-->
+            <Grid>
+                <Grid.Resources>
+                    <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
+                    <ToggleButton x:Name="OpenParams" DockPanel.Dock="Left">設定</ToggleButton>
+                    <Button DockPanel.Dock="Right">更新</Button>
+                </DockPanel>
+                <WrapPanel Visibility="{Binding IsChecked,ElementName=OpenParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}" Grid.Row="1" Grid.ColumnSpan="2">
+                    <!--setting params-->
+                    <TextBlock>content</TextBlock>
+                </WrapPanel>
+                <TreeView Grid.Column="0" Grid.Row="2">
+                    
+                </TreeView>
+                <TreeView Grid.Column="1" Grid.Row="2"></TreeView>
+            </Grid>
         </Expander>
-        <local:GraphContents Grid.Column="1"/>
+        <!--<local:GraphContents Grid.Column="1"/>-->
+        <Expander Grid.Column="1" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            <Expander.Header>
+                <TextBlock Text="BrakeDown" TextAlignment="Left">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="90"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
+        </Expander>
+        
+        <StackPanel Grid.Column="2" Orientation="Vertical">
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="Transition" mah:ControlsHelper.ContentCharacterCasing="Normal">
+
+            </Expander>
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="Index" mah:ControlsHelper.ContentCharacterCasing="Normal">
+
+            </Expander>
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="Volatility" mah:ControlsHelper.ContentCharacterCasing="Normal">
+
+            </Expander>
+        </StackPanel>
+        
     </Grid>
 </UserControl>

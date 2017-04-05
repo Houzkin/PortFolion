@@ -43,14 +43,14 @@ namespace PortFolion.ViewModels {
 		public event Action ReCalcurated;
 		private void RaiseReCalcurated() => ReCalcurated?.Invoke();
 
-		protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			if (e.PropertyName == nameof(Model.InvestmentValue)) {
-				reculcHistories();
-			}
-			if(e.PropertyName == nameof(Model.Amount)) {
-				reculcRate();
-			}
-		}
+		//protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+		//	if (e.PropertyName == nameof(Model.InvestmentValue)) {
+		//		reculcHistories();
+		//	}
+		//	if(e.PropertyName == nameof(Model.Amount)) {
+		//		reculcRate();
+		//	}
+		//}
 		void reculcHistories() {
 			_currentPositionLine = null;
 			InvestmentTotal = CurrentPositionLine.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
@@ -230,12 +230,12 @@ namespace PortFolion.ViewModels {
 			base.ReCalc();
 			reculc();
 		}
-		protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-			base.ModelPropertyChanged(sender, e);
-			if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.Amount)) {
-				reculc();
-			}
-		}
+		//protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
+		//	base.ModelPropertyChanged(sender, e);
+		//	if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.Amount)) {
+		//		reculc();
+		//	}
+		//}
 		void reculc() {
 			this.ProfitLoss = Model.Amount - InvestmentTotal - InvestmentReturnTotal;
 			//this.UnrealizedProfitLoss = Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);

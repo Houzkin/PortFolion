@@ -11,6 +11,7 @@ using LiveCharts.Defaults;
 using Livet;
 using Houzkin.Architecture;
 using PortFolion.IO;
+using System.Collections.ObjectModel;
 
 namespace PortFolion.ViewModels {
 	public enum Period {
@@ -29,16 +30,16 @@ namespace PortFolion.ViewModels {
 		StackCashFlow,
 		ProfitLossOnly,
 	}
-	public enum VolatilityType {
-		Normal,
-		Log,
-	}
+	//public enum VolatilityType {
+	//	Normal,
+	//	Log,
+	//}
 	public class TempValue {
 		public string Title { get; set; }
 		public double Amount { get; set; }
 		public double Rate { get; set; }
-		public double Invest { get; set; }
-		public NodeType Type { get; set; }
+		//public double Invest { get; set; }
+		//public NodeType Type { get; set; }
 	}
 	public class GraphValue {
 		/// <summary>残高</summary>
@@ -46,7 +47,7 @@ namespace PortFolion.ViewModels {
 		/// <summary>外部キャッシュフロー</summary>
 		public double Flow { get; set; }
 		/// <summary>修正ディーツ法による変動比率</summary>
-		public double Dietz { get; set; }
+		public double Dietz { get; set; } = 1;
 		public DateTime Date { get; set; }
 	}
 	public class DateSpan {
@@ -66,19 +67,12 @@ namespace PortFolion.ViewModels {
 		public static IEnumerable<T> Dequeue<T>(this Queue<T> self,Func<T,bool> pred) {
 			if (!self.Any()) return Enumerable.Empty<T>();
 			var lst = new List<T>();
-			while (pred(self.Peek())) {
+			while (self.Any() && pred(self.Peek())) {
 				lst.Add(self.Dequeue());
 			}
 			return lst;
 		}
-		//public static IEnumerable<DateSpan> GetTimeAx(this IEnumerable<TotalRiskFundNode> self, Period period) {
-		//	if (RootCollection.Instance.Any()) {
-		//		var ds = RootCollection.Instance.Keys.ToArray();
-		//		return Ext.GetTimeAxis(period, ds.Min(), ds.Max());
-		//	}else {
-		//		return Enumerable.Empty<DateSpan>();
-		//	}
-		//}
+		
 		public static IEnumerable<GraphValue> ToGraphValues(this Dictionary<DateTime,CommonNode> src, Period period) {
 			if (src == null || !src.Any()) return Enumerable.Empty<GraphValue>();
 			var ax = Ext.GetTimeAxis(period, src.Keys.Min(), src.Keys.Max());
@@ -106,8 +100,8 @@ namespace PortFolion.ViewModels {
 						(pr, cu) => pr + cu.Value.InvestmentValue * (ds.End - cu.Key).Days / (ds.End - ds.Start).Days);
 
 					var rst = st + cf;
-					if (rst == 0) gv.Dietz = 1;
-					else gv.Dietz = vc / rst;
+					if (rst != 0)
+						gv.Dietz = vc / rst; 
 				}
 				return gv;
 			});
@@ -195,6 +189,9 @@ namespace PortFolion.ViewModels {
 		public static IEnumerable<TempValue> MargeNodes(this CommonNode current, int tgtLv,DividePattern div) {
 			return current.TargetLevels(tgtLv).MargeNodes(div);
 		}
+		private class CashNodeCountedTempValue : TempValue {
+			public int CashCount { get; set; }
+		}
 		public static IEnumerable<TempValue> MargeNodes(this IEnumerable<CommonNode> collection, DividePattern div) {
 			Func<CommonNode, string> DivFunc;
 			switch (div) {
@@ -210,14 +207,15 @@ namespace PortFolion.ViewModels {
 			return collection
 				.ToLookup(DivFunc)
 				.Select(a => {
-					var tv = new TempValue();
+					var tv = new CashNodeCountedTempValue();
 					tv.Title = a.Key;
 					tv.Amount = a.Sum(b => b.Amount);
 					tv.Rate = tv.Amount / ttl * 100;
-					tv.Invest = a.Sum(b => b.InvestmentValue);
-					tv.Type = a.First().GetNodeType();
+					tv.CashCount = a.Count(b => b.GetNodeType() == NodeType.Cash);
 					return tv;
-				});
+				})
+				.OrderBy(a => a.CashCount);
+			
 		}
 	}
 	public class GraphDataManager : DynamicViewModel {
@@ -227,6 +225,9 @@ namespace PortFolion.ViewModels {
 		}
 		public void Refresh() => Model.Refresh();
 		GraphMediator Model => this.MaybeModelAs<GraphMediator>().Value;
+
+		DateTreeRoot dtr = new DateTreeRoot();
+		public ObservableCollection<DateTree> DateList => dtr.Children;
 
 		public BrakeDownList BrakeDown { get; } = new BrakeDownList();
 		public TransitionList Transition { get; } = new TransitionList();
@@ -241,6 +242,8 @@ namespace PortFolion.ViewModels {
 			}
 			public void Initialize(GraphDataManager vm) {
 				gdm = vm;
+				this._commonNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
+							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
 				Refresh();
 			}
 			#region properties
@@ -296,17 +299,6 @@ namespace PortFolion.ViewModels {
 					//RefreshHistoryList();
 				}
 			}
-			//int? _displayItemsCount;
-			//public int? DisplayItemsCount {
-			//	get { return _displayItemsCount; }
-			//	set {
-			//		if (_displayItemsCount == value) return;
-			//		_displayItemsCount = value;
-			//		RaisePropertyChanged();
-			//		RefreshBrakeDownList();
-			//		RefreshHistoryList();
-			//	}
-			//}
 			DividePattern _divide;
 			public DividePattern Divide {
 				get { return _divide; }
@@ -326,26 +318,18 @@ namespace PortFolion.ViewModels {
 					_investmentUnit = value;
 					RaisePropertyChanged();
 					//InvestmentUnitChanged();
-					DrowTransitionGraph();
+					DrawTransitionGraph();
 				}
 			}
-			VolatilityType _volatilityType;
-			public VolatilityType VolatilityType {
-				get { return _volatilityType; }
-				set {
-					if (_volatilityType == value) return;
-					_volatilityType = value;
-					RaisePropertyChanged();
-					VolatilityTypeChanged();
-				}
-			}
+			
 			#endregion
 			public void Refresh() {
-
+				RefreshBrakeDownList();
+				RefreshHistoryList();
 			}
 			void RefreshBrakeDownList() {
-				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
 				gdm.BrakeDown.Clear();
+				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
 				foreach (var data in tgnss) {
 					gdm.BrakeDown.Add(
 						new PieSeries() {
@@ -374,48 +358,48 @@ namespace PortFolion.ViewModels {
 				}
 
 				// _______________________________________ Transition initialize
-				DrowTransitionGraph();
-
+				DrawTransitionGraph();
 				// _______________________________________ Volatility initialize
-				gdm.Volatility.Clear();
+				DrawVolatilityGraph();
 				// _______________________________________ Index initialize
+				DrawIndexGraph();
 			}
 
 			#region Draw Transition Graph
-			void DrowTransitionGraph() {
+			void DrawTransitionGraph() {
 				gdm.Transition.Clear();
 				gdm.Transition.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
-					drawBalanceLine();
-					drawCashFlowColumn();
+					setBalanceLine();
+					setCashFlowColumn();
 				}else if(this.TransitionStatus == TransitionStatus.StackCashFlow) {
-					drawFlowAndProfitLoss();
+					setFlowAndProfitLoss();
 				}else if(this.TransitionStatus == TransitionStatus.ProfitLossOnly) {
-					drawProfitLoss();
+					setProfitLoss();
 				}else if(this.TransitionStatus == TransitionStatus.BalanceOnly) {
-					drawBalanceLine();
+					setBalanceLine();
 				}
 			}
-			void drawBalanceLine() {
+			void setBalanceLine() {
 				gdm.Transition.Add(new LineSeries() {
 					Title = CurrentNode.Name,
 					//Values = new ChartValues<DateTimePoint>(_GraphRowData.Select(a=>new DateTimePoint(a.Date,a.Amount))),
 					Values = new ChartValues<double>(_GraphRowData.Select(a => a.Amount)),
 				});
 			}
-			void drawCashFlowColumn() {
+			void setCashFlowColumn() {
 				gdm.Transition.Add(new ColumnSeries() {
 					Title = "Cash Flow",
 					Values = new ChartValues<double>(_GraphRowData.Select(a=>a.Flow)),
 				});
 			}
-			void drawProfitLoss() {
+			void setProfitLoss() {
 				gdm.Transition.Add(new LineSeries() {
 					Title = "Profit and Loss",
 					Values = new ChartValues<double>(_GraphRowPL.Select(a => a.Item2 - a.Item1)),
 				});
 			}
-			void drawFlowAndProfitLoss() {
+			void setFlowAndProfitLoss() {
 				gdm.Transition.Add(
 					new StackedAreaSeries() {
 						Title = "Profit and Loss",
@@ -444,23 +428,23 @@ namespace PortFolion.ViewModels {
 			#endregion
 
 			#region Draw Volatility Graph
-			void VolatilityTypeChanged() {
+			void DrawVolatilityGraph() {
 				gdm.Volatility.Clear();
 				gdm.Volatility.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				gdm.Volatility.Add(new LineSeries() {
 					Title = "Volatility",
-					Values = new ChartValues<double>(_GraphRowData.Select(a => a.Dietz * 100)),
+					Values = new ChartValues<double>(_GraphRowData.Select(a => (a.Dietz - 1) * 100)),
 				});
 			}
 			#endregion
 		}
 	}
 	public class BrakeDownList : SeriesCollection { }
-	public class TransitionList : TokenSeriesCollection { }
-	public class IndexList : TokenSeriesCollection { }
-	public class VolatilityList : TokenSeriesCollection { }
+	public class TransitionList : DisplaySeriesCollection { }
+	public class IndexList : DisplaySeriesCollection { }
+	public class VolatilityList : DisplaySeriesCollection { }
 
-	public class TokenSeriesCollection : SeriesCollection {
+	public class DisplaySeriesCollection : SeriesCollection {
 		
 		IEnumerable<string> _labels = Enumerable.Empty<string>();
 		public IEnumerable<string> Labels {

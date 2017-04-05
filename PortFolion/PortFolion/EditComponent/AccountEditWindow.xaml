@@ -160,7 +160,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Visibility="{Binding IsPerPriceEditable, Converter={StaticResource BoolToVisibility}}" Text="{Binding CurrentPerPrice, Mode=TwoWay}" />
+                            <TextBox Visibility="{Binding IsPerPriceEditable, Converter={StaticResource BoolToVisibility}}" Text="{Binding CurrentPerPrice,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -181,7 +181,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Visibility="{Binding IsTradeQuantityEditable,Converter={StaticResource BoolToVisibility}}" Text="{Binding TradeQuantity}"/>
+                            <TextBox Visibility="{Binding IsTradeQuantityEditable,Converter={StaticResource BoolToVisibility}}" Text="{Binding TradeQuantity,UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -203,7 +203,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding InvestmentValue}"/>
+                            <TextBox Text="{Binding InvestmentValue,UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -216,7 +216,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Visibility="{Binding IsQuantityEditable,Converter={StaticResource BoolToVisibility}}" Text="{Binding Quantity}"/>
+                            <TextBox Visibility="{Binding IsQuantityEditable,Converter={StaticResource BoolToVisibility}}" Text="{Binding Quantity,UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -229,7 +229,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Amount}"/>
+                            <TextBox Text="{Binding Amount,UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

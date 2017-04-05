@@ -20,6 +20,7 @@ namespace PortFolion.Views {
 	public partial class GraphTab : UserControl {
 		public GraphTab() {
 			InitializeComponent();
+			this.DataContext = new PortFolion.ViewModels.GraphDataManager();
 		}
 	}
 }
