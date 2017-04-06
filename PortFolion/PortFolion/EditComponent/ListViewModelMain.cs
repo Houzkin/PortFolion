@@ -22,6 +22,7 @@ namespace PortFolion.ViewModels {
 		public ListviewModel() {
 			controler = new VmControler(this);
 			controler.CurrentDate = DateTime.Today;
+			this.ExpandAllNode();
 			controler.PropertyChanged += (o, e) => RaisePropertyChanged(e.PropertyName);
 			this.CompositeDisposable.Add(new CollectionChangedWeakEventListener(RootCollection.Instance, controler.RootCollectionChanged));
 			var d = new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>,DateTimeSelectedEventArgs>(
@@ -31,46 +32,29 @@ namespace PortFolion.ViewModels {
 				(s, e) => this.CurrentDate = e.SelectedDateTime);
 			this.CompositeDisposable.Add(d);
 		}
-
-		//private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-		//	dtr.Refresh();
-		//	RaisePropertyChanged(nameof(DateList));
-		//	TotalRiskFundNode rt;
-		//	switch (e.Action) {
-		//	case NotifyCollectionChangedAction.Add:
-		//		rt = e.NewItems[0] as TotalRiskFundNode;
-		//		if (rt == null) goto default;
-		//		break;
-		//	default:
-		//		rt = Model.LastOrDefault(a => a.CurrentDate <= (this.CurrentDate ?? DateTime.Today)) ?? Model.LastOrDefault();
-		//		break;
-		//	}
-		//	if (totalRiskFund == rt) return;
-		//	if(rt == null) {
-		//		totalRiskFund = null;
-		//		CurrentDate = null;// DateTime.Today;
-		//		Path = Enumerable.Empty<string>();
-		//		Refresh();
-		//	}else {
-		//		totalRiskFund = rt;
-		//		SetCurrentDate(totalRiskFund.CurrentDate);
-		//	}
-		//}
-
 		public DateTime? CurrentDate {
 			get { return controler.CurrentDate; }
 			set { controler.CurrentDate = value; }
 		}
-		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
+		public ObservableCollection<_CommonNodeVM> Root { get; } = new ObservableCollection<_CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
 			if (Root.Any(a => a.IsModelEquals(root))) return;
 			Root.ForEach(r => r.ReCalcurated -= RefreshHistory);
+
+			List<NodePath<string>> expns = new List<NodePath<string>>();
+			if (Root.Any()) {
+				var ls = Root.First().Preorder().Where(a => a.IsExpand).Select(a => a.Path);
+				expns.AddRange(ls);
+			}
 			Root.Clear();
 			if (root != null) {
-				var rt = CommonNodeVM.Create(root);
+				var rt = _CommonNodeVM.Create(root);
 				rt.ReCalcurated += RefreshHistory;
 				rt.ReCalcurate();
 				Root.Add(rt);
+				rt.Preorder()
+					.Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
+					.ForEach(a => a.IsExpand = true);
 			}
 		}
 
@@ -80,11 +64,16 @@ namespace PortFolion.ViewModels {
 		}
 
 		public void RefreshHistory() {
-			_history = RootCollection.GetNodeLine(Path).Select(a => CommonNodeVM.Create(a.Value));
+			_history = RootCollection.GetNodeLine(Path).Select(a => _CommonNodeVM.Create(a.Value));
 			this.RaisePropertyChanged(nameof(History));
 		}
-		IEnumerable<CommonNodeVM> _history = null;
-		public IEnumerable<CommonNodeVM> History
+		void testRefreshMethod(CommonVm src) {
+			var refList = src.Levelorder().Skip(1).Reverse()
+				.Concat(src.Siblings())
+				.Concat(src.Upstream().Skip(1));
+		}
+		IEnumerable<_CommonNodeVM> _history = null;
+		public IEnumerable<_CommonNodeVM> History
 			=> _history;
 		
 		#region date
@@ -198,7 +187,7 @@ namespace PortFolion.ViewModels {
 				set {
 					value = value ?? Enumerable.Empty<string>();
 					//if (_path.SequenceEqual(value)) return;
-					_path = value;
+					_path = value.ToArray();
 					RaisePropertyChanged();
 					if (_path.Any()) {
 						//lvm.ExpandCurrentNode();

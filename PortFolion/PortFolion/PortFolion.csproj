@@ -114,6 +114,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EditComponent\TNodeVm.cs" />
     <Compile Include="ViewModels\Class1.cs" />
     <Compile Include="ViewModels\DateTree.cs" />
     <Compile Include="EditComponent\ListViewModelMain.cs" />

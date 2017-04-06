@@ -10,23 +10,12 @@ using System.ComponentModel;
 using Livet.EventListeners.WeakEvents;
 
 namespace PortFolion.ViewModels {
-	public class FinancialValueVM : CommonNodeVM {
-		public FinancialValueVM(FinancialValue model) : base(model) { }
+	public class _FinancialValueVM : _CommonNodeVM {
+		public _FinancialValueVM(FinancialValue model) : base(model) { }
 	}
-	public class FinancialProductVM : FinancialBasketVM {
-		public FinancialProductVM(FinancialProduct model) : base(model) {
+	public class _FinancialProductVM : _FinancialBasketVM {
+		public _FinancialProductVM(FinancialProduct model) : base(model) {
 		}
-		//protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-		//	base.ModelPropertyChanged(sender, e);
-		//	if(MaybeModelAs<FinancialProduct>().TrueOrNot(
-		//		o => e.PropertyName == nameof(o.InvestmentValue)
-		//			|| e.PropertyName == nameof(o.Amount)
-		//			|| e.PropertyName == nameof(o.Quantity)
-		//			|| e.PropertyName == nameof(o.TradeQuantity),
-		//		x => false)) {
-		//		reculc();
-		//	}
-		//}
 		protected override void ReCalc() {
 			base.ReCalc();
 			reculc();

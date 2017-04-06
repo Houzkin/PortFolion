@@ -13,19 +13,19 @@ using Houzkin;
 using System.ComponentModel;
 using Livet.EventListeners.WeakEvents;
 using System.Windows;
+using PortFolion.IO;
 
 namespace PortFolion.ViewModels {
-	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
-		protected CommonNodeVM(CommonNode model) : base(model) {
-			
+	public class _CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, _CommonNodeVM> {
+		protected _CommonNodeVM(CommonNode model) : base(model) {
 			//listener = new PropertyChangedWeakEventListener(model, new PropertyChangedEventHandler((o,e)=> { ModelPropertyChanged(o, e); }));
 			//ReCalc();
 		}
 		//IDisposable listener;
-		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
-			return CommonNodeVM.Create(modelChildNode);
+		protected override _CommonNodeVM GenerateChild(CommonNode modelChildNode) {
+			return _CommonNodeVM.Create(modelChildNode);
 		}
-		bool isExpand = true;
+		bool isExpand = false;
 		public bool IsExpand {
 			get { return isExpand; }
 			set {
@@ -37,20 +37,17 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		/// <summary>再計算</summary>
 		public void ReCalcurate() {
-			foreach (var n in this.Root().Levelorder().Reverse()) n.ReCalc(this);
+
+			var tgts = this.Levelorder().Skip(1).Reverse()
+				.Concat(this.Siblings())
+				.Concat(this.Upstream().Skip(1));
+
+			foreach (var n in tgts) n.ReCalc();
 			this.Root().RaiseReCalcurated();
 		}
 		public event Action ReCalcurated;
 		private void RaiseReCalcurated() => ReCalcurated?.Invoke();
 
-		//protected virtual void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-		//	if (e.PropertyName == nameof(Model.InvestmentValue)) {
-		//		reculcHistories();
-		//	}
-		//	if(e.PropertyName == nameof(Model.Amount)) {
-		//		reculcRate();
-		//	}
-		//}
 		void reculcHistories() {
 			_currentPositionLine = null;
 			InvestmentTotal = CurrentPositionLine.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
@@ -58,10 +55,6 @@ namespace PortFolion.ViewModels {
 		}
 		void reculcRate() {
 			var amount = Model.Amount;
-			//if (this.Parent == null) {
-			//	this.AmountRate = "-";
-			//	return;
-			//}
 			foreach(var c in this.Children) {
 				if(amount == 0) {
 					c.AmountRate = "0";
@@ -70,10 +63,6 @@ namespace PortFolion.ViewModels {
 					c.AmountRate = aa;
 				}
 			}
-		}
-		private void ReCalc(CommonNodeVM sender) {
-			if(sender == this || this.IsAncestorOf(sender) || this.IsDescendantOf(sender))
-			ReCalc();
 		}
 		/// <summary>再計算内容</summary>
 		protected virtual void ReCalc() {
@@ -129,15 +118,15 @@ namespace PortFolion.ViewModels {
 			//if (disposing) listener?.Dispose();
 			base.Dispose(disposing);
 		}
-		public static CommonNodeVM Create(CommonNode node) {
+		public static _CommonNodeVM Create(CommonNode node) {
 			if (node == null) return null;
-			var mcn = node.GetType();
-			if (typeof(FinancialProduct)== mcn || typeof(StockValue) == mcn) {
-				return new FinancialProductVM(node as FinancialProduct);
-			}else if (typeof(FinancialValue)== mcn) {
-				return new FinancialValueVM(node as FinancialValue);
+			var nt = node.GetNodeType();
+			if(nt == NodeType.OtherProduct || nt == NodeType.Stock || nt == NodeType.Forex) {
+				return new _FinancialProductVM(node as FinancialProduct);
+			}else if(nt == NodeType.Cash) {
+				return new _FinancialValueVM(node as FinancialValue);
 			}else {
-				return new FinancialBasketVM(node);
+				return new _FinancialBasketVM(node);
 			}
 		}
 	}
@@ -158,10 +147,10 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> Children 
 			=> children = children ?? new ObservableCollection<MenuItemVm>();
 	}
-	public class FinancialBasketVM : CommonNodeVM {
-		public FinancialBasketVM(CommonNode model) : base(model){
-			var ty = model.GetType();
-			if(ty == typeof(AccountNode)) {
+	public class _FinancialBasketVM : _CommonNodeVM {
+		public _FinancialBasketVM(CommonNode model) : base(model){
+			var ty = model.GetNodeType();
+			if(ty == NodeType.Account) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new AccountEditVM(model as AccountNode);
 					var w = new Views.AccountEditWindow();
@@ -169,33 +158,34 @@ namespace PortFolion.ViewModels {
 					var r = w.ShowDialog();
 					if (vm.EdittingList.Any()) {
 						//save or not
-						if (r == true)
-							IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
-						else
+						if (r == true) {
+							HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+						} else {
 							RootCollection.Instance.Refresh();
+						}
 						this.ReCalcurate();
 					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
-			}else if (ty == typeof(BrokerNode)) {
+			}else if (ty == NodeType.Broker) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new NodeNameEditerVM(model, new AccountNode(AccountClass.General));
 					var w = new Views.NodeNameEditWindow();
 					w.DataContext = vm;
 					if(w.ShowDialog() == true && vm.EdittingList.Any()) {
 						//save
-						IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "アカウント追加" });
-			}else if(ty == typeof(TotalRiskFundNode)) {
+			}else if(ty == NodeType.Total) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new NodeNameEditerVM(model, new BrokerNode());
 					var w = new Views.NodeNameEditWindow();
 					w.DataContext = vm;
 					if(w.ShowDialog() == true && vm.EdittingList.Any()) {
 						//save
-						IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 					}
 				});
 				MenuList.Add(new MenuItemVm(vc) { Header = "ブローカー追加" });
@@ -207,12 +197,12 @@ namespace PortFolion.ViewModels {
 				w.DataContext = vm;
 				if(w.ShowDialog()==true && vm.EdittingList.Any()) {
 					//save
-					IO.HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+					HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 				}
 			}, () => model.Parent != null);
 			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
 			
-			if(ty == typeof(BrokerNode) || ty == typeof(AccountNode)) {
+			if(ty == NodeType.Broker || ty == NodeType.Account) {
 				var vc = new ViewModelCommand(() => {
 					
 					var lst = new double[] { model.Amount, model.InvestmentValue }
@@ -221,7 +211,7 @@ namespace PortFolion.ViewModels {
 					if (lst.All(a => a == 0)) {
 						var d = this.Model.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
 						this.Model.Parent.RemoveChild(this.Model);
-						IO.HistoryIO.SaveRoots((DateTime)d);
+						HistoryIO.SaveRoots((DateTime)d);
 					}else {
 						MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません","削除不可",MessageBoxButton.OK,MessageBoxImage.Information);
 					}
@@ -234,12 +224,6 @@ namespace PortFolion.ViewModels {
 			base.ReCalc();
 			reculc();
 		}
-		//protected override void ModelPropertyChanged(object sender, PropertyChangedEventArgs e) {
-		//	base.ModelPropertyChanged(sender, e);
-		//	if(e.PropertyName == nameof(Model.InvestmentValue) || e.PropertyName == nameof(Model.Amount)) {
-		//		reculc();
-		//	}
-		//}
 		void reculc() {
 			this.ProfitLoss = Model.Amount - InvestmentTotal - InvestmentReturnTotal;
 			//this.UnrealizedProfitLoss = Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
@@ -255,7 +239,7 @@ namespace PortFolion.ViewModels {
 		}
 		/// <summary>含み損益</summary>
 		public virtual long UnrealizedProfitLoss
-			=> Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
+			=> Children.OfType<_FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
 
 		/// <summary>含み損益率</summary>
 		public double UnrealizedPLRatio

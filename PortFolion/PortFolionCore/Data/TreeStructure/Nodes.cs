@@ -172,6 +172,9 @@ namespace PortFolion.Core {
 	/// <summary>アカウント</summary>
 	public class AccountNode : FinancialBasket {
 		public AccountNode(AccountClass type) { Account = type; }
+		public AccountNode(AccountClass type,int leva) : this(type) {
+			levarage = leva;
+		}
 		internal AccountNode(CushionNode cushion) : base(cushion) {
 			Account = cushion.Account;
 			levarage = cushion.Levarage;
@@ -187,24 +190,10 @@ namespace PortFolion.Core {
 			}
 		}
 		public FinancialValue GetOrCreateNuetral() {
-			var nd = ChildNodes.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
+			var nd = ChildNodes.SingleOrDefault(a => a.GetNodeType() == NodeType.Cash) as FinancialValue;//.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
 			if (nd != null) return nd;
-			string name;
-			switch (Account) {
-			case AccountClass.General:
-				name = "現金";
-				break;
-			case AccountClass.Credit:
-				name = "保証金現金";
-				break;
-			case AccountClass.FX:
-				name = "有効証拠金";
-				break;
-			default:
-				name = "余力";
-				break;
-			}
-			var n = new FinancialValue() { Name = name };
+			
+			var n = new FinancialValue() { Name = "余力" };
 			this.AddChild(n);
 			return n;
 		}
