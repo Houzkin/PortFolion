@@ -9,12 +9,12 @@ using Houzkin.Architecture;
 using System.ComponentModel;
 using Livet.EventListeners.WeakEvents;
 
-namespace PortFolion.ViewModels {
-	public class _FinancialValueVM : _CommonNodeVM {
-		public _FinancialValueVM(FinancialValue model) : base(model) { }
+namespace PortFolion.ViewModels.Abs {
+	public class FinancialValueVM : CommonNodeVM {
+		public FinancialValueVM(FinancialValue model) : base(model) { }
 	}
-	public class _FinancialProductVM : _FinancialBasketVM {
-		public _FinancialProductVM(FinancialProduct model) : base(model) {
+	public class FinancialProductVM : FinancialBasketVM {
+		public FinancialProductVM(FinancialProduct model) : base(model) {
 		}
 		protected override void ReCalc() {
 			base.ReCalc();

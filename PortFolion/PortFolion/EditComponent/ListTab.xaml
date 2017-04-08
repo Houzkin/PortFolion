@@ -219,7 +219,7 @@
                     <!--<Style TargetType="TreeView" BasedOn="{StaticResource tree:TreeListView}"></Style>-->
                     <!--Select elements-->
                     <selector:NodeTemplateSelector x:Key="NodeTemplateSelector"/>
-                    <DataTemplate x:Key="NodeTemplate" DataType="{x:Type vm:_CommonNodeVM}">
+                    <DataTemplate x:Key="NodeTemplate" DataType="{x:Type vm:CommonNodeVM}">
                         <StackPanel Orientation="Horizontal" >
                             <tree:TreeListViewExpander x:Name="TreeExpander" Margin="3,0"/>
                             <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
@@ -243,16 +243,18 @@
                             <mah:DropDownButton VerticalContentAlignment="Center"
                                                 Content="" ItemsSource="{Binding MenuList}" >
                                     <mah:DropDownButton.ItemContainerStyle>
-                                            <Style TargetType="MenuItem">
-                                                <Setter Property="Header" Value="{Binding Header}"/>
-                                                <Setter Property="Command" Value="{Binding MenuCommand}"/>
-                                            </Style>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Icon" Value="{Binding Icon}"/>
+                                        <Setter Property="Header" Value="{Binding Header}"/>
+                                            <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                                        </Style>
                                     </mah:DropDownButton.ItemContainerStyle>
                             </mah:DropDownButton>
                             <StackPanel.ContextMenu>
                                 <ContextMenu ItemsSource="{Binding MenuList}">
                                     <ContextMenu.ItemContainerStyle>
                                         <Style TargetType="MenuItem">
+                                            <Setter Property="Icon" Value="{Binding Icon}"/>
                                             <Setter Property="Header" Value="{Binding Header}"/>
                                             <Setter Property="Command" Value="{Binding MenuCommand}"/>
                                         </Style>
@@ -261,7 +263,7 @@
                             </StackPanel.ContextMenu>
                         </StackPanel>
                     </DataTemplate>
-                    <DataTemplate x:Key="LeafTemplate" DataType="{x:Type vm:_CommonNodeVM}">
+                    <DataTemplate x:Key="LeafTemplate" DataType="{x:Type vm:CommonNodeVM}">
                         <StackPanel Orientation="Horizontal">
                             <tree:TreeListViewExpander x:Name="TreeExpander" Margin="3,0"/>
                             <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
@@ -373,7 +375,7 @@
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserReorder="True"
                                         CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss}"
+                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False">
                     </DataGridTextColumn>
                 </DataGrid.Columns>

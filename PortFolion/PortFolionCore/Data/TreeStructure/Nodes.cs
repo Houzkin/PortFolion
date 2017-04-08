@@ -298,7 +298,7 @@ namespace PortFolion.Core {
 		/// <param name="path">パス</param>
 		public CommonNode SearchNodeOf(IEnumerable<string> path) {
 			var pp = this.Evolve(
-				a => Children.Where(
+				a => a.Children.Where(
 					b => !b.Path.Except(path.Take(b.Path.Count())).Any()),
 				(a, b) => a.Concat(b));
 			return pp.LastOrDefault();

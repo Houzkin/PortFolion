@@ -15,15 +15,15 @@ using Livet.EventListeners.WeakEvents;
 using System.Windows;
 using PortFolion.IO;
 
-namespace PortFolion.ViewModels {
-	public class _CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, _CommonNodeVM> {
-		protected _CommonNodeVM(CommonNode model) : base(model) {
+namespace PortFolion.ViewModels.Abs {
+	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
+		protected CommonNodeVM(CommonNode model) : base(model) {
 			//listener = new PropertyChangedWeakEventListener(model, new PropertyChangedEventHandler((o,e)=> { ModelPropertyChanged(o, e); }));
 			//ReCalc();
 		}
 		//IDisposable listener;
-		protected override _CommonNodeVM GenerateChild(CommonNode modelChildNode) {
-			return _CommonNodeVM.Create(modelChildNode);
+		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
+			return CommonNodeVM.Create(modelChildNode);
 		}
 		bool isExpand = false;
 		public bool IsExpand {
@@ -118,37 +118,20 @@ namespace PortFolion.ViewModels {
 			//if (disposing) listener?.Dispose();
 			base.Dispose(disposing);
 		}
-		public static _CommonNodeVM Create(CommonNode node) {
+		public static CommonNodeVM Create(CommonNode node) {
 			if (node == null) return null;
 			var nt = node.GetNodeType();
 			if(nt == NodeType.OtherProduct || nt == NodeType.Stock || nt == NodeType.Forex) {
-				return new _FinancialProductVM(node as FinancialProduct);
+				return new FinancialProductVM(node as FinancialProduct);
 			}else if(nt == NodeType.Cash) {
-				return new _FinancialValueVM(node as FinancialValue);
+				return new FinancialValueVM(node as FinancialValue);
 			}else {
-				return new _FinancialBasketVM(node);
+				return new FinancialBasketVM(node);
 			}
 		}
 	}
-	public class MenuItemVm {
-		public string Header { get; set; }
-		public MenuItemVm() : this(() => { }) { }
-		public MenuItemVm(ICommand command) {
-			menuCommand = command;
-		}
-		public MenuItemVm(Action execute) : this(execute,()=>true) { }
-		public MenuItemVm(Action execute,Func<bool> canExecute) {
-			menuCommand = new ViewModelCommand(execute, canExecute);
-		}
-		ICommand menuCommand;
-		public ICommand MenuCommand => menuCommand;
-		ObservableCollection<MenuItemVm> children;
-
-		public ObservableCollection<MenuItemVm> Children 
-			=> children = children ?? new ObservableCollection<MenuItemVm>();
-	}
-	public class _FinancialBasketVM : _CommonNodeVM {
-		public _FinancialBasketVM(CommonNode model) : base(model){
+	public class FinancialBasketVM : CommonNodeVM {
+		public FinancialBasketVM(CommonNode model) : base(model){
 			var ty = model.GetNodeType();
 			if(ty == NodeType.Account) {
 				var vc = new ViewModelCommand(() => {
@@ -239,7 +222,7 @@ namespace PortFolion.ViewModels {
 		}
 		/// <summary>含み損益</summary>
 		public virtual long UnrealizedProfitLoss
-			=> Children.OfType<_FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
+			=> Children.OfType<FinancialBasketVM>().Sum(a => a.UnrealizedProfitLoss);
 
 		/// <summary>含み損益率</summary>
 		public double UnrealizedPLRatio

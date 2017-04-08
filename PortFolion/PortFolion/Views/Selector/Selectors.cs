@@ -11,12 +11,12 @@ namespace PortFolion.Views.Selector {
 	public class NodeTemplateSelector : DataTemplateSelector {
 		public override DataTemplate SelectTemplate(object item, DependencyObject container) {
 			var element = container as FrameworkElement;
-			var viewModel = item as _CommonNodeVM;
+			var viewModel = item as CommonNodeVM;
 			if (element == null || viewModel == null) return null;
 
 			var templateName = "";
 			var t = viewModel.GetType();
-			if(t == typeof(_FinancialBasketVM)) {
+			if(t == typeof(FinancialBasketVM)) {
 				templateName = "NodeTemplate";
 			}else {
 				templateName = "LeafTemplate";

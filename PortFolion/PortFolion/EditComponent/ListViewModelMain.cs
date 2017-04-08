@@ -36,10 +36,13 @@ namespace PortFolion.ViewModels {
 			get { return controler.CurrentDate; }
 			set { controler.CurrentDate = value; }
 		}
-		public ObservableCollection<_CommonNodeVM> Root { get; } = new ObservableCollection<_CommonNodeVM>();
+		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
 			if (Root.Any(a => a.IsModelEquals(root))) return;
-			Root.ForEach(r => r.ReCalcurated -= RefreshHistory);
+			Root.ForEach(r => {
+				r.ReCalcurated -= RefreshHistory;
+				r.SetPath -= setPath;
+			});
 
 			List<NodePath<string>> expns = new List<NodePath<string>>();
 			if (Root.Any()) {
@@ -48,9 +51,12 @@ namespace PortFolion.ViewModels {
 			}
 			Root.Clear();
 			if (root != null) {
-				var rt = _CommonNodeVM.Create(root);
+				var rt = CommonNodeVM.Create(root);
 				rt.ReCalcurated += RefreshHistory;
-				rt.ReCalcurate();
+				rt.SetPath += setPath;
+				if (rt.CurrentDate != null)
+					CommonNodeVM.ReCalcurate(rt, (DateTime)rt.CurrentDate);
+				//rt.ReCalcurate();
 				Root.Add(rt);
 				rt.Preorder()
 					.Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
@@ -62,18 +68,21 @@ namespace PortFolion.ViewModels {
 			get { return controler.Path; }
 			set { controler.Path = value; }
 		}
-
-		public void RefreshHistory() {
-			_history = RootCollection.GetNodeLine(Path).Select(a => _CommonNodeVM.Create(a.Value));
+		void setPath(IEnumerable<string> path) => this.Path = path;
+		public void RefreshHistory(IEnumerable<string> path) {
+			//_history = RootCollection.GetNodeLine(Path).Select(a => CommonNodeVM.Create(a.Value));
+			_history = CommonNodeVM.ReCalcHistory(path);
 			this.RaisePropertyChanged(nameof(History));
 		}
-		void testRefreshMethod(CommonVm src) {
-			var refList = src.Levelorder().Skip(1).Reverse()
-				.Concat(src.Siblings())
-				.Concat(src.Upstream().Skip(1));
+		public void RefreshHistory(CommonNodeVM src) {
+			if(this.CurrentDate!=null)
+			CommonNodeVM.ReCalcurate(src, (DateTime)this.CurrentDate);
+
+			_history = CommonNodeVM.ReCalcHistory(this.Path);
+			this.RaisePropertyChanged(nameof(History));
 		}
-		IEnumerable<_CommonNodeVM> _history = null;
-		public IEnumerable<_CommonNodeVM> History
+		IEnumerable<VmCoreBase> _history = null;
+		public IEnumerable<VmCoreBase> History
 			=> _history;
 		
 		#region date
@@ -187,11 +196,13 @@ namespace PortFolion.ViewModels {
 				set {
 					value = value ?? Enumerable.Empty<string>();
 					//if (_path.SequenceEqual(value)) return;
-					_path = value.ToArray();
+					var pt = value.ToArray();
+					if (_path.SequenceEqual(pt)) return;
+					_path = pt;
 					RaisePropertyChanged();
 					if (_path.Any()) {
 						//lvm.ExpandCurrentNode();
-						lvm.RefreshHistory();
+						lvm.RefreshHistory(_path);
 					}
 				}
 			}
