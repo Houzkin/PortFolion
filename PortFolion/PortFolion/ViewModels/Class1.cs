@@ -329,6 +329,7 @@ namespace PortFolion.ViewModels {
 			}
 			void RefreshBrakeDownList() {
 				gdm.BrakeDown.Clear();
+				if (CurrentNode == null) return;
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
 				foreach (var data in tgnss) {
 					gdm.BrakeDown.Add(
@@ -351,6 +352,7 @@ namespace PortFolion.ViewModels {
 			void RefreshHistoryList() {
 				if (CurrentDate == null || CurrentNode == null) {
 					_GraphRowData = Enumerable.Empty<GraphValue>();
+					//return;
 				}else {
 					_GraphRowData = RootCollection
 						.GetNodeLine(this.CurrentNode.Path)
@@ -382,7 +384,7 @@ namespace PortFolion.ViewModels {
 			}
 			void setBalanceLine() {
 				gdm.Transition.Add(new LineSeries() {
-					Title = CurrentNode.Name,
+					Title = CurrentNode?.Name,
 					//Values = new ChartValues<DateTimePoint>(_GraphRowData.Select(a=>new DateTimePoint(a.Date,a.Amount))),
 					Values = new ChartValues<double>(_GraphRowData.Select(a => a.Amount)),
 				});

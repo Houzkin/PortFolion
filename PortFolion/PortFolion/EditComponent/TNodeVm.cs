@@ -153,19 +153,83 @@ namespace PortFolion.ViewModels {
 		//	public VmCoreGeneral Current { get; set; }
 		//	public VmCoreGeneral Previous { get; set; }
 		//}
-		//public static IEnumerable<CommonVm> _ReCalcHistory(IEnumerable<string> path) {
-		//	var nd = RootCollection.GetNodeLine(path).Values
-		//		.Select(a => Create(a))
-		//		.Scan(new Scanable(), (pre, cur) => {
-		//			var sbl = new Scanable();
-		//			sbl.Current.InvestmentTotal = pre.Current.InvestmentTotal + cur.InvestmentTotal;
-		//			sbl.Current.InvestmentReturnTotal = pre.Current.InvestmentReturnTotal + cur.InvestmentReturnTotal;
-		//			if (!cur.Model.IsRoot()) { sbl.Current.AmountRate = cur.Model.Amount / cur.Model.Parent.Amount * 100; }
-		//			//
-		//			return sbl;
-		//		});
-		//	throw new NotImplementedException();
-		//}
+		class keyselector : IEqualityComparer<NodePath<string>> {
+			public bool Equals(NodePath<string> x, NodePath<string> y) {
+				return x.SequenceEqual(y);
+			}
+
+			public int GetHashCode(NodePath<string> obj) {
+				return obj.ToString().GetHashCode();
+			}
+		}
+		public static IEnumerable<CommonNodeVM> _ReCalcHistory(IEnumerable<string> path) {
+			var nd = RootCollection.GetNodeLine(path).Values
+				.Select(a => Create(a))
+				.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()));
+			//nd.ForEach(
+			//	a => a.Values.ForEach(b => {
+			//		if (0 < b.Model.InvestmentValue) b.CoreData.InvestmentTotal = b.Model.InvestmentValue;
+			//		else if (b.Model.InvestmentValue < 0) b.CoreData.InvestmentReturnTotal = Math.Abs(b.Model.InvestmentValue);
+			//		if (b.Model.IsRoot())
+			//			b.CoreData.AmountRate = (b.Model.Amount / b.Model.Parent.Amount) * 100;
+			//		if (b.GetType() == typeof(FinancialBasketVM)) {
+			//			b.CoreData.UnrealizedProfitLoss = b.Preorder().OfType<FinancialProductVM>().Sum(c => c.UnrealizedProfitLoss);
+			//		} else if (b.GetType() == typeof(FinancialProductVM)) {
+			//		}
+			//		if ((b as FinancialBasketVM) != null)
+			//			b.CoreData.UnrealizedPLRatio = b.Model.Amount != 0 ? b.CoreData.UnrealizedProfitLoss / b.Model.Amount * 100 : 0;
+			//	}));
+			nd = nd.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(), 
+				(prv, cur) => {
+					foreach(var c in cur) {
+						//if (0 < c.Value.Model.InvestmentValue)
+						//	c.Value.CoreData.InvestmentTotal = c.Value.Model.InvestmentValue;
+						//else if (c.Value.Model.InvestmentValue < 0)
+						//	c.Value.CoreData.InvestmentReturnTotal = Math.Abs(c.Value.Model.InvestmentValue);
+
+						if (c.Value.IsRoot())
+							c.Value.CoreData.AmountRate = (c.Value.Model.Amount / c.Value.Model.Parent.Amount) * 100;
+						Action<bool,CommonNodeVM,CommonNodeVM> setTotal = (r,pr,cu) => {
+							if (0 < cu.Model.InvestmentValue)
+								cu.CoreData.InvestmentTotal = cu.Model.InvestmentValue;
+							else if (cu.Model.InvestmentValue < 0)
+								cu.CoreData.InvestmentReturnTotal = Math.Abs(cu.Model.InvestmentValue);
+							if (r) {
+								cu.CoreData.InvestmentTotal += pr.InvestmentTotal;
+								cu.CoreData.InvestmentReturnTotal += pr.InvestmentReturnTotal;
+							}
+						};
+						var rst = ResultWithValue.Of<NodePath<string>, CommonNodeVM>(prv.TryGetValue, c.Key);
+						setTotal(rst.Result, rst.Value, c.Value);
+						CommonNodeVM prvcm;
+						if (prv.TryGetValue(c.Key, out prvcm)) {
+							c.Value.CoreData.InvestmentTotal += prvcm.CoreData.InvestmentTotal;
+							c.Value.CoreData.InvestmentReturnTotal += prvcm.CoreData.InvestmentReturnTotal;
+							if (c.Value.GetType() == typeof(FinancialProductVM)) {
+								c.Value.MaybeModelAs<FinancialProduct>().TrueOrNot(
+									co => {
+										c.Value.CoreData.PerPrice = co.Amount / co.Quantity;
+										prvcm.MaybeModelAs<FinancialProduct>().TrueOrNot(
+											po => {
+												//前回から何倍に分割されたか
+												var qlv = (co.Quantity - co.TradeQuantity) / po.Quantity;
+												
+											});
+									});
+							}else if(c.Value.GetType() == typeof(FinancialBasketVM)) {
+								c.Value.CoreData.UnrealizedProfitLoss = c.Value.Preorder().OfType<FinancialProductVM>().Sum(d => d.UnrealizedProfitLoss);
+							}
+						}else {
+
+						}
+						if (c.Value.GetType() == typeof(FinancialBasketVM)) {
+							c.Value.CoreData.UnrealizedProfitLoss = c.Value.Preorder().OfType<FinancialProductVM>().Sum(d => d.UnrealizedProfitLoss);
+						}
+					}
+					return cur;
+				});
+			throw new NotImplementedException();
+		}
 		public static void ReCalcurate(CommonNodeVM src,DateTime d) {
 			var refList = src.Levelorder().Skip(1).Reverse()
 				.Concat(src.Siblings())
