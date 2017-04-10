@@ -21,14 +21,18 @@ using System.Windows.Resources;
 
 namespace PortFolion.ViewModels {
 	public class VmCoreBase : BindableObject {
-		public VmCoreBase() : base(new object()) { }
+		protected VmCoreBase() : base(new object()) { }
 		public VmCoreBase(CommonNode node) : base(node) { }
 		public virtual void Copy(VmCoreGeneral core) {
-			_invTtl = core.InvestmentTotal;
-			_invRTtl = core.InvestmentReturnTotal;
-			_ar = core.AmountRate;
+			InvestmentTotal = core.InvestmentTotal;
+			InvestmentReturnTotal = core.InvestmentReturnTotal;
+			AmountRate = core.AmountRate;
 		}
-		public DateTime? CurrentDate { get; set; }
+		public DateTime? CurrentDate {
+			get {
+				return this.MaybeModelAs<CommonNode>().TrueOrNot(o => (o.Root() as TotalRiskFundNode)?.CurrentDate, x => null);
+			}
+		}
 		#region common
 		double _invTtl;
 		public double InvestmentTotal {
@@ -61,13 +65,13 @@ namespace PortFolion.ViewModels {
 
 	}
 	public class VmCoreBasket : VmCoreBase {
-		public VmCoreBasket() { }
+		protected VmCoreBasket() { }
 		public VmCoreBasket(CommonNode node) : base(node) { }
 		public override void Copy(VmCoreGeneral core) {
 			base.Copy(core);
-			_pl = core.ProfitLoss;
-			_upl = core.UnrealizedProfitLoss;
-			_uplr = core.UnrealizedPLRatio;
+			ProfitLoss = core.ProfitLoss;
+			UnrealizedProfitLoss = core.UnrealizedProfitLoss;
+			UnrealizedPLRatio = core.UnrealizedPLRatio;
 		}
 		#region basket
 		double _pl;
@@ -104,8 +108,8 @@ namespace PortFolion.ViewModels {
 		public VmCoreGeneral(CommonNode node) : base(node) { }
 		public override void Copy(VmCoreGeneral core) {
 			base.Copy(core);
-			_pp = core.PerPrice;
-			_pbpa = core.PerBuyPriceAverage;
+			PerPrice = core.PerPrice;
+			PerBuyPriceAverage = core.PerBuyPriceAverage;
 		}
 		#region product
 		double _pp;
@@ -118,8 +122,6 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		double _pbpa;
-
-
 		public double PerBuyPriceAverage {
 			get { return _pbpa; }
 			set {
@@ -145,48 +147,35 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public static IEnumerable<VmCoreBase> ReCalcHistory(IEnumerable<string> path) {
-			var nd = RootCollection.GetNodeLine(path)
-				.Select(a => recalc(Create(a.Value).Levelorder().Reverse(), a.Key).Last().ToHistoryVm());
-			return nd;
-		}
-		//class Scanable {
-		//	public VmCoreGeneral Current { get; set; }
-		//	public VmCoreGeneral Previous { get; set; }
-		//}
-		class keyselector : IEqualityComparer<NodePath<string>> {
-			public bool Equals(NodePath<string> x, NodePath<string> y) {
-				return x.SequenceEqual(y);
+			var dics = _com1(RootCollection.GetNodeLine(path).Values.Select(a => Create(a)));
+			var p = new NodePath<string>(path);
+			foreach(var dic in dics) {
+				CommonNodeVM vm;
+				if(dic.TryGetValue(p, out vm)) {
+					yield return vm.ToHistoryVm();
+				}
 			}
 
-			public int GetHashCode(NodePath<string> obj) {
-				return obj.ToString().GetHashCode();
+		}
+		public static void ReCalcurate(CommonNodeVM tgt) {
+			DateTime date = (DateTime)tgt.CurrentDate;
+			var dic = _com1(RootCollection.GetNodeLine(tgt.Root().Path, date).TakeWhile(a => a.Key <= date).Select(a => Create(a.Value)))
+				.LastOrDefault();
+			if (dic == null) return;
+			foreach(var ele in tgt.Levelorder().Reverse()) {
+				CommonNodeVM vm;
+				if(dic.TryGetValue(ele.Path,out vm)) {
+					ele.CoreData.Copy(vm.CoreData);
+				}
 			}
 		}
-		public static IEnumerable<CommonNodeVM> _ReCalcHistory(IEnumerable<string> path) {
-			var nd = RootCollection.GetNodeLine(path).Values
-				.Select(a => Create(a))
-				.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()));
-			//nd.ForEach(
-			//	a => a.Values.ForEach(b => {
-			//		if (0 < b.Model.InvestmentValue) b.CoreData.InvestmentTotal = b.Model.InvestmentValue;
-			//		else if (b.Model.InvestmentValue < 0) b.CoreData.InvestmentReturnTotal = Math.Abs(b.Model.InvestmentValue);
-			//		if (b.Model.IsRoot())
-			//			b.CoreData.AmountRate = (b.Model.Amount / b.Model.Parent.Amount) * 100;
-			//		if (b.GetType() == typeof(FinancialBasketVM)) {
-			//			b.CoreData.UnrealizedProfitLoss = b.Preorder().OfType<FinancialProductVM>().Sum(c => c.UnrealizedProfitLoss);
-			//		} else if (b.GetType() == typeof(FinancialProductVM)) {
-			//		}
-			//		if ((b as FinancialBasketVM) != null)
-			//			b.CoreData.UnrealizedPLRatio = b.Model.Amount != 0 ? b.CoreData.UnrealizedProfitLoss / b.Model.Amount * 100 : 0;
-			//	}));
-			nd = nd.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(), 
+		
+		static IEnumerable<Dictionary<NodePath<string>,CommonNodeVM>> _com1(IEnumerable<CommonNodeVM> nodes) {
+			var nd = nodes
+				.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
+				.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(), 
 				(prv, cur) => {
-					foreach(var c in cur) {
-						//if (0 < c.Value.Model.InvestmentValue)
-						//	c.Value.CoreData.InvestmentTotal = c.Value.Model.InvestmentValue;
-						//else if (c.Value.Model.InvestmentValue < 0)
-						//	c.Value.CoreData.InvestmentReturnTotal = Math.Abs(c.Value.Model.InvestmentValue);
-
+					foreach(var c in cur) {  
 						if (c.Value.IsRoot())
 							c.Value.CoreData.AmountRate = (c.Value.Model.Amount / c.Value.Model.Parent.Amount) * 100;
 						Action<bool,CommonNodeVM,CommonNodeVM> setTotal = (r,pr,cu) => {
@@ -201,89 +190,109 @@ namespace PortFolion.ViewModels {
 						};
 						var rst = ResultWithValue.Of<NodePath<string>, CommonNodeVM>(prv.TryGetValue, c.Key);
 						setTotal(rst.Result, rst.Value, c.Value);
-						CommonNodeVM prvcm;
-						if (prv.TryGetValue(c.Key, out prvcm)) {
-							c.Value.CoreData.InvestmentTotal += prvcm.CoreData.InvestmentTotal;
-							c.Value.CoreData.InvestmentReturnTotal += prvcm.CoreData.InvestmentReturnTotal;
-							if (c.Value.GetType() == typeof(FinancialProductVM)) {
-								c.Value.MaybeModelAs<FinancialProduct>().TrueOrNot(
+						Action<bool, CommonNodeVM, CommonNodeVM> setPer = (r, pr, cu) => {
+							if(cu.GetType() == typeof(FinancialBasketVM)) {
+								cu.CoreData.UnrealizedProfitLoss = cu.Preorder()
+									.OfType<FinancialProductVM>()
+									.Sum(d => d.UnrealizedProfitLoss);
+							}else if(cu.GetType() == typeof(FinancialProductVM)) {
+								cu.MaybeModelAs<FinancialProduct>()
+									.TrueOrNot(
 									co => {
-										c.Value.CoreData.PerPrice = co.Amount / co.Quantity;
-										prvcm.MaybeModelAs<FinancialProduct>().TrueOrNot(
-											po => {
-												//前回から何倍に分割されたか
-												var qlv = (co.Quantity - co.TradeQuantity) / po.Quantity;
-												
-											});
+										cu.CoreData.PerPrice = co.Quantity == 0 ? 0 : co.Amount / co.Quantity;
+										if (r) {
+											var po = pr.Model as FinancialProduct;
+											if(po != null && 0 < co.InvestmentValue) {
+												cu.CoreData.PerBuyPriceAverage = co.Quantity == 0 
+												? 0
+												: ((pr.CoreData.PerBuyPriceAverage * po.Quantity) + co.InvestmentValue) / co.Quantity;
+											}else {
+												cu.CoreData.PerBuyPriceAverage = pr.CoreData.PerBuyPriceAverage;
+											}
+										}else {
+											cu.CoreData.PerBuyPriceAverage = co.Quantity == 0 ? 0 : co.Amount / co.Quantity;
+										}
+										cu.CoreData.UnrealizedProfitLoss = co.Amount - (cu.CoreData.PerBuyPriceAverage * co.TradeQuantity);
 									});
-							}else if(c.Value.GetType() == typeof(FinancialBasketVM)) {
-								c.Value.CoreData.UnrealizedProfitLoss = c.Value.Preorder().OfType<FinancialProductVM>().Sum(d => d.UnrealizedProfitLoss);
 							}
-						}else {
-
-						}
-						if (c.Value.GetType() == typeof(FinancialBasketVM)) {
-							c.Value.CoreData.UnrealizedProfitLoss = c.Value.Preorder().OfType<FinancialProductVM>().Sum(d => d.UnrealizedProfitLoss);
-						}
+						};
+						setPer(rst.Result, rst.Value, c.Value);
 					}
 					return cur;
 				});
-			throw new NotImplementedException();
+			return nd;
 		}
-		public static void ReCalcurate(CommonNodeVM src,DateTime d) {
-			var refList = src.Levelorder().Skip(1).Reverse()
-				.Concat(src.Siblings())
-				.Concat(src.Upstream().Skip(1));
-			recalc(refList, d);
-		}
-		static IEnumerable<CommonNodeVM> recalc(IEnumerable<CommonNodeVM> refList,DateTime d) {
-			foreach (var nd in refList) {
-				var cpl = RootCollection.GetNodeLine(nd.Path, d)
-					.Where(a => a.Key <= d)
-					.ToDictionary(a => a.Key, a => a.Value);
-				calcCommon(cpl, nd);
-				if (nd.GetType() == typeof(FinancialBasketVM)) calcBasket(nd as FinancialBasketVM);
-				else if (nd.GetType () == typeof(FinancialProductVM)) calcProduct(cpl, nd as FinancialProductVM);
-				if((nd as FinancialBasketVM) != null)
-					nd.CoreData.UnrealizedPLRatio = nd.Model.Amount != 0 ? nd.CoreData.UnrealizedProfitLoss / nd.Model.Amount * 100 : 0;
-			}
-			return refList;
-		}
-		static void calcCommon(Dictionary<DateTime,CommonNode> dic, CommonNodeVM vm) {
-			vm.CoreData.InvestmentTotal = dic.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
-			vm.CoreData.InvestmentReturnTotal = Math.Abs(dic.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue));
-			if (!vm.Model.IsRoot()) {
-				double v = ((double)vm.Model.Amount / (double)vm.Model.Parent.Amount) * 100;
-				vm.CoreData.AmountRate = v;
-			}
-		}
-		static void calcBasket(FinancialBasketVM vm) {
-			vm.CoreData.ProfitLoss = vm.Model.Amount - vm.CoreData.InvestmentTotal - vm.CoreData.InvestmentReturnTotal;
-			vm.CoreData.UnrealizedProfitLoss = vm.Preorder().OfType<FinancialProductVM>().Sum(a => a.UnrealizedProfitLoss);//vm.Children.OfType<BasketVm>().Sum(a => a.UnrealizedProfitLoss);
-		}
-		static void calcProduct(Dictionary<DateTime,CommonNode> dic, FinancialProductVM vm) {
-			vm.MaybeModelAs<FinancialProduct>().TrueOrNot(
-				o => vm.CoreData.PerPrice = o.Amount / o.Quantity);
-			var m = dic.Select(a => a.Value).OfType<FinancialProduct>();
-			if (m.Any()) {
-				var nml = m.Zip(m.Skip(1), (a, b) => a.Quantity == 0 ? 1d : (b.Quantity - b.TradeQuantity) / a.Quantity)
-					.Concat(new double[] { 1d })
-					.Reverse()
-					.Scan(1d, (a, b) => a * b)
-					.Reverse()
-					.Zip(m, (r, fp) => new { TQuantity = fp.TradeQuantity * r, TAmount = fp.InvestmentValue })
-					.Where(a => a.TQuantity > 0)
-					.Aggregate(
-						new { TQuantity = 1d, TAmount = 1d },
-						(a, b) => new { TQuantity = a.TQuantity + b.TQuantity, TAmount = a.TAmount + b.TAmount });
-				vm.CoreData.PerBuyPriceAverage = nml.TAmount / nml.TQuantity;
-			}else {
-				vm.CoreData.PerBuyPriceAverage = 0;
-			}
-			vm.MaybeModelAs<FinancialProduct>().TrueOrNot(
-				o => vm.CoreData.UnrealizedProfitLoss = o.Amount - (vm.PerBuyPriceAverage * o.Quantity));
 
+		class keyselector : IEqualityComparer<NodePath<string>> {
+			public bool Equals(NodePath<string> x, NodePath<string> y) {
+				return x.SequenceEqual(y);
+			}
+
+			public int GetHashCode(NodePath<string> obj) {
+				return obj.ToString().GetHashCode();
+			}
 		}
+
+		//public static IEnumerable<VmCoreBase> ReCalcHistory(IEnumerable<string> path) {
+		//	var nd = RootCollection.GetNodeLine(path)
+		//		.Select(a => recalc(Create(a.Value).Levelorder().Reverse(), a.Key).Last().ToHistoryVm());
+		//	return nd;
+		//}
+		
+		//public static void ReCalcurate(CommonNodeVM src,DateTime d) {
+		//	var refList = src.Levelorder().Skip(1).Reverse()
+		//		.Concat(src.Siblings())
+		//		.Concat(src.Upstream().Skip(1));
+		//	recalc(refList, d);
+		//}
+		//static IEnumerable<CommonNodeVM> recalc(IEnumerable<CommonNodeVM> refList,DateTime d) {
+		//	foreach (var nd in refList) {
+		//		var cpl = RootCollection.GetNodeLine(nd.Path, d)
+		//			.Where(a => a.Key <= d)
+		//			.ToDictionary(a => a.Key, a => a.Value);
+		//		calcCommon(cpl, nd);
+		//		if (nd.GetType() == typeof(FinancialBasketVM)) calcBasket(nd as FinancialBasketVM);
+		//		else if (nd.GetType () == typeof(FinancialProductVM)) calcProduct(cpl, nd as FinancialProductVM);
+		//		if((nd as FinancialBasketVM) != null)
+		//			nd.CoreData.UnrealizedPLRatio = nd.Model.Amount != 0 ? nd.CoreData.UnrealizedProfitLoss / nd.Model.Amount * 100 : 0;
+		//	}
+		//	return refList;
+		//}
+		//static void calcCommon(Dictionary<DateTime,CommonNode> dic, CommonNodeVM vm) {
+		//	vm.CoreData.InvestmentTotal = dic.Where(a => 0 < a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue);
+		//	vm.CoreData.InvestmentReturnTotal = Math.Abs(dic.Where(a => 0 > a.Value.InvestmentValue).Sum(a => a.Value.InvestmentValue));
+		//	if (!vm.Model.IsRoot()) {
+		//		double v = ((double)vm.Model.Amount / (double)vm.Model.Parent.Amount) * 100;
+		//		vm.CoreData.AmountRate = v;
+		//	}
+		//}
+		//static void calcBasket(FinancialBasketVM vm) {
+		//	vm.CoreData.ProfitLoss = vm.Model.Amount - vm.CoreData.InvestmentTotal - vm.CoreData.InvestmentReturnTotal;
+		//	vm.CoreData.UnrealizedProfitLoss = vm.Preorder().OfType<FinancialProductVM>().Sum(a => a.UnrealizedProfitLoss);//vm.Children.OfType<BasketVm>().Sum(a => a.UnrealizedProfitLoss);
+		//}
+		//static void calcProduct(Dictionary<DateTime,CommonNode> dic, FinancialProductVM vm) {
+		//	vm.MaybeModelAs<FinancialProduct>().TrueOrNot(
+		//		o => vm.CoreData.PerPrice = o.Amount / o.Quantity);
+		//	var m = dic.Select(a => a.Value).OfType<FinancialProduct>();
+		//	if (m.Any()) {
+		//		var nml = m.Zip(m.Skip(1), (a, b) => a.Quantity == 0 ? 1d : (b.Quantity - b.TradeQuantity) / a.Quantity)
+		//			.Concat(new double[] { 1d })
+		//			.Reverse()
+		//			.Scan(1d, (a, b) => a * b)
+		//			.Reverse()
+		//			.Zip(m, (r, fp) => new { TQuantity = fp.TradeQuantity * r, TAmount = fp.InvestmentValue })
+		//			.Where(a => a.TQuantity > 0)
+		//			.Aggregate(
+		//				new { TQuantity = 1d, TAmount = 1d },
+		//				(a, b) => new { TQuantity = a.TQuantity + b.TQuantity, TAmount = a.TAmount + b.TAmount });
+		//		vm.CoreData.PerBuyPriceAverage = nml.TAmount / nml.TQuantity;
+		//	}else {
+		//		vm.CoreData.PerBuyPriceAverage = 0;
+		//	}
+		//	vm.MaybeModelAs<FinancialProduct>().TrueOrNot(
+		//		o => vm.CoreData.UnrealizedProfitLoss = o.Amount - (vm.PerBuyPriceAverage * o.Quantity));
+
+		//}
 		#endregion
 		protected VmCoreGeneral CoreData { get; } = new VmCoreGeneral();
 		protected CommonNodeVM(CommonNode model) : base(model) {
@@ -295,8 +304,12 @@ namespace PortFolion.ViewModels {
 		public virtual VmCoreBase ToHistoryVm() {
 			var cb = new VmCoreBase(this.Model);
 			cb.Copy(CoreData);
-			cb.CurrentDate = this.CurrentDate;
+			//cb.CurrentDate = this.CurrentDate;
 			return cb;
+		}
+		public void SetCoreData(VmCoreGeneral tgt) {
+			this.CoreData.Copy(tgt);
+			
 		}
 		private void corePropertyChanged(object sender, PropertyChangedEventArgs e) {
 			this.OnPropertyChanged(e.PropertyName);
@@ -428,7 +441,7 @@ namespace PortFolion.ViewModels {
 		public override VmCoreBase ToHistoryVm() {
 			var cb = new VmCoreBasket(this.Model);
 			cb.Copy(CoreData);
-			cb.CurrentDate = this.CurrentDate;
+			//cb.CurrentDate = this.CurrentDate;
 			return cb;
 		}
 		public double ProfitLoss {
@@ -450,7 +463,7 @@ namespace PortFolion.ViewModels {
 		public override VmCoreBase ToHistoryVm() {
 			var cb = new VmCoreGeneral(this.Model);
 			cb.Copy(CoreData);
-			cb.CurrentDate = this.CurrentDate;
+			//cb.CurrentDate = this.CurrentDate;
 			return cb;
 		}
 		public double PerPrice {

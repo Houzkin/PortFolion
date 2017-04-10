@@ -55,7 +55,7 @@ namespace PortFolion.ViewModels {
 				rt.ReCalcurated += RefreshHistory;
 				rt.SetPath += setPath;
 				if (rt.CurrentDate != null)
-					CommonNodeVM.ReCalcurate(rt, (DateTime)rt.CurrentDate);
+					CommonNodeVM.ReCalcurate(rt);
 				//rt.ReCalcurate();
 				Root.Add(rt);
 				rt.Preorder()
@@ -76,7 +76,7 @@ namespace PortFolion.ViewModels {
 		}
 		public void RefreshHistory(CommonNodeVM src) {
 			if(this.CurrentDate!=null)
-			CommonNodeVM.ReCalcurate(src, (DateTime)this.CurrentDate);
+			CommonNodeVM.ReCalcurate(src);
 
 			_history = CommonNodeVM.ReCalcHistory(this.Path);
 			this.RaisePropertyChanged(nameof(History));
