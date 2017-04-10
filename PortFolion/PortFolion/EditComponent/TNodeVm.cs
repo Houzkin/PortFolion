@@ -171,51 +171,52 @@ namespace PortFolion.ViewModels {
 		}
 		
 		static IEnumerable<Dictionary<NodePath<string>,CommonNodeVM>> _com1(IEnumerable<CommonNodeVM> nodes) {
+			Action<bool,CommonNodeVM,CommonNodeVM> setTotal = (r,pr,cu) => {
+				if (!cu.Model.IsRoot()) {
+					cu.CoreData.AmountRate = ((double)cu.Model.Amount / (double)cu.Model.Parent.Amount) * 100;
+				}
+				if (0 < cu.Model.InvestmentValue)
+					cu.CoreData.InvestmentTotal = cu.Model.InvestmentValue;
+				else if (cu.Model.InvestmentValue < 0)
+					cu.CoreData.InvestmentReturnTotal = Math.Abs(cu.Model.InvestmentValue);
+				if (r) {
+					cu.CoreData.InvestmentTotal += pr.InvestmentTotal;
+					cu.CoreData.InvestmentReturnTotal += pr.InvestmentReturnTotal;
+				}
+			};
+			Action<bool, CommonNodeVM, CommonNodeVM> setPer = (r, pr, cu) => {
+				if(cu.GetType() == typeof(FinancialBasketVM)) {
+					cu.CoreData.UnrealizedProfitLoss = cu.Preorder()
+						.OfType<FinancialProductVM>()
+						.Sum(d => d.UnrealizedProfitLoss);
+				}else if(cu.GetType() == typeof(FinancialProductVM)) {
+					cu.MaybeModelAs<FinancialProduct>()
+						.TrueOrNot(
+						co => {
+							cu.CoreData.PerPrice = co.Quantity == 0 ? 0 : co.Amount / co.Quantity;
+							if (r) {
+								var po = pr.Model as FinancialProduct;
+								if(po != null && 0 < co.InvestmentValue) {
+									cu.CoreData.PerBuyPriceAverage = co.Quantity == 0 
+									? 0
+									: ((pr.CoreData.PerBuyPriceAverage * po.Quantity) + co.InvestmentValue) / co.Quantity;
+								}else {
+									cu.CoreData.PerBuyPriceAverage = pr.CoreData.PerBuyPriceAverage;
+								}
+							}else {
+								cu.CoreData.PerBuyPriceAverage = co.Quantity == 0 ? 0 : co.Amount / co.Quantity;
+							}
+							cu.CoreData.UnrealizedProfitLoss = co.Amount - (cu.CoreData.PerBuyPriceAverage * co.Quantity);
+						});
+				}
+			};
 			var nd = nodes
 				.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
 				.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(), 
 				(prv, cur) => {
-					foreach(var c in cur) {  
-						if (c.Value.IsRoot())
-							c.Value.CoreData.AmountRate = (c.Value.Model.Amount / c.Value.Model.Parent.Amount) * 100;
-						Action<bool,CommonNodeVM,CommonNodeVM> setTotal = (r,pr,cu) => {
-							if (0 < cu.Model.InvestmentValue)
-								cu.CoreData.InvestmentTotal = cu.Model.InvestmentValue;
-							else if (cu.Model.InvestmentValue < 0)
-								cu.CoreData.InvestmentReturnTotal = Math.Abs(cu.Model.InvestmentValue);
-							if (r) {
-								cu.CoreData.InvestmentTotal += pr.InvestmentTotal;
-								cu.CoreData.InvestmentReturnTotal += pr.InvestmentReturnTotal;
-							}
-						};
+					foreach(var c in cur) {
 						var rst = ResultWithValue.Of<NodePath<string>, CommonNodeVM>(prv.TryGetValue, c.Key);
 						setTotal(rst.Result, rst.Value, c.Value);
-						Action<bool, CommonNodeVM, CommonNodeVM> setPer = (r, pr, cu) => {
-							if(cu.GetType() == typeof(FinancialBasketVM)) {
-								cu.CoreData.UnrealizedProfitLoss = cu.Preorder()
-									.OfType<FinancialProductVM>()
-									.Sum(d => d.UnrealizedProfitLoss);
-							}else if(cu.GetType() == typeof(FinancialProductVM)) {
-								cu.MaybeModelAs<FinancialProduct>()
-									.TrueOrNot(
-									co => {
-										cu.CoreData.PerPrice = co.Quantity == 0 ? 0 : co.Amount / co.Quantity;
-										if (r) {
-											var po = pr.Model as FinancialProduct;
-											if(po != null && 0 < co.InvestmentValue) {
-												cu.CoreData.PerBuyPriceAverage = co.Quantity == 0 
-												? 0
-												: ((pr.CoreData.PerBuyPriceAverage * po.Quantity) + co.InvestmentValue) / co.Quantity;
-											}else {
-												cu.CoreData.PerBuyPriceAverage = pr.CoreData.PerBuyPriceAverage;
-											}
-										}else {
-											cu.CoreData.PerBuyPriceAverage = co.Quantity == 0 ? 0 : co.Amount / co.Quantity;
-										}
-										cu.CoreData.UnrealizedProfitLoss = co.Amount - (cu.CoreData.PerBuyPriceAverage * co.TradeQuantity);
-									});
-							}
-						};
 						setPer(rst.Result, rst.Value, c.Value);
 					}
 					return cur;
@@ -346,7 +347,7 @@ namespace PortFolion.ViewModels {
 			set { CoreData.InvestmentReturnTotal = value; }
 		}
 		public string AmountRate {
-			get { return this.IsRoot() ? "-" : CoreData.AmountRate.ToString("0.#"); }
+			get { return this.Model.IsRoot() ? "-" : CoreData.AmountRate.ToString("0.#"); }
 			set { CoreData.AmountRate = ResultWithValue.Of<double>(double.TryParse, value).Value; }
 		}
 	}
@@ -441,7 +442,6 @@ namespace PortFolion.ViewModels {
 		public override VmCoreBase ToHistoryVm() {
 			var cb = new VmCoreBasket(this.Model);
 			cb.Copy(CoreData);
-			//cb.CurrentDate = this.CurrentDate;
 			return cb;
 		}
 		public double ProfitLoss {
@@ -463,9 +463,9 @@ namespace PortFolion.ViewModels {
 		public override VmCoreBase ToHistoryVm() {
 			var cb = new VmCoreGeneral(this.Model);
 			cb.Copy(CoreData);
-			//cb.CurrentDate = this.CurrentDate;
 			return cb;
 		}
+		
 		public double PerPrice {
 			get { return CoreData.PerPrice; }
 			set { CoreData.PerPrice = value; }
