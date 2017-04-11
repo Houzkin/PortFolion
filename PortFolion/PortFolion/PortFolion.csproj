@@ -119,7 +119,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="EditComponent\TNodeVm.cs" />
-    <Compile Include="ViewModels\Class1.cs" />
+    <Compile Include="ViewModels\GraphViewModel.cs" />
     <Compile Include="ViewModels\DateTree.cs" />
     <Compile Include="EditComponent\ListViewModelMain.cs" />
     <Compile Include="EditComponent\AccountEditVM.cs" />
@@ -129,6 +129,7 @@
     <Compile Include="EditComponent\AccountEditWindow.xaml.cs">
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\LocationTree.cs" />
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
     <Compile Include="Views\Converter\TransableComment.cs" />

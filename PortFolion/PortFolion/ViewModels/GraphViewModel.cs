@@ -12,6 +12,8 @@ using Livet;
 using Houzkin.Architecture;
 using PortFolion.IO;
 using System.Collections.ObjectModel;
+using Livet.EventListeners.WeakEvents;
+using System.Collections.Specialized;
 
 namespace PortFolion.ViewModels {
 	public enum Period {
@@ -236,7 +238,7 @@ namespace PortFolion.ViewModels {
 
 		
 		
-		private class GraphMediator : NotificationObject {
+		private class GraphMediator : ViewModel {
 			GraphDataManager gdm;
 			public GraphMediator() {
 			}
@@ -244,22 +246,62 @@ namespace PortFolion.ViewModels {
 				gdm = vm;
 				this._commonNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
+
+				this.CompositeDisposable.Add(
+					new CollectionChangedWeakEventListener(RootCollection.Instance, (o, e) => {
+						dtr.Refresh();
+						this.CurrentDate = CurrentDate;
+					}));
+				var d = new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>, DateTimeSelectedEventArgs>(
+					h => h,
+					h => dtr.DateTimeSelected += h,
+					h => dtr.DateTimeSelected -= h,
+					(s, e) => this.CurrentDate = e.SelectedDateTime);
+				this.CompositeDisposable.Add(d);
 				Refresh();
 			}
+
 			#region properties
+			DateTreeRoot dtr = new DateTreeRoot();
+			public ObservableCollection<DateTree> DateList => dtr.Children;
+
 			public DateTime? CurrentDate {
 				get { return (CurrentNode?.Root() as TotalRiskFundNode)?.CurrentDate; }
 				set {
-					if (CurrentDate == value) return;
+					if (RootCollection.Instance.Contains(CurrentNode?.Root()) && CurrentDate == value) return;
 					// set currentNode
 					if (value == null) {
 						CurrentNode = null;
 					}else {
 						var nn = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= value)
 							?? RootCollection.Instance.FirstOrDefault(a => value <= a.CurrentDate);
-						CurrentNode = nn;
+						if(CurrentNode != null) {
+							CurrentNode = nn.SearchNodeOf(CurrentNode.Path);
+						}else {
+							CurrentNode = nn;
+						}
 					}
 					RaisePropertyChanged();
+				}
+			}
+			public ObservableCollection<LocationNode> Root { get; } = new ObservableCollection<LocationNode>();
+			void setRoot(TotalRiskFundNode rt) {
+				if (Root.Any(a => a.IsModelEquals(rt))) return;
+				Root.ForEach(a => {
+					// remove events
+				});
+				List<NodePath<string>> expns = new List<NodePath<string>>();
+				if (Root.Any()) {
+					var ls = Root.First().Preorder().Where(a => a.IsExpand).Select(a => a.Path);
+					expns.AddRange(ls);
+				}
+				Root.Clear();
+				if (rt != null) {
+					var ln = new LocationNode(rt);
+					// add events
+					Root.Add(ln);
+					ln.Preorder().Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
+						.ForEach(a => a.IsExpand = true);
 				}
 			}
 			CommonNode _commonNode;
@@ -267,6 +309,8 @@ namespace PortFolion.ViewModels {
 				get { return _commonNode; }
 				private set {
 					if (_commonNode == value) return;
+					if (_commonNode?.Root() != value?.Root())
+						setRoot(value?.Root() as TotalRiskFundNode);
 					_commonNode = value;
 					RaisePropertyChanged();
 					RaisePropertyChanged(() => TargetLevel);
