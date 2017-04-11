@@ -244,7 +244,7 @@ namespace PortFolion.ViewModels {
 			}
 			public void Initialize(GraphDataManager vm) {
 				gdm = vm;
-				this._commonNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
+				this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
 
 				this.CompositeDisposable.Add(
@@ -258,7 +258,9 @@ namespace PortFolion.ViewModels {
 					h => dtr.DateTimeSelected -= h,
 					(s, e) => this.CurrentDate = e.SelectedDateTime);
 				this.CompositeDisposable.Add(d);
-				Refresh();
+				//this.CurrentDate = DateTime.Today;
+				//Refresh();
+				RefreshHistoryList();
 			}
 
 			#region properties
@@ -284,11 +286,12 @@ namespace PortFolion.ViewModels {
 					RaisePropertyChanged();
 				}
 			}
-			public ObservableCollection<LocationNode> Root { get; } = new ObservableCollection<LocationNode>();
+			public ObservableCollection<LocationRoot> Root { get; } = new ObservableCollection<LocationRoot>();
 			void setRoot(TotalRiskFundNode rt) {
 				if (Root.Any(a => a.IsModelEquals(rt))) return;
 				Root.ForEach(a => {
 					// remove events
+					a.Selected -= locationSelected;
 				});
 				List<NodePath<string>> expns = new List<NodePath<string>>();
 				if (Root.Any()) {
@@ -297,12 +300,16 @@ namespace PortFolion.ViewModels {
 				}
 				Root.Clear();
 				if (rt != null) {
-					var ln = new LocationNode(rt);
+					var ln = new LocationRoot(rt);
 					// add events
+					ln.Selected += locationSelected;
 					Root.Add(ln);
 					ln.Preorder().Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
 						.ForEach(a => a.IsExpand = true);
 				}
+			}
+			void locationSelected(object o,LocationSelectedEventArgs e) {
+				this.CurrentNode = e.Location;
 			}
 			CommonNode _commonNode;
 			public CommonNode CurrentNode {
@@ -413,7 +420,9 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Transition Graph
 			void DrawTransitionGraph() {
-				gdm.Transition.Clear();
+				if(gdm.Transition.Count != 0) {
+					gdm.Transition.Clear();
+				}
 				gdm.Transition.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					setBalanceLine();
@@ -461,6 +470,7 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Index Graph
 			void DrawIndexGraph() {
+				if(gdm.Index.Count != 0)
 				gdm.Index.Clear();
 				gdm.Index.Labels = _GraphRowData.Select(a => a.Date.ToShortDateString());
 				gdm.Index.Add(new LineSeries() {
@@ -475,6 +485,7 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Volatility Graph
 			void DrawVolatilityGraph() {
+				if(gdm.Volatility.Count != 0)
 				gdm.Volatility.Clear();
 				gdm.Volatility.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				gdm.Volatility.Add(new LineSeries() {

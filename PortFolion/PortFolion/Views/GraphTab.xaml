@@ -79,8 +79,24 @@
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
-                <TreeView Grid.Column="1" Grid.Row="2">
-                    
+                <TreeView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding Root}" Style="{StaticResource VirtualisedMetroTreeView}">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected,Mode=TwoWay}"/>
+                            <Setter Property="IsExpanded" Value="{Binding IsExpand,Mode=TwoWay}"/>
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="model:DateTree" ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name,UpdateSourceTrigger=PropertyChanged}" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
                 </TreeView>
             </Grid>
         </Expander>

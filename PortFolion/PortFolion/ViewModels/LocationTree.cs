@@ -17,9 +17,8 @@ namespace PortFolion.ViewModels {
 	class LocationNode : ReadOnlyBindableTreeNode<CommonNode,LocationNode> {
 		public LocationNode(CommonNode model) : base(model) {
 		}
-
 		protected override LocationNode GenerateChild(CommonNode modelChildNode) {
-			throw new NotImplementedException();
+			return new LocationNode(modelChildNode);
 		}
 
 		public bool IsModelEquals(CommonNode node) {
@@ -39,8 +38,18 @@ namespace PortFolion.ViewModels {
 				if (_isSelected == value) return;
 				_isSelected = value;
 				OnPropertyChanged();
-				Selected(this, new LocationSelectedEventArgs(this.Model));
+				RaiseSelected(this.Model);
 			}
+		}
+		protected virtual void RaiseSelected(CommonNode node) {
+			this.Root().RaiseSelected(node);
+		}
+	}
+	class LocationRoot : LocationNode {
+		public LocationRoot(CommonNode model) : base(model) {
+		}
+		protected override void RaiseSelected(CommonNode node) {
+			Selected?.Invoke(this, new LocationSelectedEventArgs(node));
 		}
 		public event EventHandler<LocationSelectedEventArgs> Selected;
 	}
