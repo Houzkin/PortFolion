@@ -9,6 +9,7 @@
              xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
     <Grid>
@@ -50,7 +51,7 @@
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Kind="Refresh"/>
-                                    <TextBlock Text=" 更新"/>
+                                    <TextBlock Text="更新" Margin="3,0,0,0"/>
                                 </StackPanel>
                             </DataTemplate>
                         </Button.ContentTemplate>
@@ -60,7 +61,8 @@
                     <!--setting params-->
                     <TextBlock>content</TextBlock>
                 </WrapPanel>
-                <TreeView Grid.Column="0" Grid.Row="2" ItemsSource="{Binding DateList}" Style="{StaticResource VirtualisedMetroTreeView}">
+                <GroupBox Grid.Column="0" Grid.Row="2" Header="Date" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                    <TreeView ItemsSource="{Binding DateList}" Style="{StaticResource VirtualisedMetroTreeView}">
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
                             <Setter Property="IsSelected" Value="{Binding IsSelected,Mode=TwoWay}"/>
@@ -79,25 +81,29 @@
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
-                <TreeView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding Root}" Style="{StaticResource VirtualisedMetroTreeView}">
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
-                            <Setter Property="IsSelected" Value="{Binding IsSelected,Mode=TwoWay}"/>
-                            <Setter Property="IsExpanded" Value="{Binding IsExpand,Mode=TwoWay}"/>
-                            <Setter Property="FontWeight" Value="Normal" />
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                    <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate DataType="model:DateTree" ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Name,UpdateSourceTrigger=PropertyChanged}" />
-                        </HierarchicalDataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
+                </GroupBox>
+
+                <GroupBox Grid.Column="1" Grid.Row="2" Header="Location" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                    <TreeView ItemsSource="{Binding Root}" Style="{StaticResource VirtualisedMetroTreeView}">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
+                                <Setter Property="IsSelected" Value="{Binding IsSelected,Mode=TwoWay}"/>
+                                <Setter Property="IsExpanded" Value="{Binding IsExpand,Mode=TwoWay}"/>
+                                <Setter Property="FontWeight" Value="Normal" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate DataType="model:DateTree" ItemsSource="{Binding Children}">
+                                <TextBlock Text="{Binding Name,UpdateSourceTrigger=PropertyChanged}" />
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+                </GroupBox>
             </Grid>
         </Expander>
         <!--<local:GraphContents Grid.Column="1"/>-->
@@ -109,6 +115,9 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
+            <lvc:PieChart Series="{Binding BrakeDown}"  LegendLocation="Bottom" MinHeight="100" MinWidth="100" >
+                
+            </lvc:PieChart>
         </Expander>
         
         <StackPanel Grid.Column="2" Orientation="Vertical">

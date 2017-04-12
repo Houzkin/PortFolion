@@ -23,8 +23,8 @@ namespace PortFolion.ViewModels {
 		Weekly,
 	}
 	public enum DividePattern {
-		Tag,
 		Location,
+		Tag,
 	}
 	public enum TransitionStatus {
 		BalanceOnly,
@@ -32,10 +32,7 @@ namespace PortFolion.ViewModels {
 		StackCashFlow,
 		ProfitLossOnly,
 	}
-	//public enum VolatilityType {
-	//	Normal,
-	//	Log,
-	//}
+	
 	public class TempValue {
 		public string Title { get; set; }
 		public double Amount { get; set; }
@@ -231,10 +228,26 @@ namespace PortFolion.ViewModels {
 		DateTreeRoot dtr = new DateTreeRoot();
 		public ObservableCollection<DateTree> DateList => dtr.Children;
 
-		public BrakeDownList BrakeDown { get; } = new BrakeDownList();
-		public TransitionList Transition { get; } = new TransitionList();
-		public IndexList Index { get; } = new IndexList();
-		public VolatilityList Volatility { get; } = new VolatilityList();
+		BrakeDownList bdl;
+		public BrakeDownList BrakeDown {
+			get { return bdl; }
+			set { SetProperty(ref bdl, value); }
+		}
+		TransitionList tsl;
+		public TransitionList Transition {
+			get { return tsl; }
+			set { SetProperty(ref tsl, value); }
+		}
+		IndexList idl;
+		public IndexList Index {
+			get { return idl; }
+			set { SetProperty(ref idl, value); }
+		}
+		VolatilityList vll;
+		public VolatilityList Volatility {
+			get { return vll; }
+			set { SetProperty(ref vll, value); }
+		}
 
 		
 		
@@ -258,9 +271,7 @@ namespace PortFolion.ViewModels {
 					h => dtr.DateTimeSelected -= h,
 					(s, e) => this.CurrentDate = e.SelectedDateTime);
 				this.CompositeDisposable.Add(d);
-				//this.CurrentDate = DateTime.Today;
-				//Refresh();
-				RefreshHistoryList();
+				
 			}
 
 			#region properties
@@ -379,15 +390,17 @@ namespace PortFolion.ViewModels {
 				RefreshHistoryList();
 			}
 			void RefreshBrakeDownList() {
-				gdm.BrakeDown.Clear();
+				//gdm.BrakeDown.Clear();
+				gdm.BrakeDown = new BrakeDownList();
 				if (CurrentNode == null) return;
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
 				foreach (var data in tgnss) {
 					gdm.BrakeDown.Add(
 						new PieSeries() {
 							Title = data.Title,
-							Values = new ChartValues<ObservableValue>() { new ObservableValue(data.Rate) },
+							Values = new ChartValues<ObservableValue>() { new ObservableValue(data.Amount) },
 							DataLabels = true,
+							LabelPoint = cp => string.Format("{0} ({1:P})", data.Title, cp.Participation),
 						});
 				}
 			}
@@ -420,9 +433,8 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Transition Graph
 			void DrawTransitionGraph() {
-				if(gdm.Transition.Count != 0) {
-					gdm.Transition.Clear();
-				}
+				//gdm.Transition.Clear();
+				gdm.Transition = new TransitionList();
 				gdm.Transition.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					setBalanceLine();
@@ -470,8 +482,8 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Index Graph
 			void DrawIndexGraph() {
-				if(gdm.Index.Count != 0)
-				gdm.Index.Clear();
+				//gdm.Index.Clear();
+				gdm.Index = new IndexList();
 				gdm.Index.Labels = _GraphRowData.Select(a => a.Date.ToShortDateString());
 				gdm.Index.Add(new LineSeries() {
 					Title = "Index",
@@ -485,8 +497,8 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Volatility Graph
 			void DrawVolatilityGraph() {
-				if(gdm.Volatility.Count != 0)
-				gdm.Volatility.Clear();
+				//gdm.Volatility.Clear();
+				gdm.Volatility = new VolatilityList();
 				gdm.Volatility.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
 				gdm.Volatility.Add(new LineSeries() {
 					Title = "Volatility",
