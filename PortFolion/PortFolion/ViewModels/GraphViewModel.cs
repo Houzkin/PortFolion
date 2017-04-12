@@ -1,19 +1,20 @@
-﻿using LiveCharts;
+﻿using Houzkin.Architecture;
+using Houzkin.Tree;
+using LiveCharts;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using Livet;
+using Livet.EventListeners.WeakEvents;
 using PortFolion.Core;
+using PortFolion.IO;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Houzkin.Tree;
-using LiveCharts.Wpf;
-using LiveCharts.Defaults;
-using Livet;
-using Houzkin.Architecture;
-using PortFolion.IO;
-using System.Collections.ObjectModel;
-using Livet.EventListeners.WeakEvents;
-using System.Collections.Specialized;
+using System.Windows.Media;
 
 namespace PortFolion.ViewModels {
 	public enum Period {
@@ -213,8 +214,46 @@ namespace PortFolion.ViewModels {
 					tv.CashCount = a.Count(b => b.GetNodeType() == NodeType.Cash);
 					return tv;
 				})
-				.OrderBy(a => a.CashCount);
+				.GroupBy(a => a.CashCount)
+				.OrderBy(a => a.Key)
+				.SelectMany(a => a.OrderByDescending(b => b.Amount));
+				//.OrderBy(a => a.CashCount);
 			
+		}
+		public static IEnumerable<Color> BrushColors() {
+			//object obj = ColorConverter.ConvertFromString("#51000000");
+			//SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
+			return new List<Color>() {
+				Color.FromRgb(17,140,18),
+				Color.FromRgb(214,54,96),
+				Color.FromRgb(59,67,255),
+				Color.FromRgb(167,68,227),
+				Color.FromRgb(237,103,30),
+
+				Color.FromRgb(76,143,44),
+				Color.FromRgb(44,50,143),
+				Color.FromRgb(248,63,27),
+				Color.FromRgb(130,16,142),
+				Color.FromRgb(21,157,184),
+
+				Color.FromRgb(201,15,41),
+				Color.FromRgb(216,105,26),
+				Color.FromRgb(7,109,48),
+				Color.FromRgb(73,13,147),
+				Color.FromRgb(221,39,124),
+
+				Color.FromRgb(225,116,223),
+				Color.FromRgb(98,183,189),
+				Color.FromRgb(132,79,175),
+				Color.FromRgb(255,239,0),
+				Color.FromRgb(175,176,0),
+
+				Color.FromRgb(199,27,76),
+				Color.FromRgb(170,119,10),
+				Color.FromRgb(49,226,239),
+				Color.FromRgb(33,145,242),
+				Color.FromRgb(21,234,152),
+			};
 		}
 	}
 	public class GraphDataManager : DynamicViewModel {
@@ -389,20 +428,39 @@ namespace PortFolion.ViewModels {
 				RefreshBrakeDownList();
 				RefreshHistoryList();
 			}
+			public Livet.Commands.ListenerCommand<ChartPoint> HoverCommand { get; set; }
+
 			void RefreshBrakeDownList() {
 				//gdm.BrakeDown.Clear();
 				gdm.BrakeDown = new BrakeDownList();
 				if (CurrentNode == null) return;
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
-				foreach (var data in tgnss) {
-					gdm.BrakeDown.Add(
-						new PieSeries() {
-							Title = data.Title,
-							Values = new ChartValues<ObservableValue>() { new ObservableValue(data.Amount) },
-							DataLabels = true,
-							LabelPoint = cp => string.Format("{0} ({1:P})", data.Title, cp.Participation),
-						});
-				}
+				tgnss.Zip(Ext.BrushColors().Repeat(), (a, b) => new { Data = a, Brush = b })
+					.ForEach(a => {
+						gdm.BrakeDown.Add(
+							new PieSeries() {
+								Title = a.Data.Title,
+								Values = new ChartValues<ObservableValue>() { new ObservableValue(a.Data.Amount) },
+								DataLabels = true,
+								LabelPoint = cp => string.Format("{0}\n({1:P})", a.Data.Title, cp.Participation),
+								Fill = new SolidColorBrush(a.Brush),
+								LabelPosition = PieLabelPosition.OutsideSlice,
+								StrokeThickness = 5,
+								Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f)),
+							});
+					});
+				//foreach (var data in tgnss) {
+				//	gdm.BrakeDown.Add(
+				//		new PieSeries() {
+				//			Title = data.Title,
+				//			Values = new ChartValues<ObservableValue>() { new ObservableValue(data.Amount) },
+				//			DataLabels = true,
+				//			LabelPoint = cp => string.Format("{0} ({1:P})", data.Title, cp.Participation),
+				//			//Fill = null,
+				//			Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Brown),
+							
+				//		});
+				//}
 			}
 			IEnumerable<GraphValue> _GraphRowData = Enumerable.Empty<GraphValue>();
 			/// <summary>累計キャッシュフローとその時点での評価総額</summary>

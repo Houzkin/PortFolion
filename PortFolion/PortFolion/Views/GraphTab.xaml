@@ -115,7 +115,7 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-            <lvc:PieChart Series="{Binding BrakeDown}"  LegendLocation="Bottom" MinHeight="100" MinWidth="100" DataTooltip="{x:Null}">
+            <lvc:PieChart Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom" MinHeight="100" MinWidth="200"  Margin="15" DataTooltip="{x:Null}" DataHoverCommand="{Binding HoverCommand}"><!---->
                 
             </lvc:PieChart>
         </Expander>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiveCharts.Defaults;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,5 +23,11 @@ namespace PortFolion.Views {
 			InitializeComponent();
 			this.DataContext = new PortFolion.ViewModels.GraphDataManager();
 		}
+
+		//private void PieChart_DataHover(object sender, LiveCharts.ChartPoint chartPoint) {
+		//	var v = chartPoint.Instance;
+		//	var t = v.GetType();
+		//	var ts = v as ObservableValue;
+		//}
 	}
 }
