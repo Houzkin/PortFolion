@@ -115,8 +115,15 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-            <lvc:PieChart Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom" MinHeight="100" MinWidth="200"  Margin="15" DataTooltip="{x:Null}" DataHoverCommand="{Binding HoverCommand}"><!---->
-                
+            <lvc:PieChart Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom"
+                          MinHeight="100" MinWidth="200"  Margin="15" ><!--DataTooltip="{x:Null}"  DataHoverCommand="{Binding HoverCommand}"-->
+                <lvc:PieChart.DataTooltip>
+                    <lvc:DefaultTooltip Background="Black" Opacity="0.7" SelectionMode="SharedYInSeries" ShowSeries="False"/>
+                </lvc:PieChart.DataTooltip>
+                <lvc:PieChart.ChartLegend>
+                    <local:PieChartCustomLegend/>
+                    <!--<lvc:DefaultLegend Orientation="Vertical"/>-->
+                </lvc:PieChart.ChartLegend>
             </lvc:PieChart>
         </Expander>
         

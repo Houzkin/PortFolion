@@ -131,6 +131,9 @@
     </Compile>
     <Compile Include="ViewModels\LocationTree.cs" />
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
+    <Compile Include="Views\PieChartCustomLegend.xaml.cs">
+      <DependentUpon>PieChartCustomLegend.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
     <Compile Include="Views\Converter\TransableComment.cs" />
     <Compile Include="Views\Converter\TryStringToNumberConverter.cs" />
@@ -154,6 +157,10 @@
     </Compile>
     <Compile Include="Views\Selector\Selectors.cs" />
     <Page Include="EditComponent\AccountEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PieChartCustomLegend.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

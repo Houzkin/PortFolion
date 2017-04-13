@@ -1,9 +1,11 @@
 ﻿using Houzkin.Architecture;
 using Houzkin.Tree;
 using LiveCharts;
+using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Livet;
+using Livet.Commands;
 using Livet.EventListeners.WeakEvents;
 using PortFolion.Core;
 using PortFolion.IO;
@@ -210,7 +212,7 @@ namespace PortFolion.ViewModels {
 					var tv = new CashNodeCountedTempValue();
 					tv.Title = a.Key;
 					tv.Amount = a.Sum(b => b.Amount);
-					tv.Rate = tv.Amount / ttl * 100;
+					tv.Rate = ((double)tv.Amount / (double)ttl);
 					tv.CashCount = a.Count(b => b.GetNodeType() == NodeType.Cash);
 					return tv;
 				})
@@ -260,6 +262,7 @@ namespace PortFolion.ViewModels {
 
 		public GraphDataManager() : base(new GraphMediator()) {
 			Model.Initialize(this);
+			
 		}
 		public void Refresh() => Model.Refresh();
 		GraphMediator Model => this.MaybeModelAs<GraphMediator>().Value;
@@ -287,12 +290,12 @@ namespace PortFolion.ViewModels {
 			get { return vll; }
 			set { SetProperty(ref vll, value); }
 		}
-
-		
 		
 		private class GraphMediator : ViewModel {
 			GraphDataManager gdm;
 			public GraphMediator() {
+				var cmp = Mappers.Pie<TempValue>().Value(tv => tv.Amount);
+				Charting.For<TempValue>(cmp);
 			}
 			public void Initialize(GraphDataManager vm) {
 				gdm = vm;
@@ -301,21 +304,19 @@ namespace PortFolion.ViewModels {
 
 				this.CompositeDisposable.Add(
 					new CollectionChangedWeakEventListener(RootCollection.Instance, (o, e) => {
-						dtr.Refresh();
+						gdm.dtr.Refresh();
 						this.CurrentDate = CurrentDate;
 					}));
 				var d = new LivetWeakEventListener<EventHandler<DateTimeSelectedEventArgs>, DateTimeSelectedEventArgs>(
 					h => h,
-					h => dtr.DateTimeSelected += h,
-					h => dtr.DateTimeSelected -= h,
+					h => gdm.dtr.DateTimeSelected += h,
+					h => gdm.dtr.DateTimeSelected -= h,
 					(s, e) => this.CurrentDate = e.SelectedDateTime);
 				this.CompositeDisposable.Add(d);
 				
 			}
 
 			#region properties
-			DateTreeRoot dtr = new DateTreeRoot();
-			public ObservableCollection<DateTree> DateList => dtr.Children;
 
 			public DateTime? CurrentDate {
 				get { return (CurrentNode?.Root() as TotalRiskFundNode)?.CurrentDate; }
@@ -428,7 +429,7 @@ namespace PortFolion.ViewModels {
 				RefreshBrakeDownList();
 				RefreshHistoryList();
 			}
-			public Livet.Commands.ListenerCommand<ChartPoint> HoverCommand { get; set; }
+
 
 			void RefreshBrakeDownList() {
 				//gdm.BrakeDown.Clear();
@@ -440,27 +441,18 @@ namespace PortFolion.ViewModels {
 						gdm.BrakeDown.Add(
 							new PieSeries() {
 								Title = a.Data.Title,
-								Values = new ChartValues<ObservableValue>() { new ObservableValue(a.Data.Amount) },
+								//Values = new ChartValues<ObservableValue>() { new ObservableValue(a.Data.Amount) },
+								Values = new ChartValues<TempValue>() { a.Data },
 								DataLabels = true,
-								LabelPoint = cp => string.Format("{0}\n({1:P})", a.Data.Title, cp.Participation),
+								//LabelPoint = cp => string.Format("{0}\n({1:P})", a.Data.Title, cp.Participation),
+								LabelPoint = cp => a.Data.Title,
 								Fill = new SolidColorBrush(a.Brush),
 								LabelPosition = PieLabelPosition.OutsideSlice,
 								StrokeThickness = 5,
 								Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f)),
 							});
 					});
-				//foreach (var data in tgnss) {
-				//	gdm.BrakeDown.Add(
-				//		new PieSeries() {
-				//			Title = data.Title,
-				//			Values = new ChartValues<ObservableValue>() { new ObservableValue(data.Amount) },
-				//			DataLabels = true,
-				//			LabelPoint = cp => string.Format("{0} ({1:P})", data.Title, cp.Participation),
-				//			//Fill = null,
-				//			Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Brown),
-							
-				//		});
-				//}
+				
 			}
 			IEnumerable<GraphValue> _GraphRowData = Enumerable.Empty<GraphValue>();
 			/// <summary>累計キャッシュフローとその時点での評価総額</summary>

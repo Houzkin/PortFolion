@@ -52,6 +52,9 @@ namespace PortFolion.ViewModels {
 				RaisePropertyChanged();
 			}
 		}
+		protected virtual void RaiseDateTimeSelected(DateTime date) {
+			this.Root().RaiseDateTimeSelected(date);
+		}
 	}
 	public class DateTreeLeaf : DateTree {
 		public DateTreeLeaf(DateTime date) {
@@ -59,9 +62,10 @@ namespace PortFolion.ViewModels {
 			this.PropertyChanged += (o, e) => {
 				if(e.PropertyName == nameof(this.IsSelected) && this.IsSelected) {
 					foreach (var t in this.Upstream().Skip(1)) t.IsExpand = true;
-					(this.Root() as DateTreeRoot)
-					?.DateTimeSelected
-					?.Invoke(this.Root(), new DateTimeSelectedEventArgs(_date));
+					//(this.Root() as DateTreeRoot)
+					//?.DateTimeSelected
+					//?.Invoke(this.Root(), new DateTimeSelectedEventArgs(_date));
+					this.RaiseDateTimeSelected(_date);
 				}
 			};
 		}
@@ -113,13 +117,16 @@ namespace PortFolion.ViewModels {
 			this.RemoveDescendant(a => !a.Preorder().OfType<DateTreeLeaf>().Any());
 			this.Levelorder().ToArray().ForEach(a => a.Sort());
 		}
-		public EventHandler<DateTimeSelectedEventArgs> DateTimeSelected;
+		public event EventHandler<DateTimeSelectedEventArgs> DateTimeSelected;
 		public void SelectAt(DateTime date) {
 			var n = this.Levelorder().OfType<DateTreeLeaf>().LastOrDefault(a => a.Date == date);
 			if (n != null) {
 				//foreach (var nd in n.Upstream()) nd.IsExpand = true;
 				n.IsSelected = true;
 			}
+		}
+		protected override void RaiseDateTimeSelected(DateTime date) {
+			DateTimeSelected?.Invoke(this, new DateTimeSelectedEventArgs(date));
 		}
 	}
 	public class DateTimeSelectedEventArgs : EventArgs {
