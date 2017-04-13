@@ -107,7 +107,7 @@
             </Grid>
         </Expander>
         <!--<local:GraphContents Grid.Column="1"/>-->
-        <Expander Grid.Column="1" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
+        <Expander x:Name="BrakeDownExp" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="BrakeDown" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
@@ -115,14 +115,13 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-            <lvc:PieChart Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom"
-                          MinHeight="100" MinWidth="200"  Margin="15" ><!--DataTooltip="{x:Null}"  DataHoverCommand="{Binding HoverCommand}"-->
+            <lvc:PieChart x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom"
+                          MinHeight="100" MinWidth="200"  Margin="15" Width="290" Grid.IsSharedSizeScope="True" >
                 <lvc:PieChart.DataTooltip>
                     <lvc:DefaultTooltip Background="Black" Opacity="0.7" SelectionMode="SharedYInSeries" ShowSeries="False"/>
                 </lvc:PieChart.DataTooltip>
                 <lvc:PieChart.ChartLegend>
-                    <local:PieChartCustomLegend/>
-                    <!--<lvc:DefaultLegend Orientation="Vertical"/>-->
+                    <local:PieChartCustomLegend Width="290"/>
                 </lvc:PieChart.ChartLegend>
             </lvc:PieChart>
         </Expander>

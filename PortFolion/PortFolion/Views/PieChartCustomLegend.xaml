@@ -6,7 +6,52 @@
              xmlns:local="clr-namespace:PortFolion.ViewModels"
              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              mc:Ignorable="d" 
+             Name="This"
              d:DesignHeight="300" d:DesignWidth="300">
+   
+    <UserControl.Resources>
+            <lvc:OrientationConverter x:Key="OrientationConverter"></lvc:OrientationConverter>
+    </UserControl.Resources>
+    <UserControl.Template>
+        <ControlTemplate>
+            <Border>
+                <ItemsControl ItemsSource="{Binding Series}" >
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel MaxWidth="{Binding MaxWidth, ElementName=This}"
+                                       MaxHeight="{Binding MaxHeight, ElementName=This}" >
+                                <WrapPanel.Orientation>
+                                    <MultiBinding Converter="{StaticResource OrientationConverter}">
+                                        <Binding Path="Orientation"/>
+                                        <Binding Path="InternalOrientation"/>
+                                    </MultiBinding>
+                                </WrapPanel.Orientation>
+                            </WrapPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type lvc:SeriesViewModel}">
+                            <Grid Margin="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions> <!---->
+                                <Path Grid.Column="0" 
+                                      Width="{Binding BulletSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type UserControl}}}" 
+                                      Height="{Binding BulletSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type UserControl}}}" 
+                                      StrokeThickness="{Binding StrokeThickness}" 
+                                      Stroke="{Binding Stroke}" Fill="{Binding Fill}"
+                                      Stretch="Fill" Data="{Binding PointGeometry}"/>
+                                <TextBlock Grid.Column="1" Margin="3,0,2,0" Text="{Binding Title}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Margin="0,0,3,0" Text="{Binding Participation,StringFormat={}({0:P1})}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </ControlTemplate>
+    </UserControl.Template>
     <!--<ItemsControl ItemsSource="{Binding Series}" Grid.IsSharedSizeScope="True">
         <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type lvc:SeriesViewModel}">
@@ -22,42 +67,5 @@
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ItemsControl>-->
-    <UserControl.Resources>
-            <lvc:OrientationConverter x:Key="OrientationConverter"></lvc:OrientationConverter>
-    </UserControl.Resources>
-    <UserControl.Template>
-        <ControlTemplate>
-            <Border>
-                <ItemsControl ItemsSource="{Binding Series}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel MaxWidth="{Binding MaxWidth, ElementName=This}"
-                                       MaxHeight="{Binding MaxHeight, ElementName=This}">
-                                <WrapPanel.Orientation>
-                                    <MultiBinding Converter="{StaticResource OrientationConverter}">
-                                        <Binding Path="Orientation"/>
-                                        <Binding Path="InternalOrientation"/>
-                                    </MultiBinding>
-                                </WrapPanel.Orientation>
-                            </WrapPanel>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type lvc:SeriesViewModel}">
-                            <StackPanel Orientation="Horizontal" Margin="2">
-                                <Path Width="{Binding BulletSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type UserControl}}}" 
-                                         Height="{Binding BulletSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type UserControl}}}" 
-                                         StrokeThickness="{Binding StrokeThickness}" 
-                                         Stroke="{Binding Stroke}" Fill="{Binding Fill}"
-                                         Stretch="Fill" Data="{Binding PointGeometry}"/>
-                                <TextBlock  Margin="3,0,3,0" Text="{Binding Title}" VerticalAlignment="Center" />
-                                <TextBlock Margin="0,0,5,0" Text="{Binding Participation,StringFormat={}({0:P1})}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Border>
-        </ControlTemplate>
-</UserControl.Template>
-    
+
 </UserControl>

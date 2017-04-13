@@ -65,13 +65,48 @@ namespace PortFolion.Views {
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
-
-		public static readonly DependencyProperty BulletSizeProperty = DependencyProperty.Register(
+		
+		public static readonly DependencyProperty BulletSizeProperty //= DefaultLegend.BulletSizeProperty.AddOwner(typeof(PieChartCustomLegend),new FrameworkPropertyMetadata(typeof(PieChartCustomLegend)));
+			= DependencyProperty.Register(
 			"BulletSize", typeof(double), typeof(PieChartCustomLegend), new PropertyMetadata(15d));
-        
-        public double BulletSize {
+
+		public double BulletSize {
             get { return (double)GetValue(BulletSizeProperty); }
             set { SetValue(BulletSizeProperty, value); }
 		}
+
+		/// <summary>
+		/// The orientation property
+		/// </summary>
+		public static readonly DependencyProperty OrientationProperty //= DefaultLegend.OrientationProperty.AddOwner(typeof(PieChartCustomLegend), new FrameworkPropertyMetadata(typeof(PieChartCustomLegend)));
+		 = DependencyProperty.Register(
+		"Orientation", typeof(Orientation?), typeof(PieChartCustomLegend), new PropertyMetadata(null));
+		/// <summary>
+		/// Gets or sets the orientation of the legend, default is null, if null LiveCharts will decide which orientation to use, based on the Chart.Legend location property.
+		/// </summary>
+		public Orientation? Orientation {
+			get { return (Orientation)GetValue(OrientationProperty); }
+			set { SetValue(OrientationProperty, value); }
+		}
+
+		/// <summary>
+		/// The internal orientation property
+		/// </summary>
+		public static readonly DependencyProperty InternalOrientationProperty //= DefaultLegend.InternalOrientationProperty.AddOwner(typeof(PieChartCustomLegend), new FrameworkPropertyMetadata(typeof(PieChartCustomLegend)));
+			= DependencyProperty.Register(
+			"InternalOrientation", typeof(Orientation), typeof(PieChartCustomLegend),
+			new PropertyMetadata(default(Orientation)));
+
+		/// <summary>
+		/// Gets or sets the internal orientation.
+		/// </summary>
+		/// <value>
+		/// The internal orientation.
+		/// </value>
+		public Orientation InternalOrientation {
+			get { return (Orientation)GetValue(InternalOrientationProperty); }
+			set { SetValue(InternalOrientationProperty, value); }
+		}
+
 	}
 }
