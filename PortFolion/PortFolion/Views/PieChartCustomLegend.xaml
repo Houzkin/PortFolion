@@ -8,18 +8,18 @@
              mc:Ignorable="d" 
              Name="This"
              d:DesignHeight="300" d:DesignWidth="300">
-   
+  
     <UserControl.Resources>
-            <lvc:OrientationConverter x:Key="OrientationConverter"></lvc:OrientationConverter>
+        <lvc:OrientationConverter x:Key="OrientationConverter"/>
     </UserControl.Resources>
     <UserControl.Template>
         <ControlTemplate>
             <Border>
-                <ItemsControl ItemsSource="{Binding Series}" >
+                <ItemsControl ItemsSource="{Binding Series}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel MaxWidth="{Binding MaxWidth, ElementName=This}"
-                                       MaxHeight="{Binding MaxHeight, ElementName=This}" >
+                            <WrapPanel Width="{Binding Width,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type lvc:PieChart}}}"
+                                       Height="{Binding Height,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type lvc:PieChart}}}" >
                                 <WrapPanel.Orientation>
                                     <MultiBinding Converter="{StaticResource OrientationConverter}">
                                         <Binding Path="Orientation"/>
@@ -36,7 +36,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions> <!---->
+                                </Grid.ColumnDefinitions> 
                                 <Path Grid.Column="0" 
                                       Width="{Binding BulletSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type UserControl}}}" 
                                       Height="{Binding BulletSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type UserControl}}}" 
@@ -52,20 +52,6 @@
             </Border>
         </ControlTemplate>
     </UserControl.Template>
-    <!--<ItemsControl ItemsSource="{Binding Series}" Grid.IsSharedSizeScope="True">
-        <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type lvc:SeriesViewModel}">
-                <Grid Margin="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Title"/>
-                    </Grid.ColumnDefinitions>
-                    <Rectangle Grid.Column="0" Stroke="{Binding Stroke}" Fill="{Binding Fill}" 
-                               Width="15" Height="15"/>
-                    <TextBlock Grid.Column="1" Margin="4 0" Text="{Binding Title}" Foreground="White" VerticalAlignment="Center" />
-                </Grid>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>-->
+   
 
 </UserControl>

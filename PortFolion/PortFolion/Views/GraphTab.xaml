@@ -43,7 +43,7 @@
                 </Grid.RowDefinitions>
                 <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
                     <ToggleButton x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}"></ToggleButton>
-                    <Button DockPanel.Dock="Right">
+                    <Button DockPanel.Dock="Right" Command="{Binding }">
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -55,6 +55,11 @@
                                 </StackPanel>
                             </DataTemplate>
                         </Button.ContentTemplate>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Refresh"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
                     </Button>
                 </DockPanel>
                 <WrapPanel Visibility="{Binding IsChecked,ElementName=OpenParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}" Grid.Row="1" Grid.ColumnSpan="2">
@@ -115,20 +120,35 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-            <lvc:PieChart x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom"
-                          MinHeight="100" MinWidth="200"  Margin="15" Width="290" Grid.IsSharedSizeScope="True" >
-                <lvc:PieChart.DataTooltip>
-                    <lvc:DefaultTooltip Background="Black" Opacity="0.7" SelectionMode="SharedYInSeries" ShowSeries="False"/>
-                </lvc:PieChart.DataTooltip>
-                <lvc:PieChart.ChartLegend>
-                    <local:PieChartCustomLegend Width="290"/>
-                </lvc:PieChart.ChartLegend>
-            </lvc:PieChart>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}"/>
+                    <TextBlock Text="{Binding CurrentNode.Name}"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <lvc:PieChart x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom"
+                              MinHeight="200" MinWidth="200"  Margin="15,0,15,3" Width="290">
+                    <lvc:PieChart.DataTooltip>
+                        <lvc:DefaultTooltip Background="Black" Opacity="0.7" SelectionMode="SharedYInSeries" ShowSeries="False"/>
+                    </lvc:PieChart.DataTooltip>
+                    <lvc:PieChart.ChartLegend>
+                        <local:PieChartCustomLegend/>
+                    </lvc:PieChart.ChartLegend>
+                </lvc:PieChart></ScrollViewer>
+            </Grid>
         </Expander>
-        
-        <StackPanel Grid.Column="2" Orientation="Vertical">
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="Transition" mah:ControlsHelper.ContentCharacterCasing="Normal">
 
+        <StackPanel Grid.Column="3" Orientation="Vertical">
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="Transition" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                <lvc:CartesianChart Series="{Binding Transition}" LegendLocation="Right" Height="230">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Date" Labels="{Binding Transition.Labels}" Position="LeftBottom"/>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
             </Expander>
             <Expander ExpandDirection="Down" IsEnabled="True" Header="Index" mah:ControlsHelper.ContentCharacterCasing="Normal">
 

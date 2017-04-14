@@ -30,9 +30,13 @@ namespace PortFolion.ViewModels {
 		Tag,
 	}
 	public enum TransitionStatus {
+		/// <summary>推移</summary>
 		BalanceOnly,
+		/// <summary>推移のラインと外部キャッシュフローをカラムにして表す</summary>
 		SingleCashFlow,
+		/// <summary>推移のラインと外部キャッシュフローの累積を表す</summary>
 		StackCashFlow,
+		/// <summary>損益のみ</summary>
 		ProfitLossOnly,
 	}
 	
@@ -369,11 +373,15 @@ namespace PortFolion.ViewModels {
 					if (_commonNode == value) return;
 					if (_commonNode?.Root() != value?.Root())
 						setRoot(value?.Root() as TotalRiskFundNode);
+					var prvPath = _commonNode?.Path ?? Enumerable.Empty<string>();
+					var curPath = value?.Path ?? Enumerable.Empty<string>();
 					_commonNode = value;
 					RaisePropertyChanged();
 					RaisePropertyChanged(() => TargetLevel);
 					RefreshBrakeDownList();
-					RefreshHistoryList();
+					if (!prvPath.SequenceEqual(curPath)) {
+						RefreshHistoryList();
+					}
 				}
 			}
 			Period _timePeriod;
@@ -432,7 +440,6 @@ namespace PortFolion.ViewModels {
 
 
 			void RefreshBrakeDownList() {
-				//gdm.BrakeDown.Clear();
 				gdm.BrakeDown = new BrakeDownList();
 				if (CurrentNode == null) return;
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
@@ -484,8 +491,11 @@ namespace PortFolion.ViewModels {
 			#region Draw Transition Graph
 			void DrawTransitionGraph() {
 				//gdm.Transition.Clear();
-				gdm.Transition = new TransitionList();
-				gdm.Transition.Labels = _GraphRowData.Select(a=>a.Date.ToShortDateString());
+				gdm.Transition = new TransitionList() {
+					//XFormatter = x => new DateTime((long)x).ToString("yyyy/M/d"),
+					//YFormatter = y => y.ToString("0,0.#"),
+				};
+				gdm.Transition.Labels = _GraphRowData.Select(a => a.Date.ToShortDateString());
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					setBalanceLine();
 					setCashFlowColumn();
@@ -558,7 +568,8 @@ namespace PortFolion.ViewModels {
 			#endregion
 		}
 	}
-	public class BrakeDownList : SeriesCollection { }
+	public class BrakeDownList : SeriesCollection {
+	}
 	public class TransitionList : DisplaySeriesCollection { }
 	public class IndexList : DisplaySeriesCollection { }
 	public class VolatilityList : DisplaySeriesCollection { }
@@ -574,5 +585,7 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(Labels)));
 			}
 		}
+		public Func<double,string> XFormatter { get; set; }
+		public Func<double,string> YFormatter { get; set; }
 	}
 }

@@ -137,14 +137,8 @@
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
     <Compile Include="Views\Converter\TransableComment.cs" />
     <Compile Include="Views\Converter\TryStringToNumberConverter.cs" />
-    <Compile Include="Views\GraphContents.xaml.cs">
-      <DependentUpon>GraphContents.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\GraphTab.xaml.cs">
       <DependentUpon>GraphTab.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ListContents.xaml.cs">
-      <DependentUpon>ListContents.xaml</DependentUpon>
     </Compile>
     <Compile Include="EditComponent\ListTab.xaml.cs">
       <DependentUpon>ListTab.xaml</DependentUpon>
@@ -164,15 +158,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\GraphContents.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\GraphTab.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ListContents.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
