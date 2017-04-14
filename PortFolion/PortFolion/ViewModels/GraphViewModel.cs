@@ -277,7 +277,15 @@ namespace PortFolion.ViewModels {
 		BrakeDownList bdl;
 		public BrakeDownList BrakeDown {
 			get { return bdl; }
-			set { SetProperty(ref bdl, value); }
+			set {
+				if (SetProperty(ref bdl, value)) 
+					OnPropertyChanged(() => BrakeDownLegend);
+			}
+		}
+		public IEnumerable<PieSeries> BrakeDownLegend {
+			get {
+				return this.BrakeDown.OfType<PieSeries>();
+			}
 		}
 		TransitionList tsl;
 		public TransitionList Transition {

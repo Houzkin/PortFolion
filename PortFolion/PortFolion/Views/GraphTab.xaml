@@ -123,22 +123,30 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}"/>
                     <TextBlock Text="{Binding CurrentNode.Name}"/>
                 </StackPanel>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <lvc:PieChart x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" LegendLocation="Bottom"
-                              MinHeight="200" MinWidth="200"  Margin="15,0,15,3" Width="290">
+                <lvc:PieChart Grid.Row="1" x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" 
+                              MinHeight="200" MinWidth="200" Width="300" Height="280" LegendLocation="None" Margin="15,0,15,3">
                     <lvc:PieChart.DataTooltip>
                         <lvc:DefaultTooltip Background="Black" Opacity="0.7" SelectionMode="SharedYInSeries" ShowSeries="False"/>
                     </lvc:PieChart.DataTooltip>
-                    <lvc:PieChart.ChartLegend>
+                    <!--<lvc:PieChart.ChartLegend>
                         <local:PieChartCustomLegend/>
-                    </lvc:PieChart.ChartLegend>
-                </lvc:PieChart></ScrollViewer>
+                    </lvc:PieChart.ChartLegend>-->
+                </lvc:PieChart>
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding BrakeDownLegend}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    
+                </ItemsControl>
             </Grid>
         </Expander>
 
