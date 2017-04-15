@@ -40,8 +40,8 @@ namespace PortFolion.ViewModels {
 		ProfitLossOnly,
 	}
 	
-	public class TempValue {
-		public string Title { get; set; }
+	public class TempValue : SeriesViewModel {
+		//public string Title { get; set; }
 		public double Amount { get; set; }
 		public double Rate { get; set; }
 		//public double Invest { get; set; }
@@ -278,14 +278,14 @@ namespace PortFolion.ViewModels {
 		public BrakeDownList BrakeDown {
 			get { return bdl; }
 			set {
-				if (SetProperty(ref bdl, value)) 
-					OnPropertyChanged(() => BrakeDownLegend);
+				SetProperty(ref bdl, value) ;
+					//OnPropertyChanged(() => BrakeDownLegend);
 			}
 		}
-		public IEnumerable<PieSeries> BrakeDownLegend {
-			get {
-				return this.BrakeDown.OfType<PieSeries>();
-			}
+		IEnumerable<TempValue> _bdLegend;
+		public IEnumerable<TempValue> BrakeDownLegend {
+			get { return _bdLegend; }
+			set { SetProperty(ref _bdLegend, value); }
 		}
 		TransitionList tsl;
 		public TransitionList Transition {
@@ -453,21 +453,29 @@ namespace PortFolion.ViewModels {
 				var tgnss = CurrentNode.MargeNodes(TargetLevel, Divide).ToArray();
 				tgnss.Zip(Ext.BrushColors().Repeat(), (a, b) => new { Data = a, Brush = b })
 					.ForEach(a => {
-						gdm.BrakeDown.Add(
-							new PieSeries() {
+						a.Data.Fill = new SolidColorBrush(a.Brush);
+						a.Data.Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f));
+						a.Data.StrokeThickness = 5;
+						var ps = new PieSeries() {
 								Title = a.Data.Title,
 								//Values = new ChartValues<ObservableValue>() { new ObservableValue(a.Data.Amount) },
 								Values = new ChartValues<TempValue>() { a.Data },
 								DataLabels = true,
 								//LabelPoint = cp => string.Format("{0}\n({1:P})", a.Data.Title, cp.Participation),
 								LabelPoint = cp => a.Data.Title,
-								Fill = new SolidColorBrush(a.Brush),
 								LabelPosition = PieLabelPosition.OutsideSlice,
-								StrokeThickness = 5,
-								Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f)),
-							});
+								//StrokeThickness = 5,
+								//Fill = new SolidColorBrush(a.Brush),
+								//Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f)),
+								StrokeThickness = a.Data.StrokeThickness,
+								Fill = a.Data.Fill,
+								Stroke = a.Data.Stroke,
+							};
+						a.Data.PointGeometry = ps.PointGeometry;
+						gdm.BrakeDown.Add(ps);
+							
 					});
-				
+				gdm.BrakeDownLegend = tgnss;
 			}
 			IEnumerable<GraphValue> _GraphRowData = Enumerable.Empty<GraphValue>();
 			/// <summary>累計キャッシュフローとその時点での評価総額</summary>

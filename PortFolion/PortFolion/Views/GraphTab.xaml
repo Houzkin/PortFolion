@@ -135,18 +135,34 @@
                     <lvc:PieChart.DataTooltip>
                         <lvc:DefaultTooltip Background="Black" Opacity="0.7" SelectionMode="SharedYInSeries" ShowSeries="False"/>
                     </lvc:PieChart.DataTooltip>
-                    <!--<lvc:PieChart.ChartLegend>
-                        <local:PieChartCustomLegend/>
-                    </lvc:PieChart.ChartLegend>-->
                 </lvc:PieChart>
-                <ItemsControl Grid.Row="2" ItemsSource="{Binding BrakeDownLegend}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    
-                </ItemsControl>
+
+                <ScrollViewer VerticalScrollBarVisibility="auto" Grid.Row="2" Margin="0,10,0,0">
+                    <ItemsControl ItemsSource="{Binding BrakeDownLegend}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" Width="{Binding Width,ElementName=Pie}"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate >
+                                <Grid Margin="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Path Grid.Column="0" Width="15" Height="15"  Stretch="Fill"
+                                          StrokeThickness="{Binding StrokeThickness}" Fill="{Binding Fill}"
+                                          Stroke="{Binding Stroke}" Data="{Binding PointGeometry}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Title}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Rate,StringFormat={}({0:P1})}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
             </Grid>
         </Expander>
 
