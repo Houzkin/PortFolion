@@ -131,6 +131,7 @@
     </Compile>
     <Compile Include="ViewModels\LocationTree.cs" />
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
+    <Compile Include="Views\Converter\PeriodToStringConverter.cs" />
     <Compile Include="Views\PieChartCustomLegend.xaml.cs">
       <DependentUpon>PieChartCustomLegend.xaml</DependentUpon>
     </Compile>

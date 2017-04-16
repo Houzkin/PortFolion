@@ -10,9 +10,21 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:vm="clr-namespace:PortFolion.ViewModels"
+             xmlns:cnv="clr-namespace:PortFolion.Views.Converter"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
     <Grid>
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+            <ObjectDataProvider x:Key="PeriodKey" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="vm:Period"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <cnv:PeriodToStringConverter x:Key="PeriodConverter"/>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
@@ -29,9 +41,6 @@
                 </TextBlock>
             </Expander.Header>
             <Grid>
-                <Grid.Resources>
-                    <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
-                </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
@@ -42,8 +51,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
-                    <ToggleButton x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}"></ToggleButton>
-                    <Button DockPanel.Dock="Right" Command="{Binding }">
+                    <!--<ToggleButton IsChecked="True" x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}"></ToggleButton>-->
+                    <Button DockPanel.Dock="Right">
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -62,10 +71,21 @@
                         </i:Interaction.Triggers>
                     </Button>
                 </DockPanel>
-                <WrapPanel Visibility="{Binding IsChecked,ElementName=OpenParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}" Grid.Row="1" Grid.ColumnSpan="2">
-                    <!--setting params-->
-                    <TextBlock>content</TextBlock>
-                </WrapPanel>
+                <!--<WrapPanel Visibility="{Binding IsChecked,ElementName=OpenParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}" Grid.Row="1" Grid.ColumnSpan="2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="期間 :" RenderTransformOrigin="2,0" HorizontalAlignment="Center"/>
+                    </Grid>
+                </WrapPanel>-->
                 <GroupBox Grid.Column="0" Grid.Row="2" Header="Date" mah:ControlsHelper.ContentCharacterCasing="Normal">
                     <TreeView ItemsSource="{Binding DateList}" Style="{StaticResource VirtualisedMetroTreeView}">
                     <TreeView.ItemContainerStyle>
@@ -120,16 +140,32 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
+                
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}"/>
-                    <TextBlock Text="{Binding CurrentNode.Name}"/>
-                </StackPanel>
+                <DockPanel Grid.Row="0">
+                    <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
+                        <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}"/>
+                        <TextBlock Text="{Binding CurrentNode.Name}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" DockPanel.Dock="Right">
+                        <ToggleButton x:Name="BdParams" Content="{iconPacks:PackIconMaterial Kind=Settings}" HorizontalAlignment="Right"/>
+                        <Grid Margin="0,0,0,15"
+                          Visibility="{Binding IsChecked,ElementName=BdParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="分割レベル : " VerticalAlignment="Center"/>
+                                    <mah:NumericUpDown Value="{Binding TargetLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Interval="1"/>
+                                    <!--<TextBox Text="{Binding TargetLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>-->
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </DockPanel>
                 <lvc:PieChart Grid.Row="1" x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" 
                               MinHeight="200" MinWidth="200" Width="300" Height="280" LegendLocation="None" Margin="15,0,15,3">
                     <lvc:PieChart.DataTooltip>
@@ -162,17 +198,69 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
-
             </Grid>
         </Expander>
 
         <StackPanel Grid.Column="3" Orientation="Vertical">
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="Transition" mah:ControlsHelper.ContentCharacterCasing="Normal">
-                <lvc:CartesianChart Series="{Binding Transition}" LegendLocation="Right" Height="230">
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Date" Labels="{Binding Transition.Labels}" Position="LeftBottom"/>
-                    </lvc:CartesianChart.AxisX>
-                </lvc:CartesianChart>
+            <Expander ExpandDirection="Down" IsExpanded="True" Header="Transition" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <lvc:CartesianChart Grid.Column="0" Series="{Binding Transition}" LegendLocation="Top" MinHeight="250" Zoom="X">
+                        <lvc:CartesianChart.DataTooltip>
+                            <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
+                        </lvc:CartesianChart.DataTooltip>
+                        <lvc:CartesianChart.AxisX>
+                            <!-- LabelFormatter="{Binding Transition.XFormatter}"-->
+                            <lvc:Axis Labels="{Binding Transition.Labels}" MinRange="2" RangeChangedCommand="{Binding Transition.RangeChangedCmd}" Position="LeftBottom"
+                                      MinValue="{Binding Transition.DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                      MaxValue="{Binding Transition.DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
+                                </lvc:Axis.Separator>
+                                <!--<i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="RangeChanged">
+                                        <l:LivetCallMethodAction MethodTarget="{Binding Transition}" MethodName="RangeChanged"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>-->
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis LabelFormatter="{Binding Transition.YFormatter}">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <ToggleButton x:Name="TsParams" Content="{iconPacks:PackIconMaterial Kind=Settings}" HorizontalAlignment="Right"/>
+                        <Grid Visibility="{Binding IsChecked,ElementName=TsParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="期間 : " VerticalAlignment="Center"/>
+                            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Source={StaticResource PeriodKey}}" SelectedValue="{Binding TimePeriod}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource PeriodConverter}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="表示 : " VerticalAlignment="Center"/>
+                            <ComboBox Grid.Row="1" Grid.Column="1">
+                                <!--未実装-->
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
             </Expander>
             <Expander ExpandDirection="Down" IsEnabled="True" Header="Index" mah:ControlsHelper.ContentCharacterCasing="Normal">
 

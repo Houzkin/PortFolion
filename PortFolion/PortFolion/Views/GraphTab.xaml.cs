@@ -24,6 +24,10 @@ namespace PortFolion.Views {
 			this.DataContext = new PortFolion.ViewModels.GraphDataManager();
 		}
 
+		//private void Axis_RangeChanged(LiveCharts.Events.RangeChangedEventArgs eventArgs) {
+
+		//}
+
 		//private void PieChart_DataHover(object sender, LiveCharts.ChartPoint chartPoint) {
 		//	var v = chartPoint.Instance;
 		//	var t = v.GetType();

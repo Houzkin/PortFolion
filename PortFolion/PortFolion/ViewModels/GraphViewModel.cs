@@ -20,10 +20,11 @@ using System.Windows.Media;
 
 namespace PortFolion.ViewModels {
 	public enum Period {
-		Yearly,
-		Quarterly,
-		Monthly,
 		Weekly,
+		Monthly,
+		Quarterly,
+		Yearly,
+		//EachWrittenDate,
 	}
 	public enum DividePattern {
 		Location,
@@ -81,7 +82,7 @@ namespace PortFolion.ViewModels {
 		
 		public static IEnumerable<GraphValue> ToGraphValues(this Dictionary<DateTime,CommonNode> src, Period period) {
 			if (src == null || !src.Any()) return Enumerable.Empty<GraphValue>();
-			var ax = Ext.GetTimeAxis(period, src.Keys.Min(), src.Keys.Max());
+			var ax = Ext.GetTimeAxis(period, src.Keys);
 			var srcs = new Queue<KeyValuePair<DateTime, CommonNode>>(src);
 			//var lst = new List<GraphValue>();
 
@@ -113,7 +114,9 @@ namespace PortFolion.ViewModels {
 			});
 			return rslt.ToArray();
 		}
-		static IEnumerable<DateSpan> GetTimeAxis(Period period, DateTime start, DateTime end) {
+		static IEnumerable<DateSpan> GetTimeAxis(Period period, IEnumerable<DateTime> dates) {
+			DateTime start = dates.Min();
+			DateTime end = dates.Max();
 			switch (period) {
 			case Period.Weekly:
 				var wkax = Ext.weeklyAxis(start, end).ToArray();
@@ -130,7 +133,9 @@ namespace PortFolion.ViewModels {
 				var yrax = Ext.yearlyAxis(start, end).ToArray();
 				return yrax.Zip(yrax.Select(a => new DateTime(a.Year, 1, 1)), (a, b) => new DateSpan(a, b));
 			default:
-				return Enumerable.Empty<DateSpan>();
+				var erd = dates.Take(1).Concat(dates.Select(a => a.AddDays(1)));
+				return dates.Zip(erd, (a, b) => new DateSpan(a, b));
+				//return Enumerable.Empty<DateSpan>();
 			}
 		}
 		#region date axis static method
@@ -274,6 +279,14 @@ namespace PortFolion.ViewModels {
 		DateTreeRoot dtr = new DateTreeRoot();
 		public ObservableCollection<DateTree> DateList => dtr.Children;
 
+		public int TargetLevel {
+			get { return this.Model.TargetLevel; }
+			set { this.Model.TargetLevel = value; }
+		}
+		public Period TimePeriod {
+			get { return Model.TimePeriod; }
+			set { Model.TimePeriod = value; }
+		}
 		BrakeDownList bdl;
 		public BrakeDownList BrakeDown {
 			get { return bdl; }
@@ -410,8 +423,10 @@ namespace PortFolion.ViewModels {
 					return Math.Min(_targetLevel, hg);
 				}
 				set {
-					if (_targetLevel == value) return;
-					_targetLevel = Math.Max(0, value);
+					var hg = CurrentNode?.Height() ?? 0;
+					value = Math.Max(0, Math.Min(hg, value));
+					if (TargetLevel == value) return;
+					_targetLevel = value;
 					RaisePropertyChanged();
 					RefreshBrakeDownList();
 					//RefreshHistoryList();
@@ -506,12 +521,12 @@ namespace PortFolion.ViewModels {
 
 			#region Draw Transition Graph
 			void DrawTransitionGraph() {
-				//gdm.Transition.Clear();
+				//gdm.Transition.Clear();new DateTime((long)x).ToString("yyyy/M/d")
 				gdm.Transition = new TransitionList() {
 					//XFormatter = x => new DateTime((long)x).ToString("yyyy/M/d"),
-					//YFormatter = y => y.ToString("0,0.#"),
+					YFormatter = y => y.ToString("0,0.#"),
 				};
-				gdm.Transition.Labels = _GraphRowData.Select(a => a.Date.ToShortDateString());
+				gdm.Transition.Labels = _GraphRowData.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					setBalanceLine();
 					setCashFlowColumn();
@@ -528,6 +543,8 @@ namespace PortFolion.ViewModels {
 					Title = CurrentNode?.Name,
 					//Values = new ChartValues<DateTimePoint>(_GraphRowData.Select(a=>new DateTimePoint(a.Date,a.Amount))),
 					Values = new ChartValues<double>(_GraphRowData.Select(a => a.Amount)),
+					//Values = new ChartValues<DateTimePoint>(_GraphRowData.Select(a => new DateTimePoint(a.Date, a.Amount))),
+					LineSmoothness = 0,
 				});
 			}
 			void setCashFlowColumn() {
@@ -592,6 +609,9 @@ namespace PortFolion.ViewModels {
 
 	public class DisplaySeriesCollection : SeriesCollection {
 		
+		public DisplaySeriesCollection() {
+			RangeChangedCmd = new ViewModelCommand(rangeChanged);
+		}
 		IEnumerable<string> _labels = Enumerable.Empty<string>();
 		public IEnumerable<string> Labels {
 			get { return _labels; }
@@ -601,7 +621,45 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(Labels)));
 			}
 		}
-		public Func<double,string> XFormatter { get; set; }
-		public Func<double,string> YFormatter { get; set; }
+		double min = double.NaN;
+		public double DisplayMinValue {
+			get { return min; }
+			set {
+				if (min == value) return;
+				min = value;
+				base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(DisplayMinValue)));
+				//base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(DisplayMinValue)));
+			}
+		}
+		double max = double.NaN;
+		public double DisplayMaxValue {
+			get { return max; }
+			set {
+				if (max == value) return;
+				max = value;
+				base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(DisplayMaxValue)));
+			}
+		}
+		public double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
+		//public Func<double,string> XFormatter { get; set; }
+		public Func<double, string> YFormatter { get; set; }
+
+		//public void RangeChanged() {
+
+		//	var xMin = this.min;
+		//	var xMax = max;
+		//}
+		public ViewModelCommand RangeChangedCmd { get; set; }
+		void rangeChanged() {
+			double rng = max - min;
+			if(min < 0) {
+				DisplayMinValue = 0;
+				DisplayMaxValue = Math.Min(rng, MaxLimit);
+			}
+			if (MaxLimit < max) {
+				DisplayMaxValue = MaxLimit;
+				DisplayMinValue = Math.Max(0, MaxLimit - rng);
+			}
+		}
 	}
 }
