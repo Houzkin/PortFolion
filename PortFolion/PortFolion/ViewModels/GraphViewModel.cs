@@ -8,6 +8,7 @@ using LiveCharts.Wpf;
 using Livet;
 using Livet.Commands;
 using Livet.EventListeners.WeakEvents;
+using Livet.Messaging;
 using PortFolion.Core;
 using PortFolion.IO;
 using System;
@@ -274,6 +275,11 @@ namespace PortFolion.ViewModels {
 			Model.Initialize(this);
 			
 		}
+		private InteractionMessenger _messenger;
+		public InteractionMessenger Messenger {
+			get { return _messenger = _messenger ?? new InteractionMessenger(); }
+			set { _messenger = value; }
+		}
 		public void Refresh() => Model.Refresh();
 		GraphMediator Model => this.MaybeModelAs<GraphMediator>().Value;
 
@@ -293,7 +299,7 @@ namespace PortFolion.ViewModels {
 			trans = 4,
 			all = period | level | trans,
 		}
-		public void EditParams() {
+		public void EnableParams() {
 			if (VisibleParams) {
 				VisibleParams = false;
 				setDisplayParams(displayParams.none);
@@ -302,7 +308,7 @@ namespace PortFolion.ViewModels {
 				setDisplayParams(displayParams.all);
 			}
 		}
-		public void EditBrakeDownParams() {
+		public void EnableBrakeDownParams() {
 			var ep = displayParams.level;
 			if (VisibleParams && ep == getDisplayParams()) {
 				VisibleParams = false;
@@ -312,7 +318,7 @@ namespace PortFolion.ViewModels {
 				setDisplayParams(ep);
 			}
 		}
-		public void EditTransitionParams() {
+		public void EnableTranstionParams() {
 			var ep = displayParams.period | displayParams.trans;
 			if(VisibleParams && ep == getDisplayParams()) {
 				VisibleParams = false;
@@ -326,7 +332,10 @@ namespace PortFolion.ViewModels {
 		bool _visibleParams;
 		public bool VisibleParams {
 			get { return _visibleParams; }
-			set { SetProperty(ref _visibleParams, value); }
+			set {
+				SetProperty(ref _visibleParams, value);
+				if(value)Messenger.Raise(new InteractionMessage("ExpandSandP"));
+			}
 		}
 		void setDisplayParams(displayParams ep) {
 			if (ep.HasFlag(displayParams.period)) EnablePeriodTime = true;
@@ -361,48 +370,6 @@ namespace PortFolion.ViewModels {
 			get { return _enableTransition; }
 			set { SetProperty(ref _enableTransition, value); }
 		}
-		/*
-		Dictionary<string, bool> enabDic = new Dictionary<string, bool>();
-		public bool EnablePeriodTime {
-			get { return ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(EnablePeriodTime)).Value; }
-			set {
-				var name = nameof(EnablePeriodTime);
-				ResultWithValue.Of<bool>(enabDic.TryGetValue, name)
-					.EitherWay(r => {
-						if(r != value) {
-							enabDic[name] = value;
-							this.OnPropertyChanged(name);
-						}
-					});
-			}
-		}
-		public bool EnableTagetLevel {
-			get { return ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(EnableTagetLevel)).Value; }
-			set {
-				var name = nameof(EnableTagetLevel);
-				ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(name))
-					.EitherWay(r => {
-						if (r != value) {
-							enabDic[name] = value;
-							this.OnPropertyChanged(name);
-						}
-					});
-			}
-		}
-		public bool EnableTransitionStatus {
-			get { return ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(EnableTransitionStatus)).Value; }
-			set {
-				var name = nameof(EnableTransitionStatus);
-				ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(name))
-					.EitherWay(r => {
-						if(r != value) {
-							enabDic[name] = value;
-							this.OnPropertyChanged(name);
-						}
-					});
-			}
-		}
-		 * */
 		#endregion
 		BrakeDownList bdl;
 		public BrakeDownList BrakeDown {
@@ -761,11 +728,6 @@ namespace PortFolion.ViewModels {
 		//public Func<double,string> XFormatter { get; set; }
 		public Func<double, string> YFormatter { get; set; }
 
-		//public void RangeChanged() {
-
-		//	var xMin = this.min;
-		//	var xMax = max;
-		//}
 		public ViewModelCommand RangeChangedCmd { get; set; }
 		void rangeChanged() {
 			double rng = max - min;

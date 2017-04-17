@@ -15,6 +15,12 @@
              xmlns:cnv="clr-namespace:PortFolion.Views.Converter"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
+    <i:Interaction.Triggers>
+        <l:InteractionMessageTrigger MessageKey="ExpandSandP" Messenger="{Binding Messenger}">
+            <!--<ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="true"/>-->
+            <ei:ChangePropertyAction TargetName="SandP" PropertyName="IsExpanded" Value="True"/>
+        </l:InteractionMessageTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.Resources>
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
@@ -40,7 +46,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
-        <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
+        <Expander Grid.Column="0" x:Name="SandP" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
                 <TextBlock Text="Setting &amp; Parametor" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
@@ -59,16 +65,22 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
-                    <ToggleButton IsChecked="True" x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}"></ToggleButton>
+                    <ToggleButton IsChecked="{Binding VisibleParams,Mode=OneWay}" x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click" >
+                                <ei:CallMethodAction TargetObject="{Binding}" MethodName="EnableParams"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </ToggleButton>
                     <Button DockPanel.Dock="Right">
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <iconPacks:PackIconMaterial 
-                                       HorizontalAlignment="Center"
+                                       HorizontalAlignment="Stretch"
                                        VerticalAlignment="Center"
-                                       Kind="Refresh"/>
-                                    <TextBlock Text="更新" Margin="3,0,0,0"/>
+                                       Kind="Refresh" Margin="0,0,3,0"/>
+                                    <TextBlock Text="更新" Margin="0,0,3,0" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </Button.ContentTemplate>
@@ -85,11 +97,11 @@
                     <StackPanel Orientation="Vertical">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="分割レベル : " VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            <mah:NumericUpDown DockPanel.Dock="Right" Value="{Binding TargetLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Interval="1" HorizontalAlignment="Right"/>
+                            <mah:NumericUpDown DockPanel.Dock="Right" IsEnabled="{Binding EnableTagetLevel}" Value="{Binding TargetLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Interval="1" HorizontalAlignment="Right"/>
                         </DockPanel>
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="期間 : " VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Source={StaticResource PeriodKey}}" SelectedValue="{Binding TimePeriod}" HorizontalAlignment="Right">
+                            <ComboBox DockPanel.Dock="Right" IsEnabled="{Binding EnablePeriodTime}" ItemsSource="{Binding Source={StaticResource PeriodKey}}" SelectedValue="{Binding TimePeriod}" HorizontalAlignment="Right">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={StaticResource PeriodConverter}}"/>
@@ -99,7 +111,7 @@
                         </DockPanel>
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="表示 : " VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Source={StaticResource TransitionStatusKey}}" SelectedValue="{Binding TransitionStatus}" HorizontalAlignment="Right">
+                            <ComboBox DockPanel.Dock="Right" IsEnabled="{Binding EnableTransitionStatus}" ItemsSource="{Binding Source={StaticResource TransitionStatusKey}}" SelectedValue="{Binding TransitionStatus}" HorizontalAlignment="Right">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={StaticResource TransitionStatusConverter}}"/>
@@ -177,7 +189,14 @@
                         <TextBlock Text="{Binding CurrentNode.Name}"/>
                     </StackPanel>
                     <Button x:Name="BdParams" DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                  Content="{iconPacks:PackIconMaterial Kind=Settings}"/>
+                                  Content="{iconPacks:PackIconMaterial Kind=Settings}" VerticalAlignment="Top">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <ei:CallMethodAction TargetObject="{Binding}" MethodName="EnableBrakeDownParams"/>
+                                <!--<ei:ChangePropertyAction TargetName="SandP" PropertyName="IsExpanded" Value="True"/>-->
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
                 </DockPanel>
                 <lvc:PieChart Grid.Row="1" x:Name="Pie" Series="{Binding BrakeDown}" StartingRotationAngle="90" 
                               MinHeight="200" MinWidth="200" Width="300" Height="280" LegendLocation="None" Margin="15,0,15,3">
@@ -249,7 +268,14 @@
                         </lvc:CartesianChart.AxisY>
                     </lvc:CartesianChart>
                     <StackPanel Grid.Column="1" Orientation="Vertical">
-                        <ToggleButton x:Name="TsParams" Content="{iconPacks:PackIconMaterial Kind=Settings}" HorizontalAlignment="Right"/>
+                        <Button x:Name="TsParams" Content="{iconPacks:PackIconMaterial Kind=Settings}" HorizontalAlignment="Right">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <ei:CallMethodAction TargetObject="{Binding}" MethodName="EnableTranstionParams"/>
+                                    <!--<ei:ChangePropertyAction TargetName="SandP" PropertyName="IsExpanded" Value="True"/>-->
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Expander>
