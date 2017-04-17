@@ -1,4 +1,5 @@
-﻿using Houzkin.Architecture;
+﻿using Houzkin;
+using Houzkin.Architecture;
 using Houzkin.Tree;
 using LiveCharts;
 using LiveCharts.Configurations;
@@ -283,10 +284,126 @@ namespace PortFolion.ViewModels {
 			get { return this.Model.TargetLevel; }
 			set { this.Model.TargetLevel = value; }
 		}
-		public Period TimePeriod {
-			get { return Model.TimePeriod; }
-			set { Model.TimePeriod = value; }
+		#region edit params
+		[Flags]
+		enum displayParams {
+			none = 0,
+			period = 1,
+			level = 2,
+			trans = 4,
+			all = period | level | trans,
 		}
+		public void EditParams() {
+			if (VisibleParams) {
+				VisibleParams = false;
+				setDisplayParams(displayParams.none);
+			}else {
+				VisibleParams = true;
+				setDisplayParams(displayParams.all);
+			}
+		}
+		public void EditBrakeDownParams() {
+			var ep = displayParams.level;
+			if (VisibleParams && ep == getDisplayParams()) {
+				VisibleParams = false;
+				setDisplayParams(displayParams.none);
+			}else {
+				VisibleParams = true;
+				setDisplayParams(ep);
+			}
+		}
+		public void EditTransitionParams() {
+			var ep = displayParams.period | displayParams.trans;
+			if(VisibleParams && ep == getDisplayParams()) {
+				VisibleParams = false;
+				setDisplayParams(displayParams.none);
+			}else {
+				VisibleParams = true;
+				setDisplayParams(ep);
+			}
+		}
+		
+		bool _visibleParams;
+		public bool VisibleParams {
+			get { return _visibleParams; }
+			set { SetProperty(ref _visibleParams, value); }
+		}
+		void setDisplayParams(displayParams ep) {
+			if (ep.HasFlag(displayParams.period)) EnablePeriodTime = true;
+			else EnablePeriodTime = false;
+
+			if (ep.HasFlag(displayParams.level)) EnableTagetLevel = true;
+			else EnableTagetLevel = false;
+
+			if (ep.HasFlag(displayParams.trans)) EnableTransitionStatus = true;
+			else EnableTransitionStatus = false;
+		}
+		displayParams getDisplayParams() {
+			displayParams ep = displayParams.none;
+			if (EnablePeriodTime) ep |= displayParams.period;
+			if (EnableTagetLevel) ep |= displayParams.level;
+			if (EnableTransitionStatus) ep |= displayParams.trans;
+			return ep;
+		}
+
+		bool _enablePeriodTime;
+		public bool EnablePeriodTime {
+			get { return _enablePeriodTime; }
+			set { SetProperty(ref _enablePeriodTime, value); }
+		}
+		bool _enableTargetLevel;
+		public bool EnableTagetLevel {
+			get { return _enableTargetLevel; }
+			set { SetProperty(ref _enableTargetLevel, value); }
+		}
+		bool _enableTransition;
+		public bool EnableTransitionStatus {
+			get { return _enableTransition; }
+			set { SetProperty(ref _enableTransition, value); }
+		}
+		/*
+		Dictionary<string, bool> enabDic = new Dictionary<string, bool>();
+		public bool EnablePeriodTime {
+			get { return ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(EnablePeriodTime)).Value; }
+			set {
+				var name = nameof(EnablePeriodTime);
+				ResultWithValue.Of<bool>(enabDic.TryGetValue, name)
+					.EitherWay(r => {
+						if(r != value) {
+							enabDic[name] = value;
+							this.OnPropertyChanged(name);
+						}
+					});
+			}
+		}
+		public bool EnableTagetLevel {
+			get { return ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(EnableTagetLevel)).Value; }
+			set {
+				var name = nameof(EnableTagetLevel);
+				ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(name))
+					.EitherWay(r => {
+						if (r != value) {
+							enabDic[name] = value;
+							this.OnPropertyChanged(name);
+						}
+					});
+			}
+		}
+		public bool EnableTransitionStatus {
+			get { return ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(EnableTransitionStatus)).Value; }
+			set {
+				var name = nameof(EnableTransitionStatus);
+				ResultWithValue.Of<bool>(enabDic.TryGetValue, nameof(name))
+					.EitherWay(r => {
+						if(r != value) {
+							enabDic[name] = value;
+							this.OnPropertyChanged(name);
+						}
+					});
+			}
+		}
+		 * */
+		#endregion
 		BrakeDownList bdl;
 		public BrakeDownList BrakeDown {
 			get { return bdl; }
