@@ -606,10 +606,15 @@ namespace PortFolion.ViewModels {
 			#region Draw Transition Graph
 			void DrawTransitionGraph() {
 				//gdm.Transition.Clear();new DateTime((long)x).ToString("yyyy/M/d")
-				gdm.Transition = new TransitionList() {
+				gdm.Transition = gdm.Transition ?? new TransitionList() {
 					//XFormatter = x => new DateTime((long)x).ToString("yyyy/M/d"),
-					YFormatter = y => y.ToString("0,0.#"),
+					YFormatter = y => y.ToString("#,0.#"),
 				};
+				var cnt = gdm.Transition.Count;
+				while(0 < cnt) {
+					cnt--;
+					gdm.Transition.RemoveAt(cnt);
+				}
 				gdm.Transition.Labels = _GraphRowData.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
 				if (this.TransitionStatus == TransitionStatus.SingleCashFlow) {
 					setBalanceLine();
@@ -621,6 +626,7 @@ namespace PortFolion.ViewModels {
 				}else if(this.TransitionStatus == TransitionStatus.BalanceOnly) {
 					setBalanceLine();
 				}
+				
 			}
 			void setBalanceLine() {
 				gdm.Transition.Add(new LineSeries() {
@@ -641,18 +647,19 @@ namespace PortFolion.ViewModels {
 				gdm.Transition.Add(new LineSeries() {
 					Title = "Profit and Loss",
 					Values = new ChartValues<double>(_GraphRowPL.Select(a => a.Item2 - a.Item1)),
+					LineSmoothness = 0,
 				});
 			}
 			void setFlowAndProfitLoss() {
 				gdm.Transition.Add(
 					new StackedAreaSeries() {
-						Title = "Profit and Loss",
-						Values = new ChartValues<double>(_GraphRowPL.Select(a=>a.Item2 - a.Item1)),
+						Title = "Cash Flow",
+						Values = new ChartValues<double>(_GraphRowPL.Select(a=>a.Item1)),
 					});
 				gdm.Transition.Add(
 					new StackedAreaSeries() {
-						Title = "Cash Flow",
-						Values = new ChartValues<double>(_GraphRowPL.Select(a=>a.Item1)),
+						Title = "Profit and Loss",
+						Values = new ChartValues<double>(_GraphRowPL.Select(a=>a.Item2 - a.Item1)),
 					});
 			}
 			#endregion

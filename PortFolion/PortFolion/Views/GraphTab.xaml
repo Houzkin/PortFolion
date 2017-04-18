@@ -170,7 +170,7 @@
         <!--<local:GraphContents Grid.Column="1"/>-->
         <Expander x:Name="BrakeDownExp" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="BrakeDown" TextAlignment="Left">
+                <TextBlock Text="内訳" TextAlignment="Left">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="90"/>
                     </TextBlock.LayoutTransform>
@@ -234,29 +234,24 @@
         </Expander>
 
         <StackPanel Grid.Column="3" Orientation="Vertical">
-            <Expander ExpandDirection="Down" IsExpanded="True" Header="Transition" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            <Expander ExpandDirection="Down" Header="推移" mah:ControlsHelper.ContentCharacterCasing="Normal">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
-                    <lvc:CartesianChart Grid.Column="0" Series="{Binding Transition}" LegendLocation="Top" MinHeight="250" Zoom="X">
+                    <lvc:CartesianChart x:Name="TransGraph" Grid.Column="0" Series="{Binding Transition}" LegendLocation="Top" MinHeight="250" Zoom="X">
                         <lvc:CartesianChart.DataTooltip>
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
-                        <lvc:CartesianChart.AxisX>
-                            <!-- LabelFormatter="{Binding Transition.XFormatter}"-->
-                            <lvc:Axis Labels="{Binding Transition.Labels}" MinRange="2" RangeChangedCommand="{Binding Transition.RangeChangedCmd}" Position="LeftBottom"
+                        <lvc:CartesianChart.AxisX><!---->
+                            <lvc:Axis MinRange="4" Labels="{Binding Transition.Labels}" RangeChangedCommand="{Binding Transition.RangeChangedCmd}" Position="LeftBottom"
                                       MinValue="{Binding Transition.DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                       MaxValue="{Binding Transition.DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
                                 <lvc:Axis.Separator>
                                     <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
                                 </lvc:Axis.Separator>
-                                <!--<i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="RangeChanged">
-                                        <l:LivetCallMethodAction MethodTarget="{Binding Transition}" MethodName="RangeChanged"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>-->
+                                
                             </lvc:Axis>
                         </lvc:CartesianChart.AxisX>
                         <lvc:CartesianChart.AxisY>
@@ -272,18 +267,22 @@
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Click">
                                     <ei:CallMethodAction TargetObject="{Binding}" MethodName="EnableTranstionParams"/>
-                                    <!--<ei:ChangePropertyAction TargetName="SandP" PropertyName="IsExpanded" Value="True"/>-->
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Expander>
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="Index" mah:ControlsHelper.ContentCharacterCasing="Normal">
-
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="インデックス" mah:ControlsHelper.ContentCharacterCasing="Normal">
             </Expander>
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="Volatility" mah:ControlsHelper.ContentCharacterCasing="Normal">
-
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="変動率" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="損益" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            <Expander ExpandDirection="Down" IsEnabled="True" Header="変動率" mah:ControlsHelper.ContentCharacterCasing="Normal">
             </Expander>
         </StackPanel>
         

@@ -24,6 +24,7 @@ namespace PortFolion.Views {
 			this.DataContext = new PortFolion.ViewModels.GraphDataManager();
 		}
 
+
 		//private void Axis_RangeChanged(LiveCharts.Events.RangeChangedEventArgs eventArgs) {
 
 		//}
