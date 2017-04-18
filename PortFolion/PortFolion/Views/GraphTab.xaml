@@ -245,7 +245,7 @@
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
                         <lvc:CartesianChart.AxisX><!---->
-                            <lvc:Axis MinRange="4" Labels="{Binding Transition.Labels}" RangeChangedCommand="{Binding Transition.RangeChangedCmd}" Position="LeftBottom"
+                            <lvc:Axis MinRange="2" Labels="{Binding Transition.Labels}" RangeChangedCommand="{Binding Transition.RangeChangedCmd}" Position="LeftBottom"
                                       MinValue="{Binding Transition.DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                       MaxValue="{Binding Transition.DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
                                 <lvc:Axis.Separator>
@@ -273,17 +273,19 @@
                     </StackPanel>
                 </Grid>
             </Expander>
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="インデックス" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            <Expander ExpandDirection="Down" Header="内訳推移" mah:ControlsHelper.ContentCharacterCasing="Normal">
             </Expander>
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="変動率" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            <Expander ExpandDirection="Down" Header="比率推移" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            <Expander ExpandDirection="Down" Header="推移＆累積CF" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            <Expander ExpandDirection="Down" Header="損益" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            <Expander ExpandDirection="Down" Header="指数" mah:ControlsHelper.ContentCharacterCasing="Normal">
+            </Expander>
+            <Expander ExpandDirection="Down" Header="変動率" mah:ControlsHelper.ContentCharacterCasing="Normal">
             </Expander>
             
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="損益" mah:ControlsHelper.ContentCharacterCasing="Normal">
-            </Expander>
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="" mah:ControlsHelper.ContentCharacterCasing="Normal">
-            </Expander>
-            <Expander ExpandDirection="Down" IsEnabled="True" Header="変動率" mah:ControlsHelper.ContentCharacterCasing="Normal">
-            </Expander>
         </StackPanel>
         
     </Grid>
