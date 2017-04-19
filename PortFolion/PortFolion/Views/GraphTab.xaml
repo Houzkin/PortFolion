@@ -249,8 +249,8 @@
                     </Expander.Header>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Orientation="Vertical">
-                            <ToggleButton Content="残高＆CF"/>
-                            <ToggleButton Content="残高＆累積CF"/>
+                            <ToggleButton Content="残高&amp;CF"/>
+                            <ToggleButton Content="残高&amp;累積CF"/>
                             <ToggleButton Content="損益"/>
                             <ToggleButton Content="比率推移"/>
                             <ToggleButton Content="内訳推移"/>
