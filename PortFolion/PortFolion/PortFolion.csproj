@@ -129,6 +129,8 @@
     <Compile Include="EditComponent\AccountEditWindow.xaml.cs">
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\GraphVm.cs" />
+    <Compile Include="ViewModels\GraphVmUtil.cs" />
     <Compile Include="ViewModels\LocationTree.cs" />
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
     <Compile Include="Views\Converter\PeriodToStringConverter.cs" />

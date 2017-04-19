@@ -13,13 +13,13 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:vm="clr-namespace:PortFolion.ViewModels"
              xmlns:cnv="clr-namespace:PortFolion.Views.Converter"
+             xmlns:selector ="clr-namespace:PortFolion.Views.Selector"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
     <i:Interaction.Triggers>
-        <l:InteractionMessageTrigger MessageKey="ExpandSandP" Messenger="{Binding Messenger}">
-            <!--<ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="true"/>-->
+        <!--<l:InteractionMessageTrigger MessageKey="ExpandSandP" Messenger="{Binding Messenger}">
             <ei:ChangePropertyAction TargetName="SandP" PropertyName="IsExpanded" Value="True"/>
-        </l:InteractionMessageTrigger>
+        </l:InteractionMessageTrigger>-->
     </i:Interaction.Triggers>
     <Grid>
         <Grid.Resources>
@@ -65,13 +65,13 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
-                    <ToggleButton IsChecked="{Binding VisibleParams,Mode=OneWay}" x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}">
+                    <!--<ToggleButton IsChecked="{Binding VisibleParams,Mode=OneWay}" x:Name="OpenParams" DockPanel.Dock="Left" Content="{iconPacks:PackIconMaterial Kind=Settings}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Click" >
                                 <ei:CallMethodAction TargetObject="{Binding}" MethodName="EnableParams"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                    </ToggleButton>
+                    </ToggleButton>-->
                     <Button DockPanel.Dock="Right">
                         <Button.ContentTemplate>
                             <DataTemplate>
@@ -91,17 +91,16 @@
                         </i:Interaction.Triggers>
                     </Button>
                 </DockPanel>
-                <GroupBox Grid.Row="1" Grid.ColumnSpan="2" Header="Params"  mah:ControlsHelper.ContentCharacterCasing="Normal"
-                    Visibility="{Binding IsChecked,ElementName=OpenParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}">
-
+                <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="Params" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                    
                     <StackPanel Orientation="Vertical">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="分割レベル : " VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            <mah:NumericUpDown DockPanel.Dock="Right" IsEnabled="{Binding EnableTagetLevel}" Value="{Binding TargetLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Interval="1" HorizontalAlignment="Right"/>
+                            <mah:NumericUpDown DockPanel.Dock="Right" Value="{Binding TargetLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Interval="1" HorizontalAlignment="Right"/>
                         </DockPanel>
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="期間 : " VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            <ComboBox DockPanel.Dock="Right" IsEnabled="{Binding EnablePeriodTime}" ItemsSource="{Binding Source={StaticResource PeriodKey}}" SelectedValue="{Binding TimePeriod}" HorizontalAlignment="Right">
+                            <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Source={StaticResource PeriodKey}}" SelectedValue="{Binding TimePeriod}" HorizontalAlignment="Right">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={StaticResource PeriodConverter}}"/>
@@ -109,7 +108,7 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </DockPanel>
-                        <DockPanel>
+                        <!--<DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="表示 : " VerticalAlignment="Center" HorizontalAlignment="Left"/>
                             <ComboBox DockPanel.Dock="Right" IsEnabled="{Binding EnableTransitionStatus}" ItemsSource="{Binding Source={StaticResource TransitionStatusKey}}" SelectedValue="{Binding TransitionStatus}" HorizontalAlignment="Right">
                                 <ComboBox.ItemTemplate>
@@ -118,9 +117,13 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
-                        </DockPanel>
+                        </DockPanel>-->
                     </StackPanel>
-                </GroupBox>
+                </Expander>
+                <!--<GroupBox Grid.Row="1" Grid.ColumnSpan="2" Header="Params"  mah:ControlsHelper.ContentCharacterCasing="Normal"
+                    Visibility="{Binding IsChecked,ElementName=OpenParams,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolToVisibility}}">
+
+                </GroupBox>-->
                 
                 <GroupBox Grid.Row="2" Grid.Column="0" Header="Date" mah:ControlsHelper.ContentCharacterCasing="Normal">
                     <TreeView ItemsSource="{Binding DateList}" Style="{StaticResource VirtualisedMetroTreeView}">
@@ -239,6 +242,23 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
+                <Grid.Resources>
+                    
+                </Grid.Resources>
+                <ScrollViewer Grid.Column="0" Margin="0" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding}"><!-- ItemTemplateSelector="{StaticResource }"-->
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <!--<ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>hoge</TextBlock>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>-->
+                    </ItemsControl>
+                </ScrollViewer>
                 <Expander IsEnabled="True" Grid.Column="1" ExpandDirection="Left" Margin="5,-5,-5,-5">
                     <Expander.Header>
                         <TextBlock Text="Menu" TextAlignment="Left">
@@ -259,11 +279,6 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Expander>
-                <ScrollViewer Grid.Column="0" Margin="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
-
-                    </StackPanel>
-                </ScrollViewer>
             </Grid>
         </GroupBox>
         <!--<StackPanel Grid.Column="3" Orientation="Vertical">

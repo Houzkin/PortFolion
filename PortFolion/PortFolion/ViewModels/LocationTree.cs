@@ -14,7 +14,7 @@ namespace PortFolion.ViewModels {
 		}
 		public CommonNode Location { get; private set; }
 	}
-	class LocationNode : ReadOnlyBindableTreeNode<CommonNode,LocationNode> {
+	public class LocationNode : ReadOnlyBindableTreeNode<CommonNode,LocationNode> {
 		public LocationNode(CommonNode model) : base(model) {
 		}
 		protected override LocationNode GenerateChild(CommonNode modelChildNode) {
@@ -45,7 +45,7 @@ namespace PortFolion.ViewModels {
 			this.Root().RaiseSelected(node);
 		}
 	}
-	class LocationRoot : LocationNode {
+	public class LocationRoot : LocationNode {
 		public LocationRoot(CommonNode model) : base(model) {
 		}
 		protected override void RaiseSelected(CommonNode node) {
