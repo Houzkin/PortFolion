@@ -25,7 +25,6 @@ namespace PortFolion.ViewModels {
 	public class GraphTabViewModel : ViewModel {
 
 		public GraphTabViewModel() {
-
 			this.CompositeDisposable.Add(
 				new CollectionChangedWeakEventListener(RootCollection.Instance, (o, e) => {
 					dtr.Refresh();
@@ -40,6 +39,7 @@ namespace PortFolion.ViewModels {
 
 
 			this.PropertyChanged += (o, e) => {
+				_mng.Update();
 				this.BrakeDown.Update();
 				foreach(var g in this.Graphs) {
 					g.Update(_mng.GraphData);
@@ -49,9 +49,13 @@ namespace PortFolion.ViewModels {
 			_mng = new gvMng(this);
 
 			BrakeDown = new BrakeDownChart(this);
-
 			this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
+
+
+
+
+
 
 		}
 		gvMng _mng;
@@ -135,7 +139,7 @@ namespace PortFolion.ViewModels {
 		public IEnumerable<string> CurrentPath {
 			get { return _currentPath; }
 			private set {
-				if (!_currentPath.SequenceEqual(value)) return;
+				if (_currentPath.SequenceEqual(value)) return;
 				_currentPath = value;
 				_mng.Update();
 				RaisePropertyChanged();
@@ -189,9 +193,14 @@ namespace PortFolion.ViewModels {
 				if (value) {
 					if (!VisibleTransition) {
 						ts = new TransitionSeries(this);
-						Graphs.Insert(0, ts);
-						ts.Disposed += (o, e) => Graphs.Remove(ts);
+						//Graphs.Insert(0, ts);
+						Graphs.Add(ts);
+						ts.Disposed += (o, e) => {
+							Graphs.Remove(ts);
+							RaisePropertyChanged();
+						};
 						//ts.Refresh(src);
+						ts.Refresh(this._mng.GraphData);
 					}
 				} else {
 					ts?.Dispose();
@@ -205,11 +214,15 @@ namespace PortFolion.ViewModels {
 			set {
 				if (!value) {
 					tscfs.Dispose();
-				}else if(value && VisibleTransitionStackCF) {
+				}else if(value && !VisibleTransitionStackCF) {
 					tscfs = new TransitionStackCFSeries(this);
 					Graphs.Insert(0, tscfs);
-					tscfs.Disposed += (o, e) => Graphs.Remove(tscfs);
+					tscfs.Disposed += (o, e) => {
+						Graphs.Remove(tscfs);
+						RaisePropertyChanged();
+					};
 					//Refresh
+					tscfs.Refresh(this._mng.GraphData);
 				}
 			}
 		}
@@ -220,11 +233,14 @@ namespace PortFolion.ViewModels {
 			set {
 				if (!value) {
 					tpls.Dispose();
-				}else if(value && VisibleTransitionPL) {
+				}else if(value && !VisibleTransitionPL) {
 					tpls = new TransitionPLSeries(this);
 					Graphs.Insert(0, tpls);
-					tpls.Disposed += (o, e) => Graphs.Remove(tpls);
-					//Refresh
+					tpls.Disposed += (o, e) => {
+						Graphs.Remove(tpls);
+						RaisePropertyChanged();
+					};
+					tpls.Refresh(_mng.GraphData);
 				}
 			}
 		}
@@ -321,7 +337,7 @@ namespace PortFolion.ViewModels {
 	}
 
 	public abstract class GraphSeriesBase : SeriesCollection , IDisposable {
-		protected GraphTabViewModel ViewModel;
+		protected GraphTabViewModel ViewModel { get; }
 
 		public GraphSeriesBase(GraphTabViewModel viewModel) {
 			ViewModel = viewModel;
@@ -335,7 +351,11 @@ namespace PortFolion.ViewModels {
 			var cnt = this.Count;
 			while (0 < cnt) {
 				cnt--;
-				this.RemoveAt(cnt);
+				try {
+					this.RemoveAt(cnt);
+				} catch {
+
+				}
 			}
 		}
 		IEnumerable<string> _labels = Enumerable.Empty<string>();

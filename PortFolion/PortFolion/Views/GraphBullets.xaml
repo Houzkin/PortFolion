@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="PortFolion.Views.GraphBullets"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PortFolion.Views"
+             xmlns:selector="clr-namespace:PortFolion.Views.Selector"
+             xmlns:vm ="clr-namespace:PortFolion.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <GroupBox Header="推移" Margin="0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.Resources>
+                <selector:GraphTemplateSelector x:Key="GraphTemplateSelector"/>
+                <DataTemplate x:Key="TransitionTemplate" DataType="{x:Type vm:GraphSeriesBase}">
+                    <Button>Transition</Button>
+                </DataTemplate>
+                <DataTemplate x:Key="TransitionStackCFTemplate" DataType="{x:Type vm:GraphSeriesBase}">
+                    <TextBlock>StackCF</TextBlock>
+                </DataTemplate>
+                <DataTemplate x:Key="TransitionPLTemplate" DataType="{x:Type vm:GraphSeriesBase}">
+                    <TextBlock>PL</TextBlock>
+                </DataTemplate>
+            </Grid.Resources>
+            <ScrollViewer Grid.Column="0" Margin="0" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Graphs}" >
+                    <!-- ItemTemplateSelector="{StaticResource }"ItemTemplateSelector="{StaticResource GraphTemplateSelector}"-->
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    
+                    <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>hoge</TextBlock>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <Expander IsExpanded="True" Grid.Column="1" ExpandDirection="Left" Margin="5,-5,-5,-5">
+                <Expander.Header>
+                    <TextBlock Text="Menu" TextAlignment="Left">
+                        <TextBlock.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </TextBlock.LayoutTransform>
+                    </TextBlock>
+                </Expander.Header>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Orientation="Vertical">
+                        <ToggleButton Content="残高&amp;CF" IsChecked="{Binding VisibleTransition}"/>
+                        <ToggleButton Content="残高&amp;累積CF" IsChecked="{Binding VisibleTransitionStackCF}"/>
+                        <ToggleButton Content="損益" IsChecked="{Binding VisibleTransitionPL}"/>
+                        <ToggleButton Content="比率推移"/>
+                        <ToggleButton Content="内訳推移"/>
+                        <ToggleButton Content="指数"/>
+                        <ToggleButton Content="変動率"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Expander>
+        </Grid>
+    </GroupBox>
+</UserControl>

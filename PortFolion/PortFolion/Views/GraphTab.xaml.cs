@@ -21,7 +21,8 @@ namespace PortFolion.Views {
 	public partial class GraphTab : UserControl {
 		public GraphTab() {
 			InitializeComponent();
-			this.DataContext = new PortFolion.ViewModels.GraphDataManager();
+			//this.DataContext = new PortFolion.ViewModels.GraphDataManager();
+			this.DataContext = new ViewModels.GraphTabViewModel();
 		}
 
 

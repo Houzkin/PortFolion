@@ -91,7 +91,7 @@
                         </i:Interaction.Triggers>
                     </Button>
                 </DockPanel>
-                <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="Params" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="Params" IsExpanded="True" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="0,5">
                     
                     <StackPanel Orientation="Vertical">
                         <DockPanel>
@@ -125,7 +125,7 @@
 
                 </GroupBox>-->
                 
-                <GroupBox Grid.Row="2" Grid.Column="0" Header="Date" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                <GroupBox Grid.Row="2" Margin="0,0,2.5,0" Grid.Column="0" Header="Date" mah:ControlsHelper.ContentCharacterCasing="Normal">
                     <TreeView ItemsSource="{Binding DateList}" Style="{StaticResource VirtualisedMetroTreeView}">
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
@@ -147,7 +147,7 @@
                 </TreeView>
                 </GroupBox>
 
-                <GroupBox Grid.Column="1" Grid.Row="2" Header="Location" mah:ControlsHelper.ContentCharacterCasing="Normal">
+                <GroupBox Grid.Column="1" Grid.Row="2" Margin="2.5,0,0,0" Header="Location" mah:ControlsHelper.ContentCharacterCasing="Normal">
                     <TreeView ItemsSource="{Binding Root}" Style="{StaticResource VirtualisedMetroTreeView}">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
@@ -209,14 +209,14 @@
                 </lvc:PieChart>
 
                 <ScrollViewer VerticalScrollBarVisibility="auto" Grid.Row="2" Margin="0,10,0,0">
-                    <ItemsControl ItemsSource="{Binding BrakeDownLegend}">
+                    <ItemsControl ItemsSource="{Binding BrakeDown.BrakeDownLegend}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal" Width="{Binding Width,ElementName=Pie}"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate >
+                            <DataTemplate>
                                 <Grid Margin="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"/>
@@ -235,52 +235,7 @@
                 </ScrollViewer>
             </Grid>
         </Expander>
-
-        <GroupBox Grid.Column="3" Header="推移" Margin="0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.Resources>
-                    
-                </Grid.Resources>
-                <ScrollViewer Grid.Column="0" Margin="0" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding}"><!-- ItemTemplateSelector="{StaticResource }"-->
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Vertical"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <!--<ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock>hoge</TextBlock>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>-->
-                    </ItemsControl>
-                </ScrollViewer>
-                <Expander IsEnabled="True" Grid.Column="1" ExpandDirection="Left" Margin="5,-5,-5,-5">
-                    <Expander.Header>
-                        <TextBlock Text="Menu" TextAlignment="Left">
-                            <TextBlock.LayoutTransform>
-                                <RotateTransform Angle="90"/>
-                            </TextBlock.LayoutTransform>
-                        </TextBlock>
-                    </Expander.Header>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Orientation="Vertical">
-                            <ToggleButton Content="残高&amp;CF"/>
-                            <ToggleButton Content="残高&amp;累積CF"/>
-                            <ToggleButton Content="損益"/>
-                            <ToggleButton Content="比率推移"/>
-                            <ToggleButton Content="内訳推移"/>
-                            <ToggleButton Content="指数"/>
-                            <ToggleButton Content="変動率"/>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Expander>
-            </Grid>
-        </GroupBox>
+        <local:GraphBullets Grid.Column="3" DataContext="{Binding}"/>
         <!--<StackPanel Grid.Column="3" Orientation="Vertical">
             <Expander ExpandDirection="Down" Header="推移" mah:ControlsHelper.ContentCharacterCasing="Normal">
                 <Grid>
