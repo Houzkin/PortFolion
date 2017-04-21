@@ -122,8 +122,8 @@
                         <ToggleButton Content="損益" IsChecked="{Binding VisibleTransitionPL}"/>
                         <ToggleButton Content="比率推移"/>
                         <ToggleButton Content="内訳推移"/>
-                        <ToggleButton Content="指数"/>
-                        <ToggleButton Content="変動率"/>
+                        <ToggleButton Content="指数" IsChecked="{Binding VisibleIndex}"/>
+                        <ToggleButton Content="変動率" IsChecked="{Binding VisibleVolatility}"/>
                     </StackPanel>
                 </ScrollViewer>
             </Expander>

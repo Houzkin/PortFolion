@@ -207,7 +207,7 @@ namespace PortFolion.ViewModels {
 			get { return !(tscfs == null || tscfs.IsDisposed); }
 			set {
 				if (!value) {
-					tscfs.Dispose();
+					tscfs?.Dispose();
 				}else if(value && !VisibleTransitionStackCF) {
 					tscfs = new TransitionStackCFSeries(this);
 					Graphs.Insert(0, tscfs);
@@ -226,7 +226,7 @@ namespace PortFolion.ViewModels {
 			get { return !(tpls == null || tpls.IsDisposed); }
 			set {
 				if (!value) {
-					tpls.Dispose();
+					tpls?.Dispose();
 				}else if(value && !VisibleTransitionPL) {
 					tpls = new TransitionPLSeries(this);
 					Graphs.Insert(0, tpls);
@@ -239,6 +239,41 @@ namespace PortFolion.ViewModels {
 			}
 		}
 
+		IndexGraphVm igvm;
+		public bool VisibleIndex {
+			get { return !(igvm == null || igvm.IsDisposed); }
+			set {
+				if (!value) {
+					igvm?.Dispose();
+				}else if(value && !VisibleIndex) {
+					igvm = new IndexGraphVm(this);
+					Graphs.Insert(0, igvm);
+					igvm.Disposed += (o, e) => {
+						Graphs.Remove(igvm);
+						RaisePropertyChanged();
+					};
+					igvm.Refresh(_mng.GraphData);
+				}
+			}
+		}
+
+		VolatilityGraphVm vgvm;
+		public bool VisibleVolatility {
+			get { return !(vgvm == null || vgvm.IsDisposed); }
+			set {
+				if (!value) {
+					vgvm?.Dispose();
+				}else if(value && !VisibleVolatility) {
+					vgvm = new VolatilityGraphVm(this);
+					Graphs.Insert(0, vgvm);
+					vgvm.Disposed += (o, e) => {
+						Graphs.Remove(vgvm);
+						RaisePropertyChanged();
+					};
+					vgvm.Refresh(_mng.GraphData);
+				}
+			}
+		}
 		#endregion
 
 		class gvMng {
@@ -403,16 +438,12 @@ namespace PortFolion.ViewModels {
 		public event EventHandler Disposed;
 	}
 
-	public class TransitionSeries : GraphVmBase {
-
+	public abstract class PathPeriodGraph : GraphVmBase {
 		IEnumerable<string> _curPath;
 		Period _period;
-
-		public TransitionSeries(GraphTabViewModel viewModel) : base(viewModel) {
-		}
-		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
+		public PathPeriodGraph(GraphTabViewModel viewModel) : base(viewModel) { }
 		public override void Update(IEnumerable<GraphValue> src) {
-			if(!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
+			if (!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
 				Refresh(src);
 			}
 		}
@@ -422,11 +453,23 @@ namespace PortFolion.ViewModels {
 
 			RemoveAll();
 
-			Labels = src.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
+			Labels = this.GetLabels(src).ToArray();// src.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
 
 			Draw(src);
 		}
-		protected virtual void Draw(IEnumerable<GraphValue> src) {
+		protected abstract void Draw(IEnumerable<GraphValue> src);
+
+		protected virtual IEnumerable<string> GetLabels(IEnumerable<GraphValue> src) {
+			return src.Select(a => a.Date.ToString("yyyy/M/d"));
+		}
+	}
+
+	public class TransitionSeries : PathPeriodGraph {
+		public TransitionSeries(GraphTabViewModel viewModel) : base(viewModel) {
+		}
+		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
+		
+		protected override void Draw(IEnumerable<GraphValue> src) {
 			this.Add(new LineSeries() {
 				Title = ViewModel.CurrentNode?.Name,
 				Values = new ChartValues<double>(src.Select(a => a.Amount)),
@@ -438,10 +481,9 @@ namespace PortFolion.ViewModels {
 			});
 		}
 	}
-	public class TransitionStackCFSeries : TransitionSeries {
+	public class TransitionStackCFSeries : PathPeriodGraph {
 		public TransitionStackCFSeries(GraphTabViewModel viewModel) : base(viewModel) {
 		}
-		protected override double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			//var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
 			//				   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
@@ -459,9 +501,8 @@ namespace PortFolion.ViewModels {
 				});
 		}
 	}
-	public class TransitionPLSeries : TransitionSeries {
+	public class TransitionPLSeries : PathPeriodGraph {
 		public TransitionPLSeries(GraphTabViewModel viewModel) : base(viewModel) { }
-		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			
 			var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
@@ -475,25 +516,32 @@ namespace PortFolion.ViewModels {
 		}
 	}
 
-	public class IndexGraphVm : GraphVmBase {
+	public class IndexGraphVm : PathPeriodGraph {
+		
 		public IndexGraphVm(GraphTabViewModel viewModel) : base(viewModel) {
 		}
-
-		public override void Update(IEnumerable<GraphValue> src) {
-			throw new NotImplementedException();
-		}
-
-		public override void Refresh(IEnumerable<GraphValue> src) {
-			throw new NotImplementedException();
+		protected override void Draw(IEnumerable<GraphValue> src) {
+			this.Add(
+				new LineSeries() {
+					Title = "指数",
+					LineSmoothness = 0,
+					Values = new ChartValues<double>(
+						src.Select(a=>a.Dietz+1.0)
+							.Scan(1d, (a, b) => a * b)
+							.Select(a=>a*1000)),
+				});
 		}
 	}
-	public class VolatilityGraphVm : GraphVmBase {
+	public class VolatilityGraphVm : PathPeriodGraph {
 		public VolatilityGraphVm(GraphTabViewModel viewModel) : base(viewModel) { }
-		public override void Update(IEnumerable<GraphValue> src) {
-			throw new NotImplementedException();
-		}
-		public override void Refresh(IEnumerable<GraphValue> src) {
-			throw new NotImplementedException();
+		protected override void Draw(IEnumerable<GraphValue> src) {
+			var dz = src.Select(a => a.Dietz).ToArray();
+			this.Add(
+				new LineSeries() {
+					Title = "変動率(修正ディーツ法)",
+					LineSmoothness = 0,
+					Values = new ChartValues<double>(src.Select(a => (a.Dietz)*100)),
+				});
 		}
 	}
 }

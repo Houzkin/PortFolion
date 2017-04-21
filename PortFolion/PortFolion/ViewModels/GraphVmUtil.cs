@@ -55,8 +55,8 @@ namespace PortFolion.ViewModels {
 		public double Amount { get; set; }
 		/// <summary>外部キャッシュフロー</summary>
 		public double Flow { get; set; }
-		/// <summary>修正ディーツ法による変動比率</summary>
-		public double Dietz { get; set; } = 1;
+		/// <summary>修正ディーツ法による変動比率(利回り)</summary>
+		public double Dietz { get; set; } = 0;
 		public DateTime Date { get; set; }
 	}
 	public class DateSpan {
@@ -95,7 +95,7 @@ namespace PortFolion.ViewModels {
 					gv.Amount = prev.Amount;
 				} else {
 					//期初時価総額
-					var st = prev.Amount != 0 ? prev.Amount : tmp.First().Value.Amount;
+					var st = prev.Amount != 0 ? prev.Amount : tmp.First().Value.Amount - tmp.First().Value.InvestmentValue;
 					//期末時価総額
 					gv.Amount = tmp.Last().Value.Amount;
 					//キャッシュフローを持つ要素
@@ -122,7 +122,7 @@ namespace PortFolion.ViewModels {
 			switch (period) {
 			case Period.Weekly:
 				var wkax = Ext.weeklyAxis(start, end).ToArray();
-				return wkax.Zip(wkax.Select(b => b.AddDays(-7)), (a, b) => new DateSpan(a, b));
+				return wkax.Zip(wkax.Select(b => b.AddDays(-6)), (a, b) => new DateSpan(a, b));
 			case Period.Monthly:
 				var mtax = Ext.monthlyAxis(start, end).ToArray();
 				return mtax.Zip(
@@ -142,7 +142,7 @@ namespace PortFolion.ViewModels {
 		}
 		#region date axis static method
 		/// <summary>週末日</summary>
-		internal static IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {
+		static IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {
 			DateTime cur = start.DayOfWeek == DayOfWeek.Sunday ? start : start.AddDays(7 - (int)start.DayOfWeek);
 			yield return cur;
 			while (cur <= end) {
@@ -151,7 +151,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		/// <summary>月末日</summary>
-		internal static IEnumerable<DateTime> monthlyAxis(DateTime start, DateTime end) {
+		static IEnumerable<DateTime> monthlyAxis(DateTime start, DateTime end) {
 			var c = EndOfMonth(start);
 			yield return c;
 			while (c <= end) {
@@ -160,7 +160,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		/// <summary>四半期末日</summary>
-		internal static IEnumerable<DateTime> quarterlyAxis(DateTime start, DateTime end) {
+		static IEnumerable<DateTime> quarterlyAxis(DateTime start, DateTime end) {
 			int q = start.Month / 3;
 			var c = EndOfMonth(new DateTime(start.Year, (q + 1) * 3, 1));
 			yield return c;
@@ -170,7 +170,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		/// <summary>年末日</summary>
-		internal static IEnumerable<DateTime> yearlyAxis(DateTime start, DateTime end) {
+		static IEnumerable<DateTime> yearlyAxis(DateTime start, DateTime end) {
 			var c = new DateTime(start.Year, 12, 31);
 			yield return c;
 			while (c <= end) {
