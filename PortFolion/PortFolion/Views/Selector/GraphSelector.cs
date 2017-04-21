@@ -11,27 +11,22 @@ namespace PortFolion.Views.Selector {
 	public class GraphTemplateSelector : DataTemplateSelector {
 		public override DataTemplate SelectTemplate(object item, DependencyObject container) {
 			var element = container as FrameworkElement;
-			var viewModel = item as object;
+			var viewModel = item as GraphVmBase;
 			if (element == null || viewModel == null) return null;
 
-			var templateName = "";
-			var t = viewModel.GetType();
-			if (t == typeof(TransitionSeries)) {
-				templateName = "TransitionTemplate";
-			} else if (t == typeof(TransitionStackCFSeries)) {
-				templateName = "TransitionStackCFTemplate";
-			} else if (t == typeof(TransitionPLSeries)) {
-				templateName = "TransitionPLTemplate";
-			}// else if (t == typeof()) {
-
-			//} else if (t == typeof()) {
-
-			//} else if (t == typeof()) {
-
+			var templateName = "TransitionTemplate";
+			//var t = viewModel.GetType();
+			//if (t == typeof(TransitionSeries)) {
+			//	templateName = "TransitionTemplate";
+			//} else if (t == typeof(TransitionStackCFSeries)) {
+			//	templateName = "TransitionStackCFTemplate";
+			//} else if (t == typeof(TransitionPLSeries)) {
+			//	templateName = "TransitionPLTemplate";
 			//}
-			return templateName == ""
-				? null
-				: element.FindResource(templateName) as DataTemplate;
+			return element.FindResource(templateName) as DataTemplate;
+			//return templateName == ""
+			//	? null
+			//	: element.FindResource(templateName) as DataTemplate;
 		}
 	}
 }

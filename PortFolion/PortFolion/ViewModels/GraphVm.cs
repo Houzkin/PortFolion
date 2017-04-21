@@ -52,11 +52,7 @@ namespace PortFolion.ViewModels {
 			this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
 
-
-
-
-
-
+			//this.VisibleTransition = true;
 		}
 		gvMng _mng;
 
@@ -65,7 +61,7 @@ namespace PortFolion.ViewModels {
 			BrakeDown.Refresh();
 			foreach (var g in Graphs) g.Refresh(_mng.GraphData);
 		}
-
+		
 
 		DateTreeRoot dtr = new DateTreeRoot();
 		public ObservableCollection<DateTree> DateList => dtr.Children;
@@ -183,7 +179,7 @@ namespace PortFolion.ViewModels {
 
 		public BrakeDownChart BrakeDown { get; }
 
-		public ObservableCollection<GraphSeriesBase> Graphs = new ObservableCollection<GraphSeriesBase>();
+		public ObservableCollection<GraphVmBase> Graphs { get; } = new ObservableCollection<GraphVmBase>();
 
 		#region graphs
 		TransitionSeries ts;
@@ -193,13 +189,11 @@ namespace PortFolion.ViewModels {
 				if (value) {
 					if (!VisibleTransition) {
 						ts = new TransitionSeries(this);
-						//Graphs.Insert(0, ts);
-						Graphs.Add(ts);
+						Graphs.Insert(0, ts);
 						ts.Disposed += (o, e) => {
 							Graphs.Remove(ts);
 							RaisePropertyChanged();
 						};
-						//ts.Refresh(src);
 						ts.Refresh(this._mng.GraphData);
 					}
 				} else {
@@ -336,10 +330,10 @@ namespace PortFolion.ViewModels {
 		}
 	}
 
-	public abstract class GraphSeriesBase : SeriesCollection , IDisposable {
+	public abstract class GraphVmBase : SeriesCollection , IDisposable {
 		protected GraphTabViewModel ViewModel { get; }
 
-		public GraphSeriesBase(GraphTabViewModel viewModel) {
+		public GraphVmBase(GraphTabViewModel viewModel) {
 			ViewModel = viewModel;
 			RangeChangedCmd = new ViewModelCommand(rangeChanged);
 		}
@@ -353,9 +347,7 @@ namespace PortFolion.ViewModels {
 				cnt--;
 				try {
 					this.RemoveAt(cnt);
-				} catch {
-
-				}
+				} catch { }
 			}
 		}
 		IEnumerable<string> _labels = Enumerable.Empty<string>();
@@ -385,7 +377,7 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(DisplayMaxValue)));
 			}
 		}
-		public double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
+		protected virtual double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		//public Func<double,string> XFormatter { get; set; }
 		public virtual Func<double, string> YFormatter => y => y.ToString("#,0.#");
 
@@ -411,14 +403,14 @@ namespace PortFolion.ViewModels {
 		public event EventHandler Disposed;
 	}
 
-	public class TransitionSeries : GraphSeriesBase {
+	public class TransitionSeries : GraphVmBase {
 
 		IEnumerable<string> _curPath;
 		Period _period;
 
 		public TransitionSeries(GraphTabViewModel viewModel) : base(viewModel) {
-			//YFormatter = y => y.ToString("#,0.#");
 		}
+		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
 		public override void Update(IEnumerable<GraphValue> src) {
 			if(!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
 				Refresh(src);
@@ -446,10 +438,10 @@ namespace PortFolion.ViewModels {
 			});
 		}
 	}
-
 	public class TransitionStackCFSeries : TransitionSeries {
 		public TransitionStackCFSeries(GraphTabViewModel viewModel) : base(viewModel) {
 		}
+		protected override double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			//var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
 			//				   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
@@ -469,6 +461,7 @@ namespace PortFolion.ViewModels {
 	}
 	public class TransitionPLSeries : TransitionSeries {
 		public TransitionPLSeries(GraphTabViewModel viewModel) : base(viewModel) { }
+		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			
 			var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
@@ -479,6 +472,28 @@ namespace PortFolion.ViewModels {
 					Values = new ChartValues<double>(ssrc.Select(a=>a.Item2 - a.Item1)),
 					LineSmoothness = 0,
 				});
+		}
+	}
+
+	public class IndexGraphVm : GraphVmBase {
+		public IndexGraphVm(GraphTabViewModel viewModel) : base(viewModel) {
+		}
+
+		public override void Update(IEnumerable<GraphValue> src) {
+			throw new NotImplementedException();
+		}
+
+		public override void Refresh(IEnumerable<GraphValue> src) {
+			throw new NotImplementedException();
+		}
+	}
+	public class VolatilityGraphVm : GraphVmBase {
+		public VolatilityGraphVm(GraphTabViewModel viewModel) : base(viewModel) { }
+		public override void Update(IEnumerable<GraphValue> src) {
+			throw new NotImplementedException();
+		}
+		public override void Refresh(IEnumerable<GraphValue> src) {
+			throw new NotImplementedException();
 		}
 	}
 }
