@@ -48,9 +48,9 @@
         
         <Expander Grid.Column="0" x:Name="SandP" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="Setting &amp; Parametor" TextAlignment="Left">
+                <TextBlock Text="Setting &amp; Parametor" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="90"/>
+                        <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
@@ -173,9 +173,9 @@
         <!--<local:GraphContents Grid.Column="1"/>-->
         <Expander x:Name="BrakeDownExp" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="内訳" TextAlignment="Left">
+                <TextBlock Text="内訳" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="90"/>
+                        <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>

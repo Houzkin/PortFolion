@@ -29,9 +29,9 @@
 
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="Date" TextAlignment="Left">
+                <TextBlock Text="Date" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="90"/>
+                        <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
