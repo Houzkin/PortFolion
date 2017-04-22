@@ -22,9 +22,9 @@
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="60*" MinWidth="50"/>
+            <ColumnDefinition Width="auto" MinWidth="50"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="45*" MinWidth="50"/>
+            <ColumnDefinition Width="*" MinWidth="50"/>
         </Grid.ColumnDefinitions>
 
         <Expander Grid.Column="0" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
@@ -83,7 +83,8 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" HorizontalAlignment="Center" />
+            
+            <TextBlock Grid.Row="0" x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="20" HorizontalAlignment="Center" Margin="0,3" />
             <Menu Grid.Row="1" HorizontalAlignment="Stretch" >
                 <!--<Button Content="開"/>
                 <Button Content="閉"/>-->
@@ -221,9 +222,9 @@
                             <tree:TreeListViewExpander x:Name="TreeExpander" Margin="3,0"/>
                             <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
-                            
-                            <mah:DropDownButton VerticalContentAlignment="Center"
-                                                Content="{iconPacks:PackIconMaterial Kind=LeadPencil,Width=13,Height=13}" ItemsSource="{Binding MenuList}" >
+                            <!--Content="{iconPacks:PackIconMaterial Kind=LeadPencil,Width=13,Height=13}" -->
+                            <mah:DropDownButton VerticalContentAlignment="Center" Content=""
+                                                ItemsSource="{Binding MenuList}" >
                                     <mah:DropDownButton.ItemContainerStyle>
                                     <Style TargetType="MenuItem">
                                         <Setter Property="Icon" Value="{Binding Icon}"/>
@@ -251,8 +252,8 @@
                             <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
                             <Button Width="22" Height="22" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}">
-                                <iconPacks:PackIconMaterial Width="13"
-                                              Height="13"
+                                <iconPacks:PackIconMaterial Width="12"
+                                              Height="12"
                                               Kind="Timetable" />
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
@@ -297,21 +298,14 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="評価額 (比率)" Width="auto">
+                    <GridViewColumn Header="時価評価額" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Right">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0:N0} ({1}%)">
-                                            <Binding Path="Amount"/>
-                                            <Binding Path="AmountRate"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock Text="{Binding Amount,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="含み損益" Width="auto">
+                    <GridViewColumn Header="含損益" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}" HorizontalAlignment="Right"/>
@@ -338,9 +332,32 @@
                     <Style TargetType="DataGridCell" BasedOn="{StaticResource MetroDataGridCell}">
                         <Setter Property="HorizontalAlignment" Value="Right"/>
                     </Style>
+                    <RoutedCommand x:Key="MyCommand"/>
                 </DataGrid.Resources>
+                <DataGrid.CommandBindings>
+                    <CommandBinding Command="{StaticResource MyCommand}" Executed="CommandBinding_Executed"/>
+                </DataGrid.CommandBindings>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/M/d}"
+                    <!--<DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/M/d}"
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>-->
+
+                    <DataGridTemplateColumn Header="日付" CanUserReorder="True" CanUserResize="True" CanUserSort="False" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}"/>
+                                    <Button Width="22" Height="22" Margin="3,0"
+                                            Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}"
+                                            Content="{iconPacks:PackIconMaterial Kind=FileTree, Width=12,Height=12}"
+                                            Command="{StaticResource MyCommand}" CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTextColumn Header="単価" Binding="{Binding PerPrice,StringFormat={}{0:N0}}" 
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="平均取得単価" Binding="{Binding PerBuyPriceAverage,StringFormat={}{0:N0}}" 
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
                         <DataGridTextColumn.HeaderTemplate>
@@ -352,7 +369,7 @@
                             </DataTemplate>
                         </DataGridTextColumn.HeaderTemplate>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding InvestmentValue}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
+                    <DataGridTextColumn Binding="{Binding InvestmentValue,StringFormat={}{0:N0}}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
                         <DataGridTextColumn.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
@@ -363,9 +380,9 @@
                             </DataTemplate>
                         </DataGridTextColumn.HeaderTemplate>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity}" 
+                    <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity,StringFormat={}{0:N0}}" 
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount}" CanUserReorder="True"
+                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount,StringFormat={}{0:N0}}" CanUserReorder="True"
                                         CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False">

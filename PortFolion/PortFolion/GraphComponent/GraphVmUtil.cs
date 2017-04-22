@@ -233,10 +233,11 @@ namespace PortFolion.ViewModels {
 			//.OrderBy(a => a.CashCount);
 
 		}
+		static IEnumerable<Color> colors;
 		public static IEnumerable<Color> BrushColors() {
 			//object obj = ColorConverter.ConvertFromString("#51000000");
 			//SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
-			return new List<Color>() {
+			return colors = colors ?? new List<Color>() {
 				Color.FromRgb(17,140,18),
 				Color.FromRgb(214,54,96),
 				Color.FromRgb(59,67,255),

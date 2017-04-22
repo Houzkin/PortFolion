@@ -10,7 +10,6 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:converter="clr-namespace:PortFolion.Views.Converter"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                 xmlns:ddmb="clr-namespace:DropDownMenuButton;assembly=DropDownMenuButton"
                  x:Name="editWindow"
                  mc:Ignorable="d" SaveWindowPosition="False"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
@@ -123,19 +122,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                 <TextBlock Text="{Binding Code}" Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding Name}" Margin="5,0,0,0"/>
-                                <!--<ddmb:DropDownMenuButton Margin="3" Style="{DynamicResource MetroToggleButton}">
-                                    <TextBlock Text="編"/>
-                                    <ddmb:DropDownMenuButton.DropDownContextMenu>
-                                        <ContextMenu ItemsSource="{Binding MenuList}">
-                                            <ContextMenu.ItemContainerStyle>
-                                                <Style TargetType="MenuItem">
-                                                    <Setter Property="Header" Value="{Binding Header}"/>
-                                                    <Setter Property="Command" Value="{Binding MenuCommand}"/>
-                                                </Style>
-                                            </ContextMenu.ItemContainerStyle>
-                                        </ContextMenu>
-                                    </ddmb:DropDownMenuButton.DropDownContextMenu>
-                                </ddmb:DropDownMenuButton>-->
+                                
 
                                 <mah:DropDownButton VerticalContentAlignment="Center"
                                                 Width="auto" Margin="3,0,0,0"

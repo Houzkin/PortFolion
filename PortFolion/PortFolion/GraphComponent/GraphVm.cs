@@ -538,10 +538,11 @@ namespace PortFolion.ViewModels {
 			var dz = src.Select(a => a.Dietz).ToArray();
 			this.Add(
 				new LineSeries() {
-					Title = "変動率(修正ディーツ法)",
+					Title = "収益率(修正ディーツ法)",
 					LineSmoothness = 0,
-					Values = new ChartValues<double>(src.Select(a => (a.Dietz)*100)),
+					Values = new ChartValues<double>(src.Select(a => (a.Dietz))),
 				});
 		}
+		public override Func<double, string> YFormatter => y => y.ToString("0.00%");
 	}
 }

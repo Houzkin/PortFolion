@@ -22,23 +22,15 @@ namespace PortFolion.Views {
 		public ListTab() {
 			InitializeComponent();
 			this.DataContext = new ListviewModel();
-			//var tr = this.LocationTree;
-			//foreach (var itm in tr.Items) {
-			//	var ii = itm as TreeViewItem;
-			//	if (ii == null) {
-
-			//	}
-			//}
+			
 		}
-		//private void StackPanel_ContextMenuOpening(object sender, ContextMenuEventArgs e) {
 
-		//	var tr = this.LocationTree;
-		//	foreach (var itm in tr.Items) {
-		//		var ii = itm as TreeViewItem;
-		//		if (ii == null) {
-
-		//		}
-		//	}
-		//}
+		private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e) {
+			var vm = this.DataContext as ListviewModel;
+			var d = e.Parameter as VmCoreBase;
+			if (d != null && vm != null)
+				vm.CurrentDate = d.CurrentDate;
+		}
+		
 	}
 }
