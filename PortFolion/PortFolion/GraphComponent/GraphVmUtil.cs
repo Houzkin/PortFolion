@@ -233,8 +233,17 @@ namespace PortFolion.ViewModels {
 			//.OrderBy(a => a.CashCount);
 
 		}
-		static IEnumerable<Color> colors;
-		public static IEnumerable<Color> BrushColors() {
+		static int rdmIdx = -1;
+		public static void ResetColorIndex() {
+			Random rdm = new Random();
+			rdmIdx = rdm.Next(BrushColors().Count);
+		}
+		public static List<Color> BrushOrder() {
+			if (rdmIdx < 0) ResetColorIndex();
+			return BrushColors().Repeat().Skip(rdmIdx).Take(BrushColors().Count).ToList();
+		}
+		static List<Color> colors;
+		public static List<Color> BrushColors() {
 			//object obj = ColorConverter.ConvertFromString("#51000000");
 			//SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
 			return colors = colors ?? new List<Color>() {

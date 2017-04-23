@@ -48,7 +48,7 @@
         
         <Expander Grid.Column="0" x:Name="SandP" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="Setting &amp; Parametor" TextAlignment="Right">
+                <TextBlock Text="Setting &amp; Parameter" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>
@@ -91,7 +91,7 @@
                         </i:Interaction.Triggers>
                     </Button>
                 </DockPanel>
-                <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="Params" IsExpanded="True" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="0,5">
+                <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="Parameter" IsExpanded="True" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="0,5">
                     
                     <StackPanel Orientation="Vertical">
                         <DockPanel>

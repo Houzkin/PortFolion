@@ -41,26 +41,34 @@
     </i:Interaction.Triggers>
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Button Content="settings"/>
-            <Button Content="options" />
-            <Button Content="lisence" Command="{Binding ShowLisence}"/>
-            <Button Content="help"/>
+            <!--<Button Content="settings"/>
+            <Button Content="options"  Command="{Binding ShowLisence}"/>-->
+            <ToggleButton Content="License" IsChecked="{Binding IsOpen,ElementName=LicenseFlyout}"/>
+            <Button Content="Wiki"/>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl>
+            <mah:Flyout x:Name="LicenseFlyout" IsModal="False" Header="License" Position="Right" AnimateOpacity="True">
+                <v:LicenseView />
+            </mah:Flyout>
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
+    
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition x:Name="ContentSpace" Height="Auto" />
+            <!--<RowDefinition x:Name="ContentSpace" Height="Auto" />-->
         </Grid.RowDefinitions>
         <Grid.Resources>
             <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
         </Grid.Resources>
         
-        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" TabStripPlacement="Left" Grid.Row="0" Grid.Column="1" mah:TabControlHelper.IsUnderlined="True" >
+        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" TabStripPlacement="Left" mah:TabControlHelper.IsUnderlined="True" >
             <mah:MetroAnimatedSingleRowTabControl.Resources>
                 <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type mah:MetroTabItem}">
                     <Setter Property="HeaderTemplate">
@@ -76,35 +84,13 @@
                     </Setter>
                 </Style>
             </mah:MetroAnimatedSingleRowTabControl.Resources>
-            <mah:MetroTabItem Header="Graph">
+            <mah:MetroTabItem Header="Graph ">
                 <v:GraphTab/>
             </mah:MetroTabItem>
-            <mah:MetroTabItem Header="Edit">
+            <mah:MetroTabItem Header="Edit ">
                 <v:ListTab />
             </mah:MetroTabItem>
         </mah:MetroAnimatedSingleRowTabControl>
-        <!--<TabControl x:Name="MainTabControl" TabStripPlacement="Left" Grid.Row="0" Grid.Column="1" mah:TabControlHelper.IsUnderlined="True" >
-            <TabControl.Resources>
-                <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type mah:MetroTabItem}">
-                    <Setter Property="HeaderTemplate">
-                        <Setter.Value>
-                            <DataTemplate>
-                                <ContentPresenter Content="{TemplateBinding Content}">
-                                    <ContentPresenter.LayoutTransform>
-                                        <RotateTransform Angle="270" />
-                                    </ContentPresenter.LayoutTransform>
-                                </ContentPresenter>
-                            </DataTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </TabControl.Resources>
-            <mah:MetroTabItem Header="Graph">
-                <v:GraphTab/>
-            </mah:MetroTabItem>
-            <mah:MetroTabItem Header="Edit">
-                <v:ListTab />
-            </mah:MetroTabItem>
-        </TabControl>-->
+        
     </Grid>
 </mah:MetroWindow>

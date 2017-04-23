@@ -345,11 +345,11 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}"/>
+                                    <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}" VerticalAlignment="Center"/>
                                     <Button Width="22" Height="22" Margin="3,0"
                                             Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}"
                                             Content="{iconPacks:PackIconMaterial Kind=FileTree, Width=12,Height=12}"
-                                            Command="{StaticResource MyCommand}" CommandParameter="{Binding}"/>
+                                            Command="{StaticResource MyCommand}" CommandParameter="{Binding}" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

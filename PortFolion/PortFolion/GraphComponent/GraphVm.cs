@@ -59,6 +59,7 @@ namespace PortFolion.ViewModels {
 		public void Refresh() {
 			_mng.Refresh();
 			BrakeDown.Refresh();
+			Ext.ResetColorIndex();
 			foreach (var g in Graphs) g.Refresh(_mng.GraphData);
 		}
 		
@@ -470,14 +471,22 @@ namespace PortFolion.ViewModels {
 		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
 		
 		protected override void Draw(IEnumerable<GraphValue> src) {
+			var cls = Ext.BrushOrder();
+
 			this.Add(new LineSeries() {
 				Title = ViewModel.CurrentNode?.Name,
 				Values = new ChartValues<double>(src.Select(a => a.Amount)),
 				LineSmoothness = 0,
+				Stroke = new SolidColorBrush(cls[0]),
+				Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 			});
 			this.Add(new ColumnSeries() {
 				Title = "キャッシュフロー",
 				Values = new ChartValues<double>(src.Select(a=>a.Flow)),
+
+				Stroke = new SolidColorBrush(cls[1]),
+				Fill = new SolidColorBrush(cls[1]) { Opacity = 0.5 },
+				StrokeThickness = 2,
 			});
 		}
 	}
@@ -487,24 +496,30 @@ namespace PortFolion.ViewModels {
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			//var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
 			//				   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
+			var cls = Ext.BrushOrder();
 			this.Add(
 				new LineSeries() {
 					Title = ViewModel.CurrentNode?.Name,
 					Values = new ChartValues<double>(src.Select(a=>a.Amount)),
 					LineSmoothness = 0,
+					Stroke = new SolidColorBrush(cls[0]),
+					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
 			this.Add(
 				new LineSeries() {
 					Title = "累積キャッシュフロー",
 					Values = new ChartValues<double>(src.Scan(0d,(ac,el)=>ac + el.Flow)),
 					LineSmoothness = 0,
+					Stroke = new SolidColorBrush(cls[1]),
+					Fill = new SolidColorBrush(cls[1]) { Opacity = 0.1 },
+					PointGeometry = DefaultGeometries.Square,
 				});
 		}
 	}
 	public class TransitionPLSeries : PathPeriodGraph {
 		public TransitionPLSeries(GraphTabViewModel viewModel) : base(viewModel) { }
 		protected override void Draw(IEnumerable<GraphValue> src) {
-			
+			var cls = Ext.BrushOrder();
 			var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
 							   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
 			this.Add(
@@ -512,6 +527,8 @@ namespace PortFolion.ViewModels {
 					Title = "損益",
 					Values = new ChartValues<double>(ssrc.Select(a=>a.Item2 - a.Item1)),
 					LineSmoothness = 0,
+					Stroke = new SolidColorBrush(cls[0]),
+					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
 		}
 	}
@@ -521,6 +538,7 @@ namespace PortFolion.ViewModels {
 		public IndexGraphVm(GraphTabViewModel viewModel) : base(viewModel) {
 		}
 		protected override void Draw(IEnumerable<GraphValue> src) {
+			var cls = Ext.BrushOrder();
 			this.Add(
 				new LineSeries() {
 					Title = "指数",
@@ -529,18 +547,24 @@ namespace PortFolion.ViewModels {
 						src.Select(a=>a.Dietz+1.0)
 							.Scan(1d, (a, b) => a * b)
 							.Select(a=>a*1000)),
+					Stroke = new SolidColorBrush(cls[0]),
+					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
 		}
+		public override Func<double, string> YFormatter => y => y.ToString("#,0.##");
 	}
 	public class VolatilityGraphVm : PathPeriodGraph {
 		public VolatilityGraphVm(GraphTabViewModel viewModel) : base(viewModel) { }
 		protected override void Draw(IEnumerable<GraphValue> src) {
+			var cls = Ext.BrushOrder();
 			var dz = src.Select(a => a.Dietz).ToArray();
 			this.Add(
 				new LineSeries() {
 					Title = "収益率(修正ディーツ法)",
 					LineSmoothness = 0,
 					Values = new ChartValues<double>(src.Select(a => (a.Dietz))),
+					Stroke = new SolidColorBrush(cls[0]),
+					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
 		}
 		public override Func<double, string> YFormatter => y => y.ToString("0.00%");

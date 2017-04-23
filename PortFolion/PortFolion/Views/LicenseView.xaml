@@ -1,0 +1,156 @@
+﻿<UserControl x:Class="PortFolion.Views.LicenseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+             xmlns:v="clr-namespace:PortFolion.Views"
+             xmlns:vm="clr-namespace:PortFolion.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600">
+    <Grid x:Name="LicenseGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <mah:MetroAnimatedTabControl Margin="5" TabStripPlacement="Right" HorizontalAlignment="Right">
+            <mah:MetroAnimatedTabControl.Resources>
+                <Style x:Key="Bd" TargetType="{x:Type Border}">
+                    <Setter Property="Padding" Value="3"/>
+                    <Setter Property="Margin" Value="5"/>
+                    <Setter Property="Height" Value="260"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Style>
+            </mah:MetroAnimatedTabControl.Resources>
+            <mah:MetroTabItem Header="PortFolion">
+                <StackPanel Orientation="Vertical" Height="auto">
+                    <TextBlock FontSize="20" Text="PortFolion"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Version :" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding VersionNumber}"/>
+                    </StackPanel>
+                    <TextBlock>
+                        <Run>Project URL : </Run><LineBreak/>
+                        <Hyperlink>https://github.com/Houzkin/PortFolion</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding PortFolionLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                    <TextBlock TextWrapping="Wrap" Text="this software includes the work that is distributed in the Apache License 2.0"/>
+                </StackPanel>
+            </mah:MetroTabItem>
+            
+            <mah:MetroTabItem Header="MahApps">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="MahApps"/>
+                    <TextBlock>
+                        <Run>Project URL : </Run><LineBreak/>
+                        <Hyperlink>https://github.com/MahApps/MahApps.Metro</Hyperlink><LineBreak/>
+                        <Hyperlink>https://github.com/MahApps/MahApps.Metro.IconPacks</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding MahAppsLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+            
+            <mah:MetroTabItem Header="LiveCharts">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="LiveCharts"/>
+                    <TextBlock>
+                        <Run>Project URL : </Run><LineBreak/>
+                        <Hyperlink>https://github.com/beto-rodriguez/Live-Charts</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding LiveChattsLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+
+            <mah:MetroTabItem Header="TreeListView">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="TreeListView"/>
+                    <TextBlock>
+                        <Run>Released under the CPOL</Run><LineBreak/><LineBreak/>
+                        <Run>Article URL : </Run><LineBreak/>
+                        <Hyperlink>https://www.codeproject.com/Articles/24973/TreeListView</Hyperlink>
+                        <LineBreak/><LineBreak/>
+                        <Run>The Code Project Open License (CPOL) 1.02</Run><LineBreak/>
+                        <Hyperlink>http://www.codeproject.com/info/cpol10.aspx</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </mah:MetroTabItem>
+            
+            <mah:MetroTabItem Header="Livet">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="Livet"/>
+                    <TextBlock>
+                        <Run>Project URL : </Run><LineBreak/>
+                        <Hyperlink>https://github.com/ugaya40/Livet</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding LivetLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+            
+            <mah:MetroTabItem Header="Ix">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="Interactive Extensions (Ix)"/>
+                    <TextBlock TextWrapping="Wrap">
+                        <Run>Project URL : </Run><LineBreak/><Hyperlink>https://github.com/Reactive-Extensions/Rx.NET/tree/master</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding IxLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+
+            <mah:MetroTabItem Header="Antlr">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="Antlr"/>
+                    <TextBlock>
+                        <Run>Project URL : </Run><LineBreak/>
+                        <Hyperlink>https://github.com/antlr/antlrcs</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding AntlrLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+
+            <mah:MetroTabItem Header="ExpressionEvalutor">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontSize="20" Text="ExpressionEvalutor"/>
+                    <TextBlock>
+                        <Run>Project URL : </Run><LineBreak/>
+                        <Hyperlink>http://eval-expression.net/?z=codeplex</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding ExpEvalLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+        </mah:MetroAnimatedTabControl>
+    </Grid>
+</UserControl>

@@ -62,10 +62,8 @@ namespace PortFolion.ViewModels {
 		public void Initialize() {
 			//listContents = ListviewModel.Instance;
 		}
-		//ListviewModel listContents;
-		//public ListviewModel ListContents
-		//	=> listContents;
-		public ICommand ShowLisence
-			=> new ViewModelCommand(() => { });
+		
+		//public ICommand ShowLisence
+		//	=> new ViewModelCommand(() => { });
 	}
 }
