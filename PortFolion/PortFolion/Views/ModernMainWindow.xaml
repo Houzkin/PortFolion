@@ -50,7 +50,7 @@
 
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
-            <mah:Flyout x:Name="LicenseFlyout" IsModal="False" Header="License" Position="Right" AnimateOpacity="True">
+            <mah:Flyout x:Name="LicenseFlyout" IsModal="False" Header="License" Position="Right" AnimateOpacity="True" Opacity="0.9">
                 <v:LicenseView />
             </mah:Flyout>
         </mah:FlyoutsControl>

@@ -6,16 +6,44 @@ using System.Linq;
 using System.Windows;
 
 using Livet;
+using System.Threading;
 
 namespace PortFolion {
 	/// <summary>
 	/// App.xaml の相互作用ロジック
 	/// </summary>
 	public partial class App : Application {
+
+		/// <summary>多重起動を防止する為のミューテックス。</summary>
+		private static Mutex _mutex;
+
 		private void Application_Startup(object sender, StartupEventArgs e) {
 			DispatcherHelper.UIDispatcher = Dispatcher;
-			//AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+			
+			var name = this.GetType().Assembly.GetName().Name;
+			_mutex = new Mutex(false, name);
+ 
+			if (!_mutex.WaitOne(TimeSpan.Zero, false)) {
+				MessageBox.Show(name + "は既に起動しています。", "二重起動防止", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+				_mutex.Close();
+				this.Shutdown();
+				return;
+			}
+
+			var mainWindow = new PortFolion.Views.ModernMainWindow();
+			mainWindow.Show();
 		}
+		private void Application_Exit(object sender, ExitEventArgs e) {
+
+			if (_mutex == null) return;
+
+			//終了処理
+			PortFolion.IO.CacheManager.Clear();
+
+			App._mutex.ReleaseMutex();
+			App._mutex.Close();
+		}
+
 
 		//集約エラーハンドラ
 		//private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

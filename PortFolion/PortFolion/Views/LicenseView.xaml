@@ -30,12 +30,15 @@
             </mah:MetroAnimatedTabControl.Resources>
             <mah:MetroTabItem Header="PortFolion">
                 <StackPanel Orientation="Vertical" Height="auto">
-                    <TextBlock FontSize="20" Text="PortFolion"/>
+                    <TextBlock>
+                        <Run FontSize="20">PortFolion</Run>
+                        <!--<Run>Released under the Apache License, Version 2.0</Run><LineBreak/>-->
+                    </TextBlock>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Version :" Margin="0,0,5,0"/>
                         <TextBlock Text="{Binding VersionNumber}"/>
                     </StackPanel>
-                    <TextBlock>
+                    <TextBlock><LineBreak/>
                         <Run>Project URL : </Run><LineBreak/>
                         <Hyperlink>https://github.com/Houzkin/PortFolion</Hyperlink>
                     </TextBlock>
@@ -50,7 +53,10 @@
             
             <mah:MetroTabItem Header="MahApps">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock FontSize="20" Text="MahApps"/>
+                    <TextBlock>
+                        <Run FontSize="20">MahApps</Run><LineBreak/>
+                        <Run>Released under the MIT License</Run><LineBreak/>
+                    </TextBlock>
                     <TextBlock>
                         <Run>Project URL : </Run><LineBreak/>
                         <Hyperlink>https://github.com/MahApps/MahApps.Metro</Hyperlink><LineBreak/>
@@ -66,7 +72,10 @@
             
             <mah:MetroTabItem Header="LiveCharts">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock FontSize="20" Text="LiveCharts"/>
+                    <TextBlock>
+                        <Run FontSize="20">LiveCharts</Run><LineBreak/>
+                        <Run>Released under the MIT License</Run><LineBreak/>
+                    </TextBlock>
                     <TextBlock>
                         <Run>Project URL : </Run><LineBreak/>
                         <Hyperlink>https://github.com/beto-rodriguez/Live-Charts</Hyperlink>
@@ -95,7 +104,10 @@
             
             <mah:MetroTabItem Header="Livet">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock FontSize="20" Text="Livet"/>
+                    <TextBlock>
+                        <Run FontSize="20">Livet</Run><LineBreak/>
+                        <Run>Released under the zlib/libpng license</Run><LineBreak/>
+                    </TextBlock>
                     <TextBlock>
                         <Run>Project URL : </Run><LineBreak/>
                         <Hyperlink>https://github.com/ugaya40/Livet</Hyperlink>
@@ -108,9 +120,12 @@
                 </StackPanel>
             </mah:MetroTabItem>
             
-            <mah:MetroTabItem Header="Ix">
+            <mah:MetroTabItem Header="InteractiveExtensions">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock FontSize="20" Text="Interactive Extensions (Ix)"/>
+                    <TextBlock>
+                        <Run FontSize="20">Interactive Extensions (Ix)</Run><LineBreak/>
+                        <Run>Released under the Apache License, Version 2.0</Run><LineBreak/>
+                    </TextBlock>
                     <TextBlock TextWrapping="Wrap">
                         <Run>Project URL : </Run><LineBreak/><Hyperlink>https://github.com/Reactive-Extensions/Rx.NET/tree/master</Hyperlink>
                     </TextBlock>
@@ -124,7 +139,10 @@
 
             <mah:MetroTabItem Header="Antlr">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock FontSize="20" Text="Antlr"/>
+                    <TextBlock>
+                        <Run FontSize="20">Antlr</Run><LineBreak/>
+                        <Run>Released under the BSD license</Run><LineBreak/>
+                    </TextBlock>
                     <TextBlock>
                         <Run>Project URL : </Run><LineBreak/>
                         <Hyperlink>https://github.com/antlr/antlrcs</Hyperlink>
@@ -139,7 +157,10 @@
 
             <mah:MetroTabItem Header="ExpressionEvalutor">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock FontSize="20" Text="ExpressionEvalutor"/>
+                    <TextBlock>
+                        <Run FontSize="20">ExpressionEvalutor</Run><LineBreak/>
+                        <Run>Released under the MIT License</Run><LineBreak/>
+                    </TextBlock>
                     <TextBlock>
                         <Run>Project URL : </Run><LineBreak/>
                         <Hyperlink>http://eval-expression.net/?z=codeplex</Hyperlink>
@@ -151,6 +172,25 @@
                     </Border>
                 </StackPanel>
             </mah:MetroTabItem>
+            
+            <mah:MetroTabItem Header="CsvHelper">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>
+                        <Run FontSize="20">CsvHelper</Run><LineBreak/>
+                        <Run>Released under the Apache License, Version 2.0</Run><LineBreak/>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run>Project URL :</Run><LineBreak/>
+                        <Hyperlink>https://github.com/JoshClose/CsvHelper</Hyperlink>
+                    </TextBlock>
+                    <Border Style="{StaticResource Bd}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock TextWrapping="Wrap" Text="{Binding CsvHelperLicense}"/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </mah:MetroTabItem>
+
         </mah:MetroAnimatedTabControl>
     </Grid>
 </UserControl>

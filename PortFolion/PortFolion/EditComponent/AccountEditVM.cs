@@ -153,13 +153,13 @@ namespace PortFolion.ViewModels {
 		bool canApply()
 			=> Elements.All(a => !a.HasErrors);
 		void apply() {
-			var elems = Elements.Where(a => !a.IsRemoveElement || Model.Children.Contains(a.Model)).ToArray();
+			var elems = Elements.Where(a => !a.IsEmptyElement || Model.Children.Contains(a.Model)).ToArray();
 			var csh = elems.Where(a => a.IsCash);
 			var stc = elems.Where(a => a.IsStock).OfType<StockEditVM>().OrderBy(a => a.Code);
 			var prd = elems.Where(a => a.IsProduct).OrderBy(a => a.Name);
 
-			var ary = stc.Concat(prd).Concat(csh);//csh.Concat(stc).Concat(prd).ToArray();
-			var rmv = Model.Children.Except(ary.Select(a => a.Model));
+			var ary = stc.Concat(prd).Concat(csh).ToArray();//csh.Concat(stc).Concat(prd).ToArray();
+			var rmv = Model.Children.Except(ary.Select(a => a.Model)).ToArray();
 
 			rmv.ForEach(a => Model.Children.Remove(a));
 			ary.ForEach((ele, idx) => {
@@ -182,24 +182,22 @@ namespace PortFolion.ViewModels {
 			var elem = Elements.OfType<ProductEditVM>();
 			var ec = Elements.First(a => a.IsCash);
 
-			var unrePL = elem.Sum(a => ExpParse.Try(a.Amount)); //ResultWithValue.Of<double>(double.TryParse, a.Amount).Value);
-			var cam = ExpParse.Try(ec.Amount);//ResultWithValue.Of<double>(double.TryParse, ec.Amount).Value;
-			var civ = ExpParse.Try(ec.InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, ec.InvestmentValue).Value;
+			var unrePL = elem.Sum(a => ExpParse.Try(a.Amount)); 
+			var cam = ExpParse.Try(ec.Amount);
+			var civ = ExpParse.Try(ec.InvestmentValue);
 			ec.InvestmentValue = ((-1D * civ) + (-1D * cam)).ToString();
 			ec.Amount = "0";
 
 			foreach(var e in elem) {
-				var am = ExpParse.Try(e.Amount);//ResultWithValue.Of<double>(double.TryParse, e.Amount).Value;
-				var iv = ExpParse.Try(e.InvestmentValue);//ResultWithValue.Of<double>(double.TryParse, e.InvestmentValue).Value;
-				var q = ExpParse.Try(e.Quantity);//ResultWithValue.Of<double>(double.TryParse, e.Quantity).Value;
-				var tq = ExpParse.Try(e.TradeQuantity);//ResultWithValue.Of<double>(double.TryParse, e.TradeQuantity).Value;
+				var am = ExpParse.Try(e.Amount);
+				var iv = ExpParse.Try(e.InvestmentValue);
+				var q = ExpParse.Try(e.Quantity);
+				var tq = ExpParse.Try(e.TradeQuantity);
 				e.TradeQuantity = ((-1D * tq) + (-1D * q)).ToString();
 				e.InvestmentValue = ((-1D * iv) + (-1D * am)).ToString();
 				e.Quantity = "0";
 				e.Amount = "0";
 			}
-			//this.EdittingList.Add(CurrentDate);
-			//if(canApply()) apply();
 		}
 
 		ViewModelCommand resetCmd;
@@ -256,19 +254,20 @@ namespace PortFolion.ViewModels {
 			_InvestmentValue = fv.InvestmentValue.ToString();
 			_Amount = fv.Amount.ToString();
 			MenuList.Add(new MenuItemVm(editName) { Header = "名前の変更" });
-			MenuList.Add(new MenuItemVm(del) { Header = "削除" });
+			MenuList.Add(new MenuItemVm(del2) { Header = "削除" });
 		}
 		void editName() {
 			var edi = new FromAccountEditerNameEditVM(AccountVM, Model);// new NodeNameEditerVM(Model.Parent, Model);
 			AccountVM.NodeNameEditer = edi;
 		}
+		//不具合あり
 		void del() {
 			if (IsCash) {
 				MessageBox.Show("このポジションは削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
 				return;
 			}
 			if (Model.IsRoot()) {
-				if (this.IsRemoveElement) {
+				if (this.IsEmptyElement) {
 					AccountVM.Elements.Remove(this);
 					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
 				} else {
@@ -286,6 +285,30 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
+		void del2() {
+			if (IsCash) {
+				MessageBox.Show("このポジションは削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
+				return;
+			}
+			Func<IEnumerable<string>> getPath = () => {
+				if (Model.IsRoot()) {
+					var lst = this.AccountVM.Model.Path.ToList();
+					lst.Add(Model.Name);
+					return lst;
+				} else {
+					return Model.Path;
+				}
+			};
+			var preEle = RootCollection.GetNodeLine(new NodePath<string>(getPath()), AccountVM.CurrentDate)
+				.Select(a => new { Key = a.Key, Value = a.Value as FinancialProduct })
+				.LastOrDefault(a => a.Value != null && a.Key < AccountVM.CurrentDate)?.Value;
+			if (preEle == null || (preEle.Amount == 0 && preEle.Quantity == 0 && preEle.TradeQuantity == 0 && preEle.InvestmentValue == 0)) {
+					AccountVM.Elements.Remove(this);
+					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
+			} else {
+				MessageBox.Show("前回の記入項目から継続するポジションは削除できません。\n数量と評価額を「０」にした場合、次回の書き込み時に消滅または削除が可能となります。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
+			}
+		}
 		public virtual void Apply() {
 			Model.Name = Name.Trim();
 			Model.SetInvestmentValue((long)_investmentValue);
@@ -294,7 +317,7 @@ namespace PortFolion.ViewModels {
 		public bool IsCash => GetType() == typeof(CashEditVM);
 		public bool IsStock => GetType() == typeof(StockEditVM);
 		public bool IsProduct => GetType() == typeof(ProductEditVM);
-		public virtual bool IsRemoveElement => false;
+		public virtual bool IsEmptyElement => false;
 		public new FinancialValue Model => base.Model;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 		string _name="";
@@ -320,7 +343,7 @@ namespace PortFolion.ViewModels {
 			get { return _InvestmentValue; }
 			set {
 				if(SetProperty(ref _InvestmentValue, value)) {
-					OnPropertyChanged(nameof(IsRemoveElement));
+					OnPropertyChanged(nameof(IsEmptyElement));
 					if(_amount == 0)
 						Amount = (Model.Amount + _investmentValue).ToString("#.##");
 				}
@@ -332,7 +355,7 @@ namespace PortFolion.ViewModels {
 			get { return _Amount; }
 			set {
 				if (SetProperty(ref _Amount, value)) {
-					OnPropertyChanged(nameof(IsRemoveElement));
+					OnPropertyChanged(nameof(IsEmptyElement));
 					if (AccountVM.Elements.Contains(this)) AccountVM.ChangedTemporaryAmount();
 				}
 			}
@@ -354,17 +377,14 @@ namespace PortFolion.ViewModels {
 			Model.SetQuantity((long)_quantity);
 		}
 		public ProductEditVM(AccountEditVM ac) : base(ac, new FinancialValue()) { }
-		public override bool IsRemoveElement => _amount == 0 && _quantity == 0 && _investmentValue == 0 && _tradeQuantity == 0;
+		public override bool IsEmptyElement => _amount == 0 && _quantity == 0 && _investmentValue == 0 && _tradeQuantity == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
 		public override string InvestmentValue {
 			get { return base.InvestmentValue; }
 			set {
 				if (SetProperty(ref _InvestmentValue, value)) {
-					OnPropertyChanged(nameof(IsRemoveElement));
+					OnPropertyChanged(nameof(IsEmptyElement));
 				}
-				//if (SetProperty(ref _InvestmentValue, value)) {
-				//	Amount = (Model.Amount + (_tradeQuantity * _investmentValue)).ToString();
-				//}
 			}
 		}
 		public override bool IsTradeQuantityEditable => true;// false;
@@ -374,7 +394,7 @@ namespace PortFolion.ViewModels {
 			get { return _TradeQuantity; }
 			set {
 				if(SetProperty(ref _TradeQuantity, value)) {
-					OnPropertyChanged(nameof(IsRemoveElement));
+					OnPropertyChanged(nameof(IsEmptyElement));
 				Quantity = (Model.Quantity + _tradeQuantity).ToString("#.##");
 				}
 			}
@@ -397,7 +417,7 @@ namespace PortFolion.ViewModels {
 			get { return _Quantity; }
 			set {
 				if (SetProperty(ref _Quantity, value)) {
-					OnPropertyChanged(nameof(IsRemoveElement));
+					OnPropertyChanged(nameof(IsEmptyElement));
 					Amount = (_quantity * _currentPerPrice).ToString();
 				}
 			}
@@ -421,9 +441,6 @@ namespace PortFolion.ViewModels {
 			var r = ResultWithValue.Of<int>(int.TryParse, value);
 			if (!r) return "コードを入力してください";
 			if (value.Count() != 4) return "4桁";
-			//var d = this.AccountVM.CurrentDate;
-			//var cm = setNameAndPrice(r.Value, d);
-			//this.AccountVM.SetStatusComment(cm);
 			return null;
 		}
 		string setNameAndPrice(int r, DateTime d) {

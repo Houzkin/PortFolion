@@ -91,12 +91,8 @@ Permission is granted to anyone to use this software for any purpose,
 		#endregion
 		public string LivetLicense => livetLicense;
 
-		string ixLicense = 
-		#region Ix
-@"Copyright (c) .NET Foundation and Contributors
-All Rights Reserved";
-		#endregion
-		public string IxLicense => ixLicense + apc;
+		
+		public string IxLicense => "Copyright (c) .NET Foundation and Contributors\nAll Rights Reserved" + apc;
 
 		string antlrLicense =
 		#region Antlr
@@ -132,6 +128,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
 		#endregion 
 		public string AntlrLicense => antlrLicense;
+
+		public string CsvHelperLicense => "Copyright (c) 2016 Josh Close" + apc;
 		
 		public string LiveChattsLicense => mit + "Copyright (c) 2016 Alberto Rodriguez & LiveCharts contributors" + mitLcs;
 
@@ -139,8 +137,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
 
 		public string ExpEvalLicense => mit + "Copyright (c) 2015 David Khristepher Santos" + mitLcs;
 
-		public string PortFolionLicense => "Copyright 2017 Houzkin" + apc;
+		public string PortFolionLicense => "Copyright (c) 2017 Houzkin" + apc;
 
 		public string VersionNumber { get; }
+
 	}
 }
