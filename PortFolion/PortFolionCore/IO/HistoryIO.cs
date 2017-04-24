@@ -23,7 +23,19 @@ namespace PortFolion.IO {
 		public static void SaveRoots(DateTime since,DateTime until) {
 			saveRoots(RootCollection.Instance.Where(a => since <= a.CurrentDate && a.CurrentDate <= until), since, until);
 		}
-		static readonly string _path = AppDomain.CurrentDomain.BaseDirectory + "今まで書き込んだデータ" + Path.DirectorySeparatorChar;
+		static string _path = null;
+		static string currentPath {
+			get {
+				if(_path == null) {
+					//var ds = Directory.GetDirectories(AppDomain.CurrentDomain.BaseDirectory, "*今まで書き込んだデータ*");
+					var di = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+					var dis = di.GetDirectories("*今まで書き込んだデータ*", SearchOption.AllDirectories).FirstOrDefault()?.Name ?? "今まで書き込んだデータ";
+					
+					_path = AppDomain.CurrentDomain.BaseDirectory + dis + Path.DirectorySeparatorChar;
+				}
+				return _path;
+			}
+		}//= AppDomain.CurrentDomain.BaseDirectory + "今まで書き込んだデータ" + Path.DirectorySeparatorChar;
 		static void saveRoots(IEnumerable<TotalRiskFundNode> list,DateTime since,DateTime until) {
 			var pu = pickUp(since, until).Select(a => a.FullName);
 			var lg = _saveRoots(list);
@@ -36,7 +48,7 @@ namespace PortFolion.IO {
 			var serializer = new XmlSerializer(typeof(SerializableNodeMap<CushionNode>));
 			foreach (var r in list) {
 				var sri = (r as CommonNode).ToSerializableNodeMap(a => a.ToSerialCushion());
-				var curP = _path + r.CurrentDate.Year.ToString();
+				var curP = currentPath + r.CurrentDate.Year.ToString();
 				var curPath = curP + Path.DirectorySeparatorChar + r.CurrentDate.ToString("yyyy-MM-dd") + ".xml";
 				if (!Directory.Exists(curP)) Directory.CreateDirectory(curP);
 				using (FileStream fs = new FileStream(curPath, FileMode.Create)) {
@@ -47,7 +59,7 @@ namespace PortFolion.IO {
 			return log;
 		}
 		static IEnumerable<FileInfo> pickUp(DateTime since, DateTime until) {
-			var d = new DirectoryInfo(_path);
+			var d = new DirectoryInfo(currentPath);
 			if (!d.Exists) return Enumerable.Empty<FileInfo>(); //new Dictionary<DateTime, FileInfo>();
 			try {
 				return d.GetDirectories("*", SearchOption.AllDirectories)
@@ -61,7 +73,7 @@ namespace PortFolion.IO {
 			}
 		}
 		internal static IEnumerable<TotalRiskFundNode> ReadRoots() {
-			var d = new DirectoryInfo(_path);
+			var d = new DirectoryInfo(currentPath);
 			if (!d.Exists) d.Create();
 			try {
 				var dd = d.GetDirectories("*", SearchOption.AllDirectories)

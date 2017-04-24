@@ -52,7 +52,8 @@ namespace PortFolion.IO {
 		}
 
 		public static void Clear() {
-			Directory.Delete(_path, true);
+			if (Directory.Exists(_path))
+				Directory.Delete(_path, true);
 		}
 	}
 }

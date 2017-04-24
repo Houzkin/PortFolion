@@ -253,7 +253,6 @@
     <Content Include="InfrastructureAssemblies\Microsoft.Expression.Interactions.dll" />
     <Content Include="InfrastructureAssemblies\System.Windows.Interactivity.dll" />
     <Content Include="TreeListView.dll" />
-    <Resource Include="license.txt" />
     <Resource Include="PortFolion.ico" />
   </ItemGroup>
   <ItemGroup>
