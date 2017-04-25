@@ -57,6 +57,9 @@ namespace PortFolion.ViewModels {
 		gvMng _mng;
 
 		public void Refresh() {
+			if(this.CurrentNode == null)
+				this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
+								?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
 			_mng.Refresh();
 			BrakeDown.Refresh();
 			Ext.ResetColorIndex();
@@ -457,6 +460,8 @@ namespace PortFolion.ViewModels {
 			Labels = this.GetLabels(src).ToArray();// src.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
 
 			Draw(src);
+			this.DisplayMaxValue = double.NaN;
+			this.DisplayMinValue = double.NaN;
 		}
 		protected abstract void Draw(IEnumerable<GraphValue> src);
 

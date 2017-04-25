@@ -26,6 +26,7 @@ namespace PortFolion {
 			if (!_mutex.WaitOne(TimeSpan.Zero, false)) {
 				MessageBox.Show(name + "は既に起動しています。", "二重起動防止", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 				_mutex.Close();
+				_mutex = null;
 				this.Shutdown();
 				return;
 			}
