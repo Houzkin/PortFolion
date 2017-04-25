@@ -54,16 +54,12 @@
   <ItemGroup>
     <Compile Include="Data\StockInfo.cs" />
     <Compile Include="Data\TreeStructure\TradingInfo.cs" />
-    <Compile Include="GraphModel\Breakdown.cs" />
-    <Compile Include="GraphModel\Ratios.cs" />
-    <Compile Include="GraphModel\Utility.cs" />
-    <Compile Include="GraphModel\TransitionData.cs" />
+    <Compile Include="Utility.cs" />
     <Compile Include="IO\CacheManager.cs" />
     <Compile Include="IO\HistoryIO.cs" />
     <Compile Include="IO\CushionNode.cs" />
     <Compile Include="Data\TreeStructure\Leafs.cs" />
     <Compile Include="Data\TreeStructure\Nodes.cs" />
-    <Compile Include="GraphModel\Enum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\TreeStructure\RootCollection.cs" />
     <Compile Include="Data\TreeStructure\TagInfo.cs" />

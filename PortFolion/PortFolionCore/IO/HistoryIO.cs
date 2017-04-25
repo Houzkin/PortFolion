@@ -29,7 +29,7 @@ namespace PortFolion.IO {
 				if(_path == null) {
 					//var ds = Directory.GetDirectories(AppDomain.CurrentDomain.BaseDirectory, "*今まで書き込んだデータ*");
 					var di = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
-					var dis = di.GetDirectories("*今まで書き込んだデータ*", SearchOption.AllDirectories).FirstOrDefault()?.Name ?? "今まで書き込んだデータ";
+					var dis = di.GetDirectories("*今まで書き込んだデータ*", SearchOption.TopDirectoryOnly).FirstOrDefault()?.Name ?? "今まで書き込んだデータ";
 					
 					_path = AppDomain.CurrentDomain.BaseDirectory + dis + Path.DirectorySeparatorChar;
 				}

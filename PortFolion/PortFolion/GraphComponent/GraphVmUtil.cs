@@ -233,9 +233,9 @@ namespace PortFolion.ViewModels {
 			//.OrderBy(a => a.CashCount);
 
 		}
+		static Random rdm = new Random();
 		static int rdmIdx = -1;
 		public static void ResetColorIndex() {
-			Random rdm = new Random();
 			rdmIdx = rdm.Next(BrushColors().Count);
 		}
 		public static List<Color> BrushOrder() {

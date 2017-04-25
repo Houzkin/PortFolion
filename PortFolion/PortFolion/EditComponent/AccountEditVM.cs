@@ -158,7 +158,7 @@ namespace PortFolion.ViewModels {
 			var stc = elems.Where(a => a.IsStock).OfType<StockEditVM>().OrderBy(a => a.Code);
 			var prd = elems.Where(a => a.IsProduct).OrderBy(a => a.Name);
 
-			var ary = stc.Concat(prd).Concat(csh).ToArray();//csh.Concat(stc).Concat(prd).ToArray();
+			var ary = stc.Concat(prd).Concat(csh).ToArray();
 			var rmv = Model.Children.Except(ary.Select(a => a.Model)).ToArray();
 
 			rmv.ForEach(a => Model.Children.Remove(a));
@@ -257,34 +257,10 @@ namespace PortFolion.ViewModels {
 			MenuList.Add(new MenuItemVm(del2) { Header = "削除" });
 		}
 		void editName() {
-			var edi = new FromAccountEditerNameEditVM(AccountVM, Model);// new NodeNameEditerVM(Model.Parent, Model);
+			var edi = new FromAccountEditerNameEditVM(AccountVM, Model);
 			AccountVM.NodeNameEditer = edi;
 		}
-		//不具合あり
-		void del() {
-			if (IsCash) {
-				MessageBox.Show("このポジションは削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
-				return;
-			}
-			if (Model.IsRoot()) {
-				if (this.IsEmptyElement) {
-					AccountVM.Elements.Remove(this);
-					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
-				} else {
-					MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
-				}
-			}else {
-				var elems = RootCollection.GetNodeLine(Model.Path, AccountVM.CurrentDate)
-					.Select(a => new { Key = a.Key, Value = a.Value as FinancialProduct })
-					.LastOrDefault(a => a.Value != null && a.Key < AccountVM.CurrentDate)?.Value;
-				if(elems == null || (elems.Amount == 0 && elems.Quantity == 0 && elems.TradeQuantity == 0 && elems.InvestmentValue == 0)) {
-					AccountVM.Elements.Remove(this);
-					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
-				} else {
-					MessageBox.Show("前回の記入項目から継続するポジションは削除できません。\n数量と評価額を「０」にした場合、次回の書き込み時に消滅または削除が可能となります。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
-				}
-			}
-		}
+		
 		void del2() {
 			if (IsCash) {
 				MessageBox.Show("このポジションは削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -302,7 +278,7 @@ namespace PortFolion.ViewModels {
 			var preEle = RootCollection.GetNodeLine(new NodePath<string>(getPath()), AccountVM.CurrentDate)
 				.Select(a => new { Key = a.Key, Value = a.Value as FinancialProduct })
 				.LastOrDefault(a => a.Value != null && a.Key < AccountVM.CurrentDate)?.Value;
-			if (preEle == null || (preEle.Amount == 0 && preEle.Quantity == 0 && preEle.TradeQuantity == 0 && preEle.InvestmentValue == 0)) {
+			if (preEle == null || (preEle.Amount == 0 && preEle.Quantity == 0)) {
 					AccountVM.Elements.Remove(this);
 					AccountVM.EdittingList.Add(AccountVM.CurrentDate);
 			} else {

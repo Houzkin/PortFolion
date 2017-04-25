@@ -137,8 +137,6 @@
     <Compile Include="EditComponent\ListViewModelMain.cs" />
     <Compile Include="EditComponent\AccountEditVM.cs" />
     <Compile Include="EditComponent\NodeNameEdit.cs" />
-    <Compile Include="EditComponent\TreeLeafVM.cs" />
-    <Compile Include="EditComponent\TreeNodeVM.cs" />
     <Compile Include="EditComponent\AccountEditWindow.xaml.cs">
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
