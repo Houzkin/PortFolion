@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Livet.EventListeners.WeakEvents;
 using Houzkin;
+using System.Windows;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
@@ -38,7 +39,7 @@ namespace PortFolion.ViewModels {
 		}
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
-			if (Root.Any(a => a.IsModelEquals(root))) return;
+			if (Root.Any(a => a.Model == root)) return;
 			Root.ForEach(r => {
 				r.ReCalcurated -= RefreshHistory;
 				r.SetPath -= setPath;
@@ -113,7 +114,33 @@ namespace PortFolion.ViewModels {
 
 		#endregion
 
-		#region tree
+		#region tree menu
+		public void ApplyCurrentPerPrice() {
+			var acs = this.Root.FirstOrDefault()?
+				.Levelorder().Select(a => a.Model)
+				.Where(a => a.GetNodeType() == IO.NodeType.Account)
+				.OfType<AccountNode>();
+			if (acs == null || !acs.Any() || this.CurrentDate == null) return;
+			var acse = acs.Select(a => new AccountEditVM(a));
+			var lstLg = new List<string>();
+			foreach(var a in acse) {
+				lstLg.AddRange(a.ApplyPerPrice());
+				a.Apply.Execute(null);
+			}
+			IO.HistoryIO.SaveRoots((DateTime)this.CurrentDate);
+			CommonNodeVM.ReCalcurate(this.Root.First());
+			if (lstLg.Any()) {
+				string msg = "以下の銘柄は値を更新できませんでした。";
+				var m = lstLg.Distinct().Aggregate(msg, (seed, ele) => seed + "\n" + ele);
+				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
+			}else {
+
+			}
+			acse.ForEach(a => a.Dispose());
+		}
+		public void DeleteCurrentDate() {
+
+		}
 		public void ExpandCurrentNode() {
 			if (!this.Path.Any()) return;
 			var c = Root.SelectMany(a => a.Levelorder()).FirstOrDefault(a => a.Path.SequenceEqual(this.Path));

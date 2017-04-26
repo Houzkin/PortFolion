@@ -222,8 +222,23 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		void applyCurrentPrice() {
+			var r = ApplyPerPrice();
+			if (r.Any()) {
+				string msg = "以下の銘柄は値を更新できませんでした。";
+				var m = r.Aggregate(msg, (seed, ele) => seed + "\n" + ele);
+				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
+			} else {
+				this.SetStatusComment(this.CurrentDate.ToString("yyyy年M月d日" + "時点での単価を適用しました。"));
+			}
+		}
+		bool canApplyCurrentPrice()
+			=> Elements.Where(a => a.IsStock).All(a => !a.HasErrors);
+
+		/// <summary>現在の単価を更新する</summary>
+		/// <returns>更新できなかった銘柄リスト</returns>
+		public IEnumerable<string> ApplyPerPrice() {
 			var pfs = Elements.OfType<StockEditVM>();
-			if (!pfs.Any()) return;
+			if (!pfs.Any()) return Enumerable.Empty<string>();
 			var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
 			var dic = new List<Tuple<string, string>>();
 			
@@ -235,15 +250,8 @@ namespace PortFolion.ViewModels {
 					p.CurrentPerPrice = sym.Close.ToString("#.##");
 				}
 			}
-			if (dic.Any()) {
-				string msg = "以下の銘柄は値を更新できませんでした。";
-				var m = dic.Aggregate(msg, (seed, ele) => seed + "\n" + ele.Item1 + " - " + ele.Item2);
-				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
-			}
-			//this.EdittingList.Add(CurrentDate);
+			return dic.Select(a => a.Item1 + " - " + a.Item2);
 		}
-		bool canApplyCurrentPrice()
-			=> Elements.Where(a => a.IsStock).All(a => !a.HasErrors);
 	}
 	
 	public class CashEditVM : DynamicViewModel<FinancialValue> {

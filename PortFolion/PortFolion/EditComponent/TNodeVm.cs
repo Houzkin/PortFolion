@@ -276,7 +276,8 @@ namespace PortFolion.ViewModels {
 			set { this.SetProperty(ref _isExpand, value); }
 		}
 		public NodePath<string> Path => Model.Path;
-		public bool IsModelEquals(CommonNode node) => this.Model == node;
+		//public bool IsModelEquals(CommonNode node) => this.Model == node;
+		public new CommonNode Model => this.Model;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 
 		public event Action<CommonNodeVM> ReCalcurated;
@@ -300,10 +301,6 @@ namespace PortFolion.ViewModels {
 			get { return CoreData.InvestmentReturnTotal; }
 			set { CoreData.InvestmentReturnTotal = value; }
 		}
-		//public string AmountRate {
-		//	get { return this.Model.IsRoot() ? "-" : CoreData.AmountRate.ToString("0.#"); }
-		//	set { CoreData.AmountRate = ResultWithValue.Of<double>(double.TryParse, value).Value; }
-		//}
 	}
 	public class FinancialValueVM : CommonNodeVM {
 		public FinancialValueVM(CommonNode model) : base(model) {
@@ -350,7 +347,7 @@ namespace PortFolion.ViewModels {
 						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 					}
 				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "アカウント追加" });
+				MenuList.Add(new MenuItemVm(vc) { Header = "口座追加" });
 			}else if(ty == NodeType.Total) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new NodeNameEditerVM(model, new BrokerNode());
@@ -361,7 +358,7 @@ namespace PortFolion.ViewModels {
 						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 					}
 				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "ブローカー追加" });
+				MenuList.Add(new MenuItemVm(vc) { Header = "証券会社追加" });
 			}
 
 			var vmc = new ViewModelCommand(() => {
