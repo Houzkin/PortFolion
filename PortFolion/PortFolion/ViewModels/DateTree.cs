@@ -114,7 +114,9 @@ namespace PortFolion.ViewModels {
 			foreach (var d in rmv)
 				foreach (var dd in this.Preorder().OfType<DateTreeLeaf>().Where(a => a.Date == d).ToArray())
 					dd.Parent.RemoveChild(dd);
-			this.RemoveDescendant(a => !a.Preorder().OfType<DateTreeLeaf>().Any());
+			var rl = this.Levelorder().Skip(1).Where(a => !a.Preorder().OfType<DateTreeLeaf>().Any()).ToArray();
+			foreach (var r in rl) r.MaybeRemoveOwn();
+			//this.RemoveDescendant(a => !a.Preorder().OfType<DateTreeLeaf>().Any());
 			this.Levelorder().ToArray().ForEach(a => a.Sort());
 		}
 		public event EventHandler<DateTimeSelectedEventArgs> DateTimeSelected;

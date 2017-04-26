@@ -19,6 +19,7 @@
     <Grid>
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
+            <BooleanToVisibilityConverter x:Key="BtoVConverter"/>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -74,8 +75,8 @@
                             CommandParameter="{Binding ElementName=PickedDate, Path=SelectedDate}"/>
                 </StackPanel>
             </Grid>
-        </Expander>
-
+        </Expander><!--{Binding IsTreeLoading, Converter={StaticResource BooleanToVisibilityConverter}}-->
+        
         <Grid Grid.Column="1" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -83,22 +84,40 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Grid.Row="0" x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="20" HorizontalAlignment="Center" Margin="0,3" />
-            <Menu Grid.Row="1" HorizontalAlignment="Stretch" >
+            <Grid.Resources>
+                
+            </Grid.Resources>
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0">
+                <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="20" Margin="0,3" VerticalAlignment="Center" />
+                <Button Content="{iconPacks:PackIconMaterial Kind=DeleteForever, Width=15,Height=15}" ToolTip="削除" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="DeleteCurrentDate"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
+            </StackPanel>
+            <Menu Grid.Row="1" >
                 <!--<Button Content="開"/>
                 <Button Content="閉"/>-->
-                <MenuItem Header="開">
+                <MenuItem Header="開" ToolTip="全て開く" Margin="3,0">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="ExpandAllNode"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </MenuItem>
-                <MenuItem Header="閉">
+                <MenuItem Header="閉" ToolTip="全て閉じる" Margin="3,0">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="CloseAllNode"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+                <MenuItem Header="株価更新" Margin="3,0" ToolTip="現時点での株価を適用">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="ApplyCurrentPerPrice"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </MenuItem>
@@ -251,7 +270,8 @@
                             <tree:TreeListViewExpander x:Name="TreeExpander" Margin="3,0"/>
                             <TextBlock Text="{Binding Code}" VerticalAlignment="Center" Margin="0,0"/>
                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,0"/>
-                            <Button Width="22" Height="22" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}">
+                            <Button Width="22" Height="22" ToolTip="履歴を表示"
+                                    Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}">
                                 <iconPacks:PackIconMaterial Width="12"
                                               Height="12"
                                               Kind="Timetable" />
@@ -315,9 +335,14 @@
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
             <Grid Grid.Row="3" x:Name="PortFolioResult">
-                <!--<TextBlock Text="dumy"/>-->
+                <!--<TextBlock Text="dumy"/>{Binding IsTreeLoading,Converter={StaticResource BtoVConverter}}-->
             </Grid>
         </Grid>
+        <!--<Grid Grid.Column="1" Background="Gray" Opacity="0.2"
+              Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
+            <mah:ProgressRing IsActive="True"/>
+        </Grid>-->
+        
         <GridSplitter Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="5"/>
         <Grid Grid.Column="3">
             <Grid.RowDefinitions>

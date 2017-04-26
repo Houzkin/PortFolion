@@ -11,26 +11,8 @@ using System.Collections.Specialized;
 using Houzkin;
 
 namespace PortFolion.Core {
-	public static class ExtBugs {
-		public static U convert<T, U>(T self, Func<T, U> generator, Action<U, U> addAction)
-		where T : IReadOnlyTreeNode<T> {
-			if (generator == null) throw new ArgumentNullException("generator");
-			if (addAction == null) throw new ArgumentNullException("addAction");
-			var t = self.Postorder().Select(x => Tuple.Create(x, generator(x)));
-			var vst = new ElementScroller<Tuple<T, U>>(t);
-			foreach (var tr in vst.GetSequence()) {
-				vst.MoveTo(tr)
-					.MaybeNext(x => x.Item1.Children.Contains(tr.Item1))
-					.TrueOrNot(r => addAction(r.Current.Item2, tr.Item2));
-			}
-			return vst.Current.Item2;
-		}
-		public static U ConvertTest<T, U>(this T self, Func<T, U> generator, Action<U, U> addAction)
-		where T : IReadOnlyTreeNode<T> {
-			return convert(self, generator, addAction);
-		}
-	}
-	public class RootCollection : ObservableCollection<TotalRiskFundNode> {//,IReadOnlyDictionary<DateTime,TotalRiskFundNode>{
+	
+	public class RootCollection : ObservableCollection<TotalRiskFundNode> {
 
 
 		public static RootCollection Instance { get; } = new RootCollection();
@@ -47,15 +29,17 @@ namespace PortFolion.Core {
 				}else if(ins.Any()) {
 					var d = ins.Max();
 					var a1 = Instance[d] as CommonNode;
-					var a2 = a1.ConvertTest(a => a.Clone(),(a,b)=>a.AddChild(b));
+					var a2 = a1.Convert(a => a.Clone(),(a,b)=>a.AddChild(b));
 
-					var trfn = a2 as TotalRiskFundNode;//= ((Instance[d] as CommonNode).Convert(a => a.Clone())) as TotalRiskFundNode;
-					trfn.RemoveDescendant(a => !a.HasPosition && a.GetType() != typeof(FinancialValue));
+					var trfn = a2 as TotalRiskFundNode;
+					var rl = trfn.Levelorder().Skip(1).Where(a => !a.HasPosition && !a.HasTrading).ToArray();
+					foreach (var r in rl) r.MaybeRemoveOwn();
+					//trfn.RemoveDescendant(a => !a.HasPosition && !a.HasTrading);
 					trfn.CurrentDate = date;
 					Instance.Add(trfn);
 				}else if (pns.Any()) {
 					var d = pns.Min();
-					var trfn = ((Instance[d] as CommonNode).ConvertTest(a => a.Clone(),(a,b)=>a.AddChild(b))) as TotalRiskFundNode;
+					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone(),(a,b)=>a.AddChild(b))) as TotalRiskFundNode;
 					trfn.CurrentDate = date;
 					Instance.Insert(0, trfn);
 				}
@@ -63,7 +47,7 @@ namespace PortFolion.Core {
 			return Instance[date];
 		}
 		public static Dictionary<DateTime,CommonNode> GetNodeLine(IEnumerable<string> path) {
-			return Instance//.Values
+			return Instance
 				.SelectMany(
 					a => a.Evolve(
 						b => b.Path.Except(path).Any() ? null : b.Children,
@@ -84,8 +68,8 @@ namespace PortFolion.Core {
 			var curNd = lne.LastOrDefault(a => currentTenure <= a.Key);
 			if (curNd.Value == null) return new Dictionary<DateTime, CommonNode>();
 			
-			var bef = lne.TakeWhile(a => a.Value != curNd.Value).Reverse().TakeWhile(a => a.Value.HasPosition);//a => a.Value.Amount != 0);
-			var aft = lne.SkipWhile(a => a.Value != curNd.Value).Separate(a => !a.Value.HasPosition).First();//a => a.Value.Amount == 0).First();
+			var bef = lne.TakeWhile(a => a.Value != curNd.Value).Reverse().TakeWhile(a => a.Value.HasPosition);
+			var aft = lne.SkipWhile(a => a.Value != curNd.Value).Separate(a => !a.Value.HasPosition).First();
 
 			return bef.Concat(aft).OrderBy(a => a.Key).ToDictionary(a => a.Key, b => b.Value);
 		}
@@ -103,10 +87,6 @@ namespace PortFolion.Core {
 			}else {
 				return new ResultWithValue<IEnumerable<DateTime>>(false, src.Where(a => !a.Rst).Select(a => a.Date));
 			}
-			//return GetNodeLine(path)
-			//	.Values
-			//	.Select(a => a.Siblings())
-			//	.All(a => a.All(b => b.Name != name));
 		}
 		/// <summary>指定したパスに該当する全てのノード名を変更する</summary>
 		/// <param name="path">変更対象を示すパス</param>
@@ -169,7 +149,6 @@ namespace PortFolion.Core {
 			hs.Add(item.CurrentDate);
 			var idx = new List<DateTime>(hs.OrderBy(a => a)).IndexOf(item.CurrentDate);
 			base.InsertItem(idx, item);
-			//if (!checkSeq(index)) DateTimeChange(item.CurrentDate);
 		}
 		protected override void SetItem(int index, TotalRiskFundNode item) {
 			if (ContainsKey(item.CurrentDate)) return;
@@ -187,7 +166,7 @@ namespace PortFolion.Core {
 		}
 		public TotalRiskFundNode this[DateTime key] {
 			get {
-				key = key.Date;// new DateTime(key.Year, key.Month, key.Day);
+				key = key.Date;
 				if (!this.ContainsKey(key)) throw new KeyNotFoundException();
 				return Items.First(a => a.CurrentDate == key);
 			}
@@ -197,17 +176,13 @@ namespace PortFolion.Core {
 			get { return Items.Select(a => a.CurrentDate); }
 		}
 
-		//public IEnumerable<TotalRiskFundNode> Values {
-		//	get { return Items; }
-		//}
-
 		public bool ContainsKey(DateTime key) {
-			key = key.Date;// new DateTime(key.Year, key.Month, key.Day);
+			key = key.Date;
 			return Keys.Contains(key);
 		}
 
 		public bool TryGetValue(DateTime key, out TotalRiskFundNode value) {
-			key = key.Date; //new DateTime(key.Year, key.Month, key.Day);
+			key = key.Date; 
 			if (ContainsKey(key)) {
 				value = Items.First(a => a.CurrentDate == key);
 				return true;
@@ -216,10 +191,6 @@ namespace PortFolion.Core {
 				return false;
 			}
 		}
-		
-		//IEnumerator<KeyValuePair<DateTime, TotalRiskFundNode>> IEnumerable<KeyValuePair<DateTime, TotalRiskFundNode>>.GetEnumerator() {
-		//	return Items.Select(a => new KeyValuePair<DateTime, TotalRiskFundNode>(a.CurrentDate, a)).GetEnumerator();
-		//}
 		#endregion
 	}
 }

@@ -84,7 +84,14 @@ namespace PortFolion.Core {
 				if (c != null && c.Quantity != 0) return true;
 				return false;
 			});
-
+		/// <summary>取引情報を持つかどうかを示す値を取得する。</summary>
+		public virtual bool HasTrading => this.Preorder().Any(
+			cn => {
+				if (cn.InvestmentValue != 0) return true;
+				var c = cn as FinancialProduct;
+				if (c != null && c.TradeQuantity != 0) return true;
+				return false;
+			});
 		protected virtual CommonNode Clone(CommonNode node){
 			node._name = _name;
 			node._tag = _tag;
@@ -96,7 +103,6 @@ namespace PortFolion.Core {
 				Name = _name,
 				Tag = Tag.TagName,
 				InvestmentValue = _investmentValue,
-				//InvestmentReturnValue = _investmentReturnValue,
 				Node = this.GetNodeType(),
 			};
 		}
@@ -197,7 +203,6 @@ namespace PortFolion.Core {
 			this.AddChild(n);
 			return n;
 		}
-		//public override bool IsInvestmentTarget => true;
 		public override long InvestmentValue 
 			=> GetOrCreateNuetral().InvestmentValue;
 		public override void SetInvestmentValue(long value) {
@@ -210,12 +215,6 @@ namespace PortFolion.Core {
 				RaisePropertyChanged(nameof(InvestmentValue));
 			}
 		}
-		//public override long InvestmentReturnValue 
-		//	=> GetOrCreateNuetral().InvestmentReturnValue;
-		//public override void SetInvestmentReturnValue(long value) {
-		//	var ntr = GetOrCreateNuetral();
-		//	ntr.SetInvestmentReturnValue(value);
-		//}
 		protected override CommonNode Clone(CommonNode nd) {
 			var n = nd as AccountNode;
 			n.Account = Account;

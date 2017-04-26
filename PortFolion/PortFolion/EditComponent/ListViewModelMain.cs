@@ -37,6 +37,15 @@ namespace PortFolion.ViewModels {
 			get { return controler.CurrentDate; }
 			set { controler.CurrentDate = value; }
 		}
+		bool _isTreeLoading = false;
+		//public bool IsTreeLoading {
+		//	get { return _isTreeLoading; }
+		//	set {
+		//		if (_isTreeLoading == value) return;
+		//		_isTreeLoading = value;
+		//		RaisePropertyChanged();
+		//	}
+		//}
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
 			if (Root.Any(a => a.Model == root)) return;
@@ -55,9 +64,11 @@ namespace PortFolion.ViewModels {
 				var rt = CommonNodeVM.Create(root);
 				rt.ReCalcurated += RefreshHistory;
 				rt.SetPath += setPath;
-				if (rt.CurrentDate != null)
+				if (rt.CurrentDate != null) {
+					//IsTreeLoading = true;
 					CommonNodeVM.ReCalcurate(rt);
-				//rt.ReCalcurate();
+					//IsTreeLoading = false;
+				}
 				Root.Add(rt);
 				rt.Preorder()
 					.Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
@@ -71,14 +82,15 @@ namespace PortFolion.ViewModels {
 		}
 		void setPath(IEnumerable<string> path) => this.Path = path;
 		public void RefreshHistory(IEnumerable<string> path) {
-			//_history = RootCollection.GetNodeLine(Path).Select(a => CommonNodeVM.Create(a.Value));
 			_history = CommonNodeVM.ReCalcHistory(path);
 			this.RaisePropertyChanged(nameof(History));
 		}
 		public void RefreshHistory(CommonNodeVM src) {
-			if(this.CurrentDate!=null)
-			CommonNodeVM.ReCalcurate(src);
-
+			//IsTreeLoading = true;
+			if (this.CurrentDate != null) {
+				CommonNodeVM.ReCalcurate(src);
+			}
+			//IsTreeLoading = false;
 			_history = CommonNodeVM.ReCalcHistory(this.Path);
 			this.RaisePropertyChanged(nameof(History));
 		}
@@ -133,13 +145,31 @@ namespace PortFolion.ViewModels {
 				string msg = "以下の銘柄は値を更新できませんでした。";
 				var m = lstLg.Distinct().Aggregate(msg, (seed, ele) => seed + "\n" + ele);
 				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
-			}else {
-
 			}
 			acse.ForEach(a => a.Dispose());
 		}
 		public void DeleteCurrentDate() {
-
+			if (CurrentDate == null || RootCollection.Instance.IsEmpty()) return;
+			Action delete = () => {
+				var d = (DateTime)CurrentDate;
+				RootCollection.Instance.Remove(this.Root.First().Model as TotalRiskFundNode);
+				IO.HistoryIO.SaveRoots(d);
+			};
+			if (RootCollection.Instance.Last().CurrentDate == CurrentDate) {
+				if (!this.Root.First().Model.HasTrading) {
+					delete();
+				}else {
+					if(MessageBoxResult.OK == MessageBox.Show("取引情報が含まれています。削除しますか？","Notice",MessageBoxButton.OKCancel,MessageBoxImage.Exclamation,MessageBoxResult.Cancel)) {
+						delete();
+					}
+				}
+			}else if (!this.Root.First().Model.HasTrading) {
+				if(MessageBoxResult.OK == MessageBox.Show(((DateTime)CurrentDate).ToString("yyyy年M月d日") + "の書込みデータを削除します。","Notice",MessageBoxButton.OKCancel,MessageBoxImage.Information,MessageBoxResult.Cancel)) {
+					delete();
+				}
+			}else {
+				MessageBox.Show("取引情報が含まれている過去のデータは削除できません。", "Notice", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			}
 		}
 		public void ExpandCurrentNode() {
 			if (!this.Path.Any()) return;
@@ -183,6 +213,7 @@ namespace PortFolion.ViewModels {
 				}
 				if (rt == null) this.CurrentDate = null;
 				else this.CurrentDate = rt.CurrentDate;
+				lvm.RefreshHistory(this.Path);
 			}
 
 			DateTime? _currentDate;

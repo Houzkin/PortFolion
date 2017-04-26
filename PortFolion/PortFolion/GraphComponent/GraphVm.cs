@@ -45,13 +45,12 @@ namespace PortFolion.ViewModels {
 					g.Update(_mng.GraphData);
 				}
 			};
-
 			_mng = new gvMng(this);
-
 			BrakeDown = new BrakeDownChart(this);
 			this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
-
+			if (this.CurrentNode != null)
+				this.dtr.SelectAt((CurrentNode.Root() as TotalRiskFundNode).CurrentDate);
 			//this.VisibleTransition = true;
 		}
 		gvMng _mng;
@@ -386,7 +385,7 @@ namespace PortFolion.ViewModels {
 				cnt--;
 				try {
 					this.RemoveAt(cnt);
-				} catch { }
+				} catch { /*ignore*/ }
 			}
 		}
 		IEnumerable<string> _labels = Enumerable.Empty<string>();

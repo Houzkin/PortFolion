@@ -52,15 +52,6 @@ namespace PortFolion.ViewModels {
 				OnPropertyChanged();
 			}
 		}
-		//double _ar;
-		//public double AmountRate {
-		//	get { return _ar; }
-		//	set {
-		//		if (_ar == value) return;
-		//		_ar = value;
-		//		OnPropertyChanged();
-		//	}
-		//}
 		#endregion
 
 	}
@@ -161,15 +152,20 @@ namespace PortFolion.ViewModels {
 		}
 		public static void ReCalcurate(CommonNodeVM tgt) {
 			DateTime date = (DateTime)tgt.CurrentDate;
-			var dic = _com1(RootCollection.GetNodeLine(tgt.Root().Path, date).TakeWhile(a => a.Key <= date).Select(a => Create(a.Value)))
+			var dic = _com1(
+				RootCollection.GetNodeLine(tgt.Root().Path, date)
+				.TakeWhile(a => a.Key <= date)
+				.Select(a => Create(a.Value))
+				)
 				.LastOrDefault();
 			if (dic == null) return;
-			foreach(var ele in tgt.Levelorder().Reverse()) {
+			foreach (var ele in tgt.Levelorder().Reverse()) {
 				CommonNodeVM vm;
-				if(dic.TryGetValue(ele.Path,out vm)) {
+				if (dic.TryGetValue(ele.Path, out vm)) {
 					ele.CoreData.Copy(vm.CoreData);
 				}
 			}
+			
 		}
 		static void _setTotal(bool r,CommonNodeVM pr,CommonNodeVM cu) {
 			//if (!cu.Model.IsRoot()) {
@@ -250,8 +246,14 @@ namespace PortFolion.ViewModels {
 		}
 		#endregion
 		protected VmCoreGeneral CoreData { get; } = new VmCoreGeneral();
+		IDisposable listenr;
 		protected CommonNodeVM(CommonNode model) : base(model) {
-			CoreData.PropertyChanged += this.corePropertyChanged;
+			listenr = new PropertyChangedWeakEventListener(CoreData, corePropertyChanged);
+			//CoreData.PropertyChanged += this.corePropertyChanged;
+		}
+		protected override void Dispose(bool disposing) {
+			if (disposing) listenr.Dispose();
+			base.Dispose(disposing);
 		}
 		protected override CommonNodeVM GenerateChild(CommonNode modelChildNode) {
 			return Create(modelChildNode);
@@ -277,7 +279,7 @@ namespace PortFolion.ViewModels {
 		}
 		public NodePath<string> Path => Model.Path;
 		//public bool IsModelEquals(CommonNode node) => this.Model == node;
-		public new CommonNode Model => this.Model;
+		public new CommonNode Model => base.Model;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
 
 		public event Action<CommonNodeVM> ReCalcurated;
@@ -347,7 +349,7 @@ namespace PortFolion.ViewModels {
 						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 					}
 				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "口座追加" });
+				MenuList.Add(new MenuItemVm(vc) { Header = "口座を追加" });
 			}else if(ty == NodeType.Total) {
 				var vc = new ViewModelCommand(() => {
 					var vm = new NodeNameEditerVM(model, new BrokerNode());
@@ -358,7 +360,7 @@ namespace PortFolion.ViewModels {
 						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
 					}
 				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "証券会社追加" });
+				MenuList.Add(new MenuItemVm(vc) { Header = "証券会社を追加" });
 			}
 
 			var vmc = new ViewModelCommand(() => {
