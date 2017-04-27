@@ -110,7 +110,7 @@ namespace PortFolion.ViewModels {
 		public ViewModelCommand AddStock 
 			=> addStockCmd = addStockCmd ?? new ViewModelCommand(executeAddStock, canAddStock);
 		bool canAddStock() {
-			return !DummyStock.HasErrors;// && Elements.All(a => a.Name != DummyStock.Name);//&& Elements.Where(a=>a.IsStock).All(a => a.Name != DummyStock.Name);
+			return !DummyStock.HasErrors && !string.IsNullOrEmpty(DummyStock.Code);// && Elements.All(a => a.Name != DummyStock.Name);//&& Elements.Where(a=>a.IsStock).All(a => a.Name != DummyStock.Name);
 		}
 		void executeAddStock() {
 			DummyStock.Apply();
@@ -450,10 +450,15 @@ namespace PortFolion.ViewModels {
 			//this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
-				siis = Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray();
+				this.AccountVM.IsLoading = true;
+				var t = Task.Run(() => Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+				t.Wait();
+				siis = t.Result;
 			} catch {
 				return "エラーにより取得不可";
-			} finally { }
+			} finally {
+				AccountVM.IsLoading = false;
+			}
 
 			StockInfo si = null;
 			if (!siis.Any()) {

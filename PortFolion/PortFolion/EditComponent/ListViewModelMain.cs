@@ -106,8 +106,8 @@ namespace PortFolion.ViewModels {
 			//_history = CommonNodeVM.ReCalcHistory(path);
 			this.IsHistoryLoading = true;
 			_history = CommonNodeVM.ReCalcHistory(path);
-			this.IsHistoryLoading = false;
 			this.RaisePropertyChanged(nameof(History));
+			this.IsHistoryLoading = false;
 		}
 		public void RefreshHistory(CommonNodeVM src) {
 
@@ -119,9 +119,9 @@ namespace PortFolion.ViewModels {
 			IsTreeLoading = false;
 
 			_history = CommonNodeVM.ReCalcHistory(this.Path);
-			IsHistoryLoading = false;
 
 			this.RaisePropertyChanged(nameof(History));
+			IsHistoryLoading = false;
 		}
 		IEnumerable<VmCoreBase> _history = null;
 		public IEnumerable<VmCoreBase> History
