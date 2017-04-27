@@ -20,6 +20,12 @@
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
             <BooleanToVisibilityConverter x:Key="BtoVConverter"/>
+            <DataTemplate x:Key="LoadingTemplate">
+                <Grid><!--{x:Static SystemColors.ControlDarkColor}-->
+                    <Grid Panel.ZIndex="2" Grid.Column="1" Background="Black" Opacity="0.2"/>
+                    <mah:ProgressRing Panel.ZIndex="3" Grid.Column="1" IsActive="True" Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+            </DataTemplate>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -75,19 +81,17 @@
                             CommandParameter="{Binding ElementName=PickedDate, Path=SelectedDate}"/>
                 </StackPanel>
             </Grid>
-        </Expander><!--{Binding IsTreeLoading, Converter={StaticResource BooleanToVisibilityConverter}}-->
+        </Expander>
         
         <Grid Grid.Column="1" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <Grid.Resources>
-                
-            </Grid.Resources>
+            
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0">
+                
                 <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="20" Margin="0,3" VerticalAlignment="Center" />
                 <Button Content="{iconPacks:PackIconMaterial Kind=DeleteForever, Width=15,Height=15}" ToolTip="削除" Margin="10,0,0,0" VerticalAlignment="Center">
                     <i:Interaction.Triggers>
@@ -334,15 +338,11 @@
                     </GridViewColumn>
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
-            <Grid Grid.Row="3" x:Name="PortFolioResult">
-                <!--<TextBlock Text="dumy"/>{Binding IsTreeLoading,Converter={StaticResource BtoVConverter}}-->
-            </Grid>
+            
         </Grid>
-        <!--<Grid Grid.Column="1" Background="Gray" Opacity="0.2"
-              Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
-            <mah:ProgressRing IsActive="True"/>
-        </Grid>-->
-        
+        <ContentControl  d:IsHidden ="True" Grid.Column="1" Panel.ZIndex="1" ContentTemplate="{StaticResource LoadingTemplate}" Content="{Binding}"
+                      Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+
         <GridSplitter Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="5"/>
         <Grid Grid.Column="3">
             <Grid.RowDefinitions>
@@ -415,5 +415,7 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
+        <ContentControl d:IsHidden ="True"  Grid.Column="3" Panel.ZIndex="1" ContentTemplate="{StaticResource LoadingTemplate}" Content="{Binding}"
+                        Visibility="{Binding IsHistoryLoading,Converter={StaticResource BtoVConverter},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
     </Grid>
 </UserControl>

@@ -67,6 +67,16 @@ namespace PortFolion.ViewModels {
 			StatusComment = comment;
 			OnPropertyChanged(nameof(StatusComment));
 		}
+		bool _isLoading;
+		public bool IsLoading {
+			get { return _isLoading; }
+			set {
+				if (_isLoading == value) return;
+				_isLoading = value;
+				OnPropertyChanged();
+				App.DoEvent();
+			}
+		}
 		public new AccountNode Model => base.Model;
 		public CashEditVM CashElement => Elements.First(a => a.IsCash);
 		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
@@ -210,6 +220,7 @@ namespace PortFolion.ViewModels {
 				else if (t == typeof(FinancialProduct)) return new ProductEditVM(this, a as FinancialProduct);
 				else return new CashEditVM(this, a as FinancialValue);
 			}).ForEach(a => Elements.Add(a));
+			this.OnPropertyChanged(nameof(CashElement));
 		}
 		ViewModelCommand applyCurrentPerPrice;
 		public ViewModelCommand ApplyCurrentPerPrice {
@@ -222,7 +233,10 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		void applyCurrentPrice() {
+			this.IsLoading = true;
 			var r = ApplyPerPrice();
+			this.IsLoading = false;
+
 			if (r.Any()) {
 				string msg = "以下の銘柄は値を更新できませんでした。";
 				var m = r.Aggregate(msg, (seed, ele) => seed + "\n" + ele);
@@ -239,7 +253,9 @@ namespace PortFolion.ViewModels {
 		public IEnumerable<string> ApplyPerPrice() {
 			var pfs = Elements.OfType<StockEditVM>();
 			if (!pfs.Any()) return Enumerable.Empty<string>();
-			var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
+			var t = Task.Run(() => Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray());
+			t.Wait();
+			var ary = t.Result;// Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
 			var dic = new List<Tuple<string, string>>();
 			
 			foreach(var p in pfs) {
@@ -295,8 +311,8 @@ namespace PortFolion.ViewModels {
 		}
 		public virtual void Apply() {
 			Model.Name = Name.Trim();
-			Model.SetInvestmentValue((long)_investmentValue);
-			Model.SetAmount((long)_amount);
+			Model.SetInvestmentValue((long)InvestmentValueView);
+			Model.SetAmount((long)AmountView);
 		}
 		public bool IsCash => GetType() == typeof(CashEditVM);
 		public bool IsStock => GetType() == typeof(StockEditVM);
@@ -322,23 +338,25 @@ namespace PortFolion.ViewModels {
 			return null;
 		}
 		protected string _InvestmentValue="";
-		protected double _investmentValue => ExpParse.Try(_InvestmentValue);
+		public double InvestmentValueView => ExpParse.Try(_InvestmentValue);
 		public virtual string InvestmentValue {
 			get { return _InvestmentValue; }
 			set {
 				if(SetProperty(ref _InvestmentValue, value)) {
+					OnPropertyChanged(nameof(InvestmentValueView));
 					OnPropertyChanged(nameof(IsEmptyElement));
-					if(_amount == 0)
-						Amount = (Model.Amount + _investmentValue).ToString("#.##");
+					//if(_amount == 0)
+					//	Amount = (Model.Amount + _investmentValue).ToString("#.##");
 				}
 			}
 		}
 		protected string _Amount;
-		protected double _amount => ExpParse.Try(_Amount);
+		public double AmountView => ExpParse.Try(_Amount);
 		public virtual string Amount {
 			get { return _Amount; }
 			set {
 				if (SetProperty(ref _Amount, value)) {
+					OnPropertyChanged(nameof(AmountView));
 					OnPropertyChanged(nameof(IsEmptyElement));
 					if (AccountVM.Elements.Contains(this)) AccountVM.ChangedTemporaryAmount();
 				}
@@ -357,52 +375,53 @@ namespace PortFolion.ViewModels {
 		}
 		public override void Apply() {
 			base.Apply();
-			Model.SetTradeQuantity((long)_tradeQuantity);
-			Model.SetQuantity((long)_quantity);
+			Model.SetTradeQuantity((long)TradeQuantityView);
+			Model.SetQuantity((long)QuantityView);
 		}
 		public ProductEditVM(AccountEditVM ac) : base(ac, new FinancialValue()) { }
-		public override bool IsEmptyElement => _amount == 0 && _quantity == 0 && _investmentValue == 0 && _tradeQuantity == 0;
+		public override bool IsEmptyElement => AmountView == 0 && QuantityView == 0 && InvestmentValueView == 0 && TradeQuantityView == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
-		public override string InvestmentValue {
-			get { return base.InvestmentValue; }
-			set {
-				if (SetProperty(ref _InvestmentValue, value)) {
-					OnPropertyChanged(nameof(IsEmptyElement));
-				}
-			}
-		}
-		public override bool IsTradeQuantityEditable => true;// false;
+		//public override string InvestmentValue {
+		//	get { return base.InvestmentValue; }
+		//	set {
+		//		base.InvestmentValue = value;
+		//	}
+		//}
+		public override bool IsTradeQuantityEditable => true;
 		protected string _TradeQuantity="";
-		protected double _tradeQuantity => ExpParse.Try(_TradeQuantity);
+		public double TradeQuantityView => ExpParse.Try(_TradeQuantity);
 		public virtual string TradeQuantity {
 			get { return _TradeQuantity; }
 			set {
 				if(SetProperty(ref _TradeQuantity, value)) {
+					OnPropertyChanged(nameof(TradeQuantityView));
 					OnPropertyChanged(nameof(IsEmptyElement));
-				Quantity = (Model.Quantity + _tradeQuantity).ToString("#.##");
+					Quantity = (Model.Quantity + TradeQuantityView).ToString("#.##");
 				}
 			}
 		}
-		public override bool IsPerPriceEditable => true;// false;
+		public override bool IsPerPriceEditable => true;
 		protected string _CurrentPerPrice="0";
-		protected double _currentPerPrice => ExpParse.Try(_CurrentPerPrice);
+		public double CurrentPerPriceView => ExpParse.Try(_CurrentPerPrice);
 		public virtual string CurrentPerPrice {
 			get { return _CurrentPerPrice; }
 			set {
 				if(SetProperty(ref _CurrentPerPrice, value)) {
-					Amount = (_quantity * _currentPerPrice).ToString();
+					OnPropertyChanged(nameof(CurrentPerPriceView));
+					Amount = (QuantityView * CurrentPerPriceView).ToString();
 				}
 			}
 		}
 		public override bool IsQuantityEditable => true;// false;
 		protected string _Quantity="0";
-		protected double _quantity => ExpParse.Try(_Quantity);
+		public double QuantityView => ExpParse.Try(_Quantity);
 		public virtual string Quantity {
 			get { return _Quantity; }
 			set {
 				if (SetProperty(ref _Quantity, value)) {
+					OnPropertyChanged(nameof(QuantityView));
 					OnPropertyChanged(nameof(IsEmptyElement));
-					Amount = (_quantity * _currentPerPrice).ToString();
+					Amount = (QuantityView * CurrentPerPriceView).ToString();
 				}
 			}
 		}

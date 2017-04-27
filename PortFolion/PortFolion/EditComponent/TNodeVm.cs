@@ -138,26 +138,35 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public static IEnumerable<VmCoreBase> ReCalcHistory(IEnumerable<string> path) {
-			var ps = RootCollection.GetNodeLine(path).Values;
-			var ps1 = ps.Select(a=>CommonNodeVM.Create(a));
-			var dics = _com1(ps1);
+			var t = Task.Run(() => {
+				var ps = RootCollection.GetNodeLine(path).Values;
+				var ps1 = ps.Select(a => CommonNodeVM.Create(a));
+				return  _com1(ps1);
+
+			});
+			t.Wait();
 			var p = new NodePath<string>(path);
-			foreach(var dic in dics) {
+			var lst = new List<VmCoreBase>();
+			foreach (var dic in t.Result) {
 				CommonNodeVM vm;
-				if(dic.TryGetValue(p, out vm)) {
-					yield return vm.ToHistoryVm();
+				if (dic.TryGetValue(p, out vm)) {
+					lst.Add(vm.ToHistoryVm());
 				}
 			}
-
+			return lst;
 		}
 		public static void ReCalcurate(CommonNodeVM tgt) {
 			DateTime date = (DateTime)tgt.CurrentDate;
-			var dic = _com1(
+			var t = Task.Run(()=> {
+				return  _com1(
 				RootCollection.GetNodeLine(tgt.Root().Path, date)
 				.TakeWhile(a => a.Key <= date)
 				.Select(a => Create(a.Value))
 				)
-				.LastOrDefault();
+				.LastOrDefault(); });
+			t.Wait();
+			var dic = t.Result;
+			
 			if (dic == null) return;
 			foreach (var ele in tgt.Levelorder().Reverse()) {
 				CommonNodeVM vm;

@@ -296,9 +296,12 @@ namespace PortFolion.ViewModels {
 			public void Refresh() {
 				_curPath = gtvm.CurrentPath;
 				_period = gtvm.TimePeriod;
-				GraphData = RootCollection
-					.GetNodeLine(_curPath)
-					.ToGraphValues(_period);
+				var t = Task.Run(() => {
+					GraphData = RootCollection
+						.GetNodeLine(_curPath)
+						.ToGraphValues(_period);
+				});
+				t.Wait();
 			}
 			public IEnumerable<GraphValue> GraphData { get; private set; }
 		}

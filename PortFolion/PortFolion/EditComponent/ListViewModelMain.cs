@@ -15,6 +15,7 @@ using System.Windows.Input;
 using Livet.EventListeners.WeakEvents;
 using Houzkin;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace PortFolion.ViewModels {
 	public class ListviewModel : ViewModel {
@@ -38,13 +39,34 @@ namespace PortFolion.ViewModels {
 			set { controler.CurrentDate = value; }
 		}
 		bool _isTreeLoading = false;
-		//public bool IsTreeLoading {
-		//	get { return _isTreeLoading; }
-		//	set {
-		//		if (_isTreeLoading == value) return;
-		//		_isTreeLoading = value;
-		//		RaisePropertyChanged();
-		//	}
+		public bool IsTreeLoading {
+			get { return _isTreeLoading; }
+			private set {
+				if (_isTreeLoading == value) return;
+				_isTreeLoading = value;
+				RaisePropertyChanged();
+				App.DoEvent();
+			}
+		}
+		bool _isHistoryLoading = false;
+		public bool IsHistoryLoading {
+			get { return _isHistoryLoading; }
+			private set {
+				if (_isHistoryLoading == value) return;
+				_isHistoryLoading = value;
+				RaisePropertyChanged();
+				App.DoEvent();
+			}
+		}
+		//private void DoEvents(){
+		//	DispatcherFrame frame = new DispatcherFrame();
+		//	var callback = new DispatcherOperationCallback(obj =>
+		//	{
+		//		((DispatcherFrame)obj).Continue = false;
+		//		return null;
+		//	});
+		//	Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, callback, frame);
+		//	Dispatcher.PushFrame(frame);
 		//}
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
@@ -65,9 +87,9 @@ namespace PortFolion.ViewModels {
 				rt.ReCalcurated += RefreshHistory;
 				rt.SetPath += setPath;
 				if (rt.CurrentDate != null) {
-					//IsTreeLoading = true;
+					IsTreeLoading = true;
 					CommonNodeVM.ReCalcurate(rt);
-					//IsTreeLoading = false;
+					IsTreeLoading = false;
 				}
 				Root.Add(rt);
 				rt.Preorder()
@@ -75,23 +97,30 @@ namespace PortFolion.ViewModels {
 					.ForEach(a => a.IsExpand = true);
 			}
 		}
-
 		public IEnumerable<string> Path {
 			get { return controler.Path; }
 			set { controler.Path = value; }
 		}
 		void setPath(IEnumerable<string> path) => this.Path = path;
 		public void RefreshHistory(IEnumerable<string> path) {
+			//_history = CommonNodeVM.ReCalcHistory(path);
+			this.IsHistoryLoading = true;
 			_history = CommonNodeVM.ReCalcHistory(path);
+			this.IsHistoryLoading = false;
 			this.RaisePropertyChanged(nameof(History));
 		}
 		public void RefreshHistory(CommonNodeVM src) {
-			//IsTreeLoading = true;
+
+			IsHistoryLoading = true;
+			IsTreeLoading = true;
 			if (this.CurrentDate != null) {
 				CommonNodeVM.ReCalcurate(src);
 			}
-			//IsTreeLoading = false;
+			IsTreeLoading = false;
+
 			_history = CommonNodeVM.ReCalcHistory(this.Path);
+			IsHistoryLoading = false;
+
 			this.RaisePropertyChanged(nameof(History));
 		}
 		IEnumerable<VmCoreBase> _history = null;
@@ -128,6 +157,7 @@ namespace PortFolion.ViewModels {
 
 		#region tree menu
 		public void ApplyCurrentPerPrice() {
+			IsTreeLoading = true;
 			var acs = this.Root.FirstOrDefault()?
 				.Levelorder().Select(a => a.Model)
 				.Where(a => a.GetNodeType() == IO.NodeType.Account)
@@ -141,6 +171,7 @@ namespace PortFolion.ViewModels {
 			}
 			IO.HistoryIO.SaveRoots((DateTime)this.CurrentDate);
 			CommonNodeVM.ReCalcurate(this.Root.First());
+			IsTreeLoading = false;
 			if (lstLg.Any()) {
 				string msg = "以下の銘柄は値を更新できませんでした。";
 				var m = lstLg.Distinct().Aggregate(msg, (seed, ele) => seed + "\n" + ele);
