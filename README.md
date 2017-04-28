@@ -1,12 +1,12 @@
 # PortFolion
-ƒ|[ƒgƒtƒHƒŠƒI‚Ì„ˆÚ‚ð‹L˜^E‰ÂŽ‹‰»‚·‚é‚½‚ß‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚Å‚·B
+ãƒãƒ¼ãƒˆãƒ•ã‚©ãƒªã‚ªã®æŽ¨ç§»ã‚’è¨˜éŒ²ãƒ»å¯è¦–åŒ–ã™ã‚‹ãŸã‚ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã§ã™ã€‚
 ## Discription
-’·Šú“ŠŽ‘‚ð‘O’ñ‚Æ‚µ‚Ä‚¢‚Ü‚·BŠ”Ž®E“ŠM‚É‚Í‘Î‰ž‚µ‚Ä‚¢‚Ü‚·‚ªAM—pŽæˆøEFX‚É‚Í‘Î‰ž‚µ‚Ä‚¢‚Ü‚¹‚ñBŠ”‰¿î•ñ‚Í[k-db.com](http://k-db.com)‚³‚ñ‚©‚ç”qŽØ‚µ‚Ä‚¢‚Ü‚·B
+é•·æœŸæŠ•è³‡ã‚’å‰æã¨ã—ã¦ã„ã¾ã™ã€‚æ ªå¼ãƒ»æŠ•ä¿¡ã«ã¯å¯¾å¿œã—ã¦ã„ã¾ã™ãŒã€ä¿¡ç”¨å–å¼•ãƒ»FXã«ã¯å¯¾å¿œã—ã¦ã„ã¾ã›ã‚“ã€‚æ ªä¾¡æƒ…å ±ã¯[k-db.com](http://k-db.com)ã•ã‚“ã‹ã‚‰æ‹å€Ÿã—ã¦ã„ã¾ã™ã€‚
 ## Demo
 ![Graph](https://github.com/Houzkin/PortFolion/blob/images/demo01.gif)
 
 ## Download
-[‚±‚¿‚ç](https://github.com/Houzkin/PortFolion/releases)‚©‚çzipƒtƒ@ƒCƒ‹‚ðƒ_ƒEƒ“ƒ[ƒh‚µ‚Ä‚­‚¾‚³‚¢B
+ãƒªãƒªãƒ¼ã‚¹ãƒŽãƒ¼ãƒˆã¯[ã“ã¡ã‚‰](https://github.com/Houzkin/PortFolion/releases)ã€‚
 
 ## Author
 [@houzkin](https://twitter.com/houzkin)
@@ -14,7 +14,7 @@
 ## License
 http://www.apache.org/licenses/LICENSE-2.0
 
-ˆÈ‰º‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚ðŽg—p‚µ‚Ä‚¢‚Ü‚·
+ä»¥ä¸‹ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’ä½¿ç”¨ã—ã¦ã„ã¾ã™
 
 * MahApps
 * LiveCharts
