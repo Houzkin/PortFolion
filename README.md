@@ -6,7 +6,10 @@
 ![Graph](https://github.com/Houzkin/PortFolion/blob/images/demo01.gif)
 
 ## Download
-リリースノートは[こちら](https://github.com/Houzkin/PortFolion/releases)。
+リリースノートは[こちら](https://github.com/Houzkin/PortFolion/releases)。 
+サンプルデータを同封しています。
+実際に使い始める場合はサンプルを削除して使用してください。
+![DownloadDirectory](https://github.com/Houzkin/PortFolion/blob/images/SampleDirectory.JPG)
 
 ## Author
 [@houzkin](https://twitter.com/houzkin)
