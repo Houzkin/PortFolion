@@ -44,7 +44,6 @@
             <!--<Button Content="settings"/>
             <Button Content="options"  Command="{Binding ShowLisence}"/>-->
             <ToggleButton Content="License" IsChecked="{Binding IsOpen,ElementName=LicenseFlyout}"/>
-            <Button Content="Wiki"/>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
 
