@@ -8,6 +8,9 @@
 ## Download
 [こちら](https://github.com/Houzkin/PortFolion/releases)からzipファイルをダウンロードしてください。
 
+## Author
+[@houzkin](https://twitter.com/houzkin)
+
 ## License
 http://www.apache.org/licenses/LICENSE-2.0
 
