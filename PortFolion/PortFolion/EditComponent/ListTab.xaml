@@ -20,6 +20,12 @@
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
             <BooleanToVisibilityConverter x:Key="BtoVConverter"/>
+            <DataTemplate x:Key="nowLoading">
+                <Grid>
+                    <Grid Background="DarkGray" Opacity="0.1"/>
+                    <mah:ProgressRing IsActive="True"/>
+                </Grid>
+            </DataTemplate>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -76,13 +82,15 @@
                 </StackPanel>
             </Grid>
         </Expander><!--{Binding IsTreeLoading, Converter={StaticResource BooleanToVisibilityConverter}}-->
-        
+
+        <ContentControl d:IsHidden="True" Grid.Column="1" Panel.ZIndex="1"
+                        Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter}}"
+                        ContentTemplate="{StaticResource nowLoading}"/>
         <Grid Grid.Column="1" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.Resources>
                 
@@ -114,7 +122,15 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </MenuItem>
-                <MenuItem Header="株価更新" Margin="3,0" ToolTip="現時点での株価を適用">
+                <MenuItem Margin="3,0" ToolTip="当日の株価を適用">
+                    <MenuItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Refresh" VerticalAlignment="Center"/>
+                                <TextBlock Text="株価更新" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </MenuItem.HeaderTemplate>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="ApplyCurrentPerPrice"/>
@@ -334,16 +350,13 @@
                     </GridViewColumn>
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
-            <Grid Grid.Row="3" x:Name="PortFolioResult">
-                <!--<TextBlock Text="dumy"/>{Binding IsTreeLoading,Converter={StaticResource BtoVConverter}}-->
-            </Grid>
         </Grid>
-        <!--<Grid Grid.Column="1" Background="Gray" Opacity="0.2"
-              Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
-            <mah:ProgressRing IsActive="True"/>
-        </Grid>-->
         
         <GridSplitter Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="5"/>
+
+        <ContentControl d:IsHidden="True" Grid.Column="3" Panel.ZIndex="1"
+                        Visibility="{Binding IsHistoryLoading,Converter={StaticResource BtoVConverter}}"
+                        ContentTemplate="{StaticResource nowLoading}"/>
         <Grid Grid.Column="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>

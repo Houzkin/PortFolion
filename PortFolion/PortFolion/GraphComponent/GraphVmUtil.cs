@@ -230,7 +230,6 @@ namespace PortFolion.ViewModels {
 				.GroupBy(a => a.CashCount)
 				.OrderBy(a => a.Key)
 				.SelectMany(a => a.OrderByDescending(b => b.Amount));
-			//.OrderBy(a => a.CashCount);
 
 		}
 		static Random rdm = new Random();

@@ -38,7 +38,8 @@ namespace PortFolion.ViewModels {
 				if (_isSelected == value) return;
 				_isSelected = value;
 				OnPropertyChanged();
-				RaiseSelected(this.Model);
+				if(_isSelected)
+					RaiseSelected(this.Model);
 			}
 		}
 		protected virtual void RaiseSelected(CommonNode node) {
@@ -46,7 +47,12 @@ namespace PortFolion.ViewModels {
 		}
 	}
 	public class LocationRoot : LocationNode {
-		public LocationRoot(CommonNode model) : base(model) {
+		public LocationRoot(TotalRiskFundNode model,CommonNode cur) : base(model) {
+			selectAt(cur);
+		}
+		void selectAt(CommonNode cur) {
+			var s = this.Levelorder().FirstOrDefault(a => a.IsModelEquals(cur));
+			if (s != null) s.IsSelected = true;
 		}
 		protected override void RaiseSelected(CommonNode node) {
 			Selected?.Invoke(this, new LocationSelectedEventArgs(node));

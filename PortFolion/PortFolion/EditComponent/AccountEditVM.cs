@@ -239,9 +239,15 @@ namespace PortFolion.ViewModels {
 		public IEnumerable<string> ApplyPerPrice() {
 			var pfs = Elements.OfType<StockEditVM>();
 			if (!pfs.Any()) return Enumerable.Empty<string>();
-			var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
+			//var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
 			var dic = new List<Tuple<string, string>>();
 			
+			StockInfo[] ary; 
+			try {
+				ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
+			} catch {
+				return new string[] { "通信状態を確認して再度実行してください。" };
+			}
 			foreach(var p in pfs) {
 				var sym = ary.Where(a => a.Symbol == p.Code).OrderBy(a => a.Turnover).LastOrDefault();
 				if (sym == null) {
@@ -251,6 +257,7 @@ namespace PortFolion.ViewModels {
 				}
 			}
 			return dic.Select(a => a.Item1 + " - " + a.Item2);
+			
 		}
 	}
 	
@@ -321,20 +328,18 @@ namespace PortFolion.ViewModels {
 			}
 			return null;
 		}
-		protected string _InvestmentValue = "";
-		public double InvestmentValueView => ExpParse.Try(_InvestmentValue);
+		string _InvestmentValue = "";
+		public virtual double InvestmentValueView => ExpParse.Try(_InvestmentValue);
 		public virtual string InvestmentValue {
 			get { return _InvestmentValue; }
 			set {
 				if (SetProperty(ref _InvestmentValue, value)) {
 					OnPropertyChanged(nameof(InvestmentValueView));
 					OnPropertyChanged(nameof(IsEmptyElement));
-					//if(_amount == 0)
-					//	Amount = (Model.Amount + _investmentValue).ToString("#.##");
 				}
 			}
 		}
-		protected string _Amount;
+		string _Amount;
 		public double AmountView => ExpParse.Try(_Amount);
 		public virtual string Amount {
 			get { return _Amount; }
@@ -365,27 +370,34 @@ namespace PortFolion.ViewModels {
 		public ProductEditVM(AccountEditVM ac) : base(ac, new FinancialValue()) { }
 		public override bool IsEmptyElement => AmountView == 0 && QuantityView == 0 && InvestmentValueView == 0 && TradeQuantityView == 0;
 		public new FinancialProduct Model => base.Model as FinancialProduct;
-		//public override string InvestmentValue {
-		//	get { return base.InvestmentValue; }
-		//	set {
-		//		base.InvestmentValue = value;
-		//	}
-		//}
+
+		public override double InvestmentValueView {
+			get {
+				if (0 < TradeQuantityView)
+					return Math.Abs(base.InvestmentValueView);
+				else if (TradeQuantityView < 0)
+					return Math.Abs(base.InvestmentValueView) * -1;
+				else
+					return base.InvestmentValueView;
+			}
+		}
+
 		public override bool IsTradeQuantityEditable => true;
-		protected string _TradeQuantity = "";
+		string _TradeQuantity = "";
 		public double TradeQuantityView => ExpParse.Try(_TradeQuantity);
 		public virtual string TradeQuantity {
 			get { return _TradeQuantity; }
 			set {
 				if (SetProperty(ref _TradeQuantity, value)) {
 					OnPropertyChanged(nameof(TradeQuantityView));
+					OnPropertyChanged(nameof(InvestmentValueView));
 					OnPropertyChanged(nameof(IsEmptyElement));
 					Quantity = (Model.Quantity + TradeQuantityView).ToString("#.##");
 				}
 			}
 		}
 		public override bool IsPerPriceEditable => true;
-		protected string _CurrentPerPrice = "0";
+		string _CurrentPerPrice = "0";
 		public double CurrentPerPriceView => ExpParse.Try(_CurrentPerPrice);
 		public virtual string CurrentPerPrice {
 			get { return _CurrentPerPrice; }
@@ -396,8 +408,8 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		public override bool IsQuantityEditable => true;// false;
-		protected string _Quantity = "0";
+		public override bool IsQuantityEditable => true;
+		string _Quantity = "0";
 		public double QuantityView => ExpParse.Try(_Quantity);
 		public virtual string Quantity {
 			get { return _Quantity; }
@@ -436,12 +448,12 @@ namespace PortFolion.ViewModels {
 			try {
 				siis = Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray();
 			} catch {
-				return "エラーにより取得不可";
+				return "通信状態を確認して再度実行してください。";
 			} finally { }
 
 			StockInfo si = null;
 			if (!siis.Any()) {
-				return "指定したコードの銘柄は存在しません";
+				return "指定したコードの銘柄は存在しません。";
 			} else {
 				si = siis.OrderBy(a => a.Turnover).Last();
 			}
@@ -449,9 +461,9 @@ namespace PortFolion.ViewModels {
 			this.OnPropertyChanged(nameof(Name));
 			if (si.Turnover != 0) {
 				this.CurrentPerPrice = si.Close.ToString("#.##");
-				return d.ToString("M月dd日") + "時点における " + this.Name + " の終値を適用しました";
+				return d.ToString("M月d日") + "における " + this.Name + " の終値を適用しました。";
 			} else {
-				return this.Name + "は出来高がないため終値を取得できませんでした";
+				return this.Name + "は出来高がないため終値を取得できませんでした。";
 			}
 
 		}

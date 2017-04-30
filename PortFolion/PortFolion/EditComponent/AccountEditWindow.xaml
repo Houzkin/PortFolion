@@ -10,6 +10,7 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:converter="clr-namespace:PortFolion.Views.Converter"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                  x:Name="editWindow"
                  mc:Ignorable="d" SaveWindowPosition="False"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
@@ -101,10 +102,14 @@
             <StackPanel Orientation="Horizontal" Margin="0,0,30,0"><!--StringFormat=”{0} :”-->
                 <TextBlock Text="{Binding CashElement.Name, StringFormat={}{0} :}" Margin="5" FontSize="15" VerticalAlignment="Bottom"/>
                     <TextBox Text="{Binding CashElement.Amount,UpdateSourceTrigger=PropertyChanged}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="140"
-                         ToolTip="記入日時点での余力"
                          InputMethod.PreferredImeState="On"
                          InputMethod.PreferredImeConversionMode="Alphanumeric"
-                         mah:TextBoxHelper.Watermark="数値または式"/>
+                         mah:TextBoxHelper.Watermark="数値または式">
+                        <TextBox.ToolTip>
+                            <ToolTip Content="{Binding CashElement.Name}"
+                                     ContentStringFormat="{}記入日時点での{0}" />
+                        </TextBox.ToolTip>
+                    </TextBox>
                 </StackPanel>
                 <TextBlock Text="内、当日(+)入・(-)出金額 :" Margin="5" FontSize="12" VerticalAlignment="Bottom"/>
                 <TextBox Text="{Binding CashElement.InvestmentValue,UpdateSourceTrigger=PropertyChanged}" Margin="5,1,1,1" FontSize="25" VerticalAlignment="Bottom" MinWidth="140"
@@ -119,7 +124,16 @@
             </StackPanel>
         </WrapPanel>
         <Grid Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Content="株価更新" Margin="5,10,5,0" Command="{Binding ApplyCurrentPerPrice}"/>
+            <Button Margin="5,10,5,0" Command="{Binding ApplyCurrentPerPrice}">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <iconPacks:PackIconMaterial Kind="Refresh" VerticalAlignment="Center"/>
+                            <TextBlock Text="株価更新" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
         </Grid>
         <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Elements}" AutoGenerateColumns="False">
             <DataGrid.Resources>

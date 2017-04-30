@@ -39,8 +39,9 @@ namespace PortFolion.ViewModels {
 
 
 			this.PropertyChanged += (o, e) => {
-				_mng.Update();
+				var t = _mng.Update();
 				this.BrakeDown.Update();
+				t.Wait();
 				foreach(var g in this.Graphs) {
 					g.Update(_mng.GraphData);
 				}
@@ -51,17 +52,19 @@ namespace PortFolion.ViewModels {
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
 			if (this.CurrentNode != null)
 				this.dtr.SelectAt((CurrentNode.Root() as TotalRiskFundNode).CurrentDate);
-			//this.VisibleTransition = true;
 		}
 		gvMng _mng;
 
 		public void Refresh() {
-			if(this.CurrentNode == null)
+			if (this.CurrentNode == null) {
 				this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 								?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
-			_mng.Refresh();
+				return;
+			}
+			var t = _mng.Refresh();
 			BrakeDown.Refresh();
 			Ext.ResetColorIndex();
+			t.Wait();
 			foreach (var g in Graphs) g.Refresh(_mng.GraphData);
 		}
 		
@@ -70,7 +73,7 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<DateTree> DateList => dtr.Children;
 
 		public ObservableCollection<LocationRoot> Root { get; } = new ObservableCollection<LocationRoot>();
-		void setRoot(TotalRiskFundNode rt) {
+		void setRoot(TotalRiskFundNode rt, CommonNode cur) {
 			if (Root.Any(a => a.IsModelEquals(rt))) return;
 			Root.ForEach(a => {
 				// remove events
@@ -83,7 +86,7 @@ namespace PortFolion.ViewModels {
 			}
 			Root.Clear();
 			if (rt != null) {
-				var ln = new LocationRoot(rt);
+				var ln = new LocationRoot(rt,cur);
 				// add events
 				ln.Selected += locationSelected;
 				Root.Add(ln);
@@ -121,9 +124,9 @@ namespace PortFolion.ViewModels {
 			private set {
 				if (_commonNode == value) return;
 				if (_commonNode?.Root() != value?.Root())
-					setRoot(value?.Root() as TotalRiskFundNode);
-				var prvPath = _commonNode?.Path ?? Enumerable.Empty<string>();
-				var curPath = value?.Path ?? Enumerable.Empty<string>();
+					setRoot(value?.Root() as TotalRiskFundNode, value);
+				//var prvPath = _commonNode?.Path ?? Enumerable.Empty<string>();
+				//var curPath = value?.Path ?? Enumerable.Empty<string>();
 				_commonNode = value;
 				CurrentPath = value?.Path ?? Enumerable.Empty<string>();
 				RaisePropertyChanged(() => TargetLevel);
@@ -140,7 +143,7 @@ namespace PortFolion.ViewModels {
 			private set {
 				if (_currentPath.SequenceEqual(value)) return;
 				_currentPath = value;
-				_mng.Update();
+				//_mng.Update();
 				RaisePropertyChanged();
 			}
 		}
@@ -165,7 +168,6 @@ namespace PortFolion.ViewModels {
 			set {
 				if (_timePeriod == value) return;
 				_timePeriod = value;
-				_mng.Update();
 				RaisePropertyChanged();
 			}
 		}
@@ -286,19 +288,25 @@ namespace PortFolion.ViewModels {
 
 			public gvMng(GraphTabViewModel vm) {
 				gtvm = vm;
-				Refresh();
+				//Refresh();
 			}
-			public void Update() {
-				if(!_curPath.SequenceEqual(gtvm.CurrentPath) || _period != gtvm.TimePeriod) {
-					this.Refresh();
-				}
+			public Task Update() {
+				var t = Task.Run(() => {
+					if (!_curPath.SequenceEqual(gtvm.CurrentPath) || _period != gtvm.TimePeriod) {
+						Refresh().Wait();
+					}
+				});
+				return t;
 			}
-			public void Refresh() {
+			public Task Refresh() {
 				_curPath = gtvm.CurrentPath;
 				_period = gtvm.TimePeriod;
-				GraphData = RootCollection
-					.GetNodeLine(_curPath)
-					.ToGraphValues(_period);
+				var t = Task.Run(() => {
+					GraphData = RootCollection
+						.GetNodeLine(_curPath)
+						.ToGraphValues(_period);
+				});
+				return t;
 			}
 			public IEnumerable<GraphValue> GraphData { get; private set; }
 		}

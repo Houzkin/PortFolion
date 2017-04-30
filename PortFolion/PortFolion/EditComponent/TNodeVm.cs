@@ -23,6 +23,10 @@ namespace PortFolion.ViewModels {
 	public class VmCoreBase : BindableObject {
 		protected VmCoreBase() : base(new object()) { }
 		public VmCoreBase(CommonNode node) : base(node) { }
+		public VmCoreBase(CommonNode node, VmCoreGeneral cg) : base(node) {
+			_invTtl = cg.InvestmentTotal;
+			_invRTtl = cg.InvestmentReturnTotal;
+		}
 		public virtual void Copy(VmCoreGeneral core) {
 			InvestmentTotal = core.InvestmentTotal;
 			InvestmentReturnTotal = core.InvestmentReturnTotal;
@@ -58,6 +62,11 @@ namespace PortFolion.ViewModels {
 	public class VmCoreBasket : VmCoreBase {
 		protected VmCoreBasket() { }
 		public VmCoreBasket(CommonNode node) : base(node) { }
+		public VmCoreBasket(CommonNode node, VmCoreGeneral cg) : base(node, cg) {
+			_pl = cg.ProfitLoss;
+			_upl = cg.UnrealizedProfitLoss;
+			_uplr = cg.UnrealizedPLRatio;
+		}
 		public override void Copy(VmCoreGeneral core) {
 			base.Copy(core);
 			ProfitLoss = core.ProfitLoss;
@@ -97,6 +106,10 @@ namespace PortFolion.ViewModels {
 	public class VmCoreGeneral : VmCoreBasket  {
 		public VmCoreGeneral() { }
 		public VmCoreGeneral(CommonNode node) : base(node) { }
+		public VmCoreGeneral(CommonNode node,VmCoreGeneral cg) : base(node, cg) {
+			_pp = cg.PerPrice;
+			_pbpa = cg.PerBuyPriceAverage;
+		}
 		public override void Copy(VmCoreGeneral core) {
 			base.Copy(core);
 			PerPrice = core.PerPrice;
@@ -140,24 +153,32 @@ namespace PortFolion.ViewModels {
 		public static IEnumerable<VmCoreBase> ReCalcHistory(IEnumerable<string> path) {
 			var ps = RootCollection.GetNodeLine(path).Values;
 			var ps1 = ps.Select(a=>CommonNodeVM.Create(a));
-			var dics = _com1(ps1);
 			var p = new NodePath<string>(path);
-			foreach(var dic in dics) {
+			var dics = _com1(ps1);
+			foreach (var dic in dics) {
 				CommonNodeVM vm;
-				if(dic.TryGetValue(p, out vm)) {
+				if (dic.TryGetValue(p, out vm)) {
 					yield return vm.ToHistoryVm();
 				}
 			}
-
+			//var dics = await _com(ps1);
+			//var t = Task.Run(() => {
+			//	var lst = new List<VmCoreBase>();
+			//	foreach(var dic in dics) {
+			//		CommonNodeVM vm;
+			//		if (dic.TryGetValue(p, out vm))
+			//			lst.Add(vm.ToHistoryVm());
+			//	}
+			//	return lst as IEnumerable<VmCoreBase>;
+			//});
+			//return await t;
 		}
 		public static void ReCalcurate(CommonNodeVM tgt) {
 			DateTime date = (DateTime)tgt.CurrentDate;
-			var dic = _com1(
-				RootCollection.GetNodeLine(tgt.Root().Path, date)
+			var dics = _com1(RootCollection.GetNodeLine(tgt.Root().Path, date)
 				.TakeWhile(a => a.Key <= date)
-				.Select(a => Create(a.Value))
-				)
-				.LastOrDefault();
+				.Select(a => Create(a.Value)).ToArray());
+			var dic = dics.LastOrDefault();
 			if (dic == null) return;
 			foreach (var ele in tgt.Levelorder().Reverse()) {
 				CommonNodeVM vm;
@@ -234,6 +255,22 @@ namespace PortFolion.ViewModels {
 				});
 			return nd;
 		}
+		static async Task<Dictionary<NodePath<string>,CommonNodeVM>[]> _com(IEnumerable<CommonNodeVM> nodes) {
+			var t = await Task.Run(() => {
+				return nodes
+					.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
+					.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(),
+					(prv, cur) => {
+						foreach (var c in cur) {
+							var rst = ResultWithValue.Of<NodePath<string>, CommonNodeVM>(prv.TryGetValue, c.Key);
+							_setTotal(rst.Result, rst.Value, c.Value);
+							_setPer(rst.Result, rst.Value, c.Value);
+						}
+						return cur;
+					}).ToArray();
+			});
+			return t;
+		}
 
 		class keyselector : IEqualityComparer<NodePath<string>> {
 			public bool Equals(NodePath<string> x, NodePath<string> y) {
@@ -259,10 +296,7 @@ namespace PortFolion.ViewModels {
 			return Create(modelChildNode);
 		}
 		public virtual VmCoreBase ToHistoryVm() {
-			var cb = new VmCoreBase(this.Model);
-			cb.Copy(CoreData);
-			//cb.CurrentDate = this.CurrentDate;
-			return cb;
+			return new VmCoreBase(this.Model, CoreData);
 		}
 		public void SetCoreData(VmCoreGeneral tgt) {
 			this.CoreData.Copy(tgt);
@@ -376,16 +410,21 @@ namespace PortFolion.ViewModels {
 			
 			if(ty == NodeType.Broker || ty == NodeType.Account) {
 				var vc = new ViewModelCommand(() => {
-					
-					var lst = new double[] { model.Amount, model.InvestmentValue }
-						.Concat(model.Levelorder().OfType<FinancialProduct>().Select(a => (double)a.Quantity))
-						.Concat(model.Levelorder().OfType<FinancialProduct>().Select(a => (double)a.TradeQuantity));
-					if (lst.All(a => a == 0)) {
+					Action delete = () => {
 						var d = this.Model.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
 						this.Model.Parent.RemoveChild(this.Model);
 						HistoryIO.SaveRoots((DateTime)d);
-					}else {
-						MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません","削除不可",MessageBoxButton.OK,MessageBoxImage.Information);
+					};
+					if ((!this.Model.HasTrading && !this.Model.HasPosition)) {
+						delete();
+					} else {
+						if (RootCollection.GetNodeLine(this.Model.Path).Values.Count == 1) {
+							if (MessageBoxResult.OK == MessageBox.Show("ポジションまたは取引に関するデータを保持しています。削除しますか？", "Notice", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation, MessageBoxResult.Cancel)) {
+								delete();
+							}
+						} else {
+							MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
+						}
 					}
 
 				});
@@ -393,9 +432,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		public override VmCoreBase ToHistoryVm() {
-			var cb = new VmCoreBasket(this.Model);
-			cb.Copy(CoreData);
-			return cb;
+			return new VmCoreBasket(this.Model, CoreData);
 		}
 		public double ProfitLoss {
 			get { return CoreData.ProfitLoss; }
@@ -414,9 +451,7 @@ namespace PortFolion.ViewModels {
 		public FinancialProductVM(CommonNode model) : base(model) {
 		}
 		public override VmCoreBase ToHistoryVm() {
-			var cb = new VmCoreGeneral(this.Model);
-			cb.Copy(CoreData);
-			return cb;
+			return new VmCoreGeneral(this.Model, CoreData);
 		}
 		
 		public double PerPrice {

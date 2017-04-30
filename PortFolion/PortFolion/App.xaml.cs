@@ -7,6 +7,7 @@ using System.Windows;
 
 using Livet;
 using System.Threading;
+using System.Windows.Threading;
 
 namespace PortFolion {
 	/// <summary>
@@ -44,7 +45,15 @@ namespace PortFolion {
 			App._mutex.ReleaseMutex();
 			App._mutex.Close();
 		}
-
+		public static void DoEvent() {
+			DispatcherFrame frame = new DispatcherFrame();
+			var callback = new DispatcherOperationCallback(obj => {
+				((DispatcherFrame)obj).Continue = false;
+				return null;
+			});
+			Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, callback, frame);
+			Dispatcher.PushFrame(frame);
+		}
 
 		//集約エラーハンドラ
 		//private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
