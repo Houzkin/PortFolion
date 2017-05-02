@@ -113,28 +113,31 @@ namespace PortFolion.ViewModels {
 		IEnumerable<VmCoreBase> _history = null;
 		public IEnumerable<VmCoreBase> History
 			=> _history;
-		
+
 		#region date
-		string _selectedDateText = DateTime.Today.ToShortDateString();
-		public string SelectedDateText {
+		DateTime? _selectedDateText = DateTime.Today;
+		public DateTime? SelectedDateText {
 			get { return _selectedDateText; }
 			set {
 				if (_selectedDateText == value) return;
 				_selectedDateText = value;
 				RaisePropertyChanged();
-				addNewRootCommand.RaiseCanExecuteChanged();
+				AddNewRootCommand.RaiseCanExecuteChanged();
 			}
 		}
-		ListenerCommand<DateTime> addNewRootCommand;
-		public ICommand AddNewRootCommand => addNewRootCommand = new ListenerCommand<DateTime>(d => {
-			var r = RootCollection.GetOrCreate(d);
+		ListenerCommand<DateTime?> addNewRootCommand;
+		public ListenerCommand<DateTime?> AddNewRootCommand => addNewRootCommand = addNewRootCommand ?? new ListenerCommand<DateTime?>(d => {
+			if (d == null) return;
+			var dd = (DateTime)d;
+			var r = RootCollection.GetOrCreate(dd);
 			if (string.IsNullOrEmpty(r.Name)) r.Name = "総リスク資産";
 			this.CurrentDate = d;
 			//dtr.SelectAt(d);
 			//this.SetCurrentDate(d);
 		},()=> {
-			var d = ResultWithValue.Of<DateTime>(DateTime.TryParse, _selectedDateText);
-			return d.Result;//&& !RootCollection.Instance.ContainsKey(d.Value);//.Any(a=>a.CurrentDate != d.Value);
+			return _selectedDateText != null;
+			//var d = ResultWithValue.Of<DateTime>(DateTime.TryParse, _selectedDateText);
+			//return d.Result;//&& !RootCollection.Instance.ContainsKey(d.Value);//.Any(a=>a.CurrentDate != d.Value);
 		});
 
 		DateTreeRoot dtr = new DateTreeRoot();

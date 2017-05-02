@@ -108,7 +108,7 @@ namespace PortFolion.ViewModels {
 				} else {
 					var nn = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= value)
 						?? RootCollection.Instance.FirstOrDefault(a => value <= a.CurrentDate);
-					if (CurrentNode != null) {
+					if (CurrentNode != null && nn != null) {
 						CurrentNode = nn.SearchNodeOf(CurrentNode.Path);
 					} else {
 						CurrentNode = nn;
