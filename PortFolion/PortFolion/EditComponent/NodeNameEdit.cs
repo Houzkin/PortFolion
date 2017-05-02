@@ -47,15 +47,14 @@ namespace PortFolion.ViewModels {
 		/// <param name="parent">親ノード</param>
 		/// <param name="model">編集対象となる子ノード</param>
 		public NodeNameEditerVM(CommonNode parent,CommonNode model) : base(model) {
-			if (parent == null || model == null) throw new ArgumentNullException();
+			if (parent == null || model == null) throw new ArgumentNullException("えらー!");
 			Parent = parent;
 			this._name = model.Name;
 			this.PresentName = model.Name;
 		}
-		string title;
+		string title = "追加または変更";
 		public string Title {
 			get { return title; }
-			set { SetProperty(ref title, value); }
 		}
 		
 		InteractionMessenger _messenger;
@@ -74,9 +73,9 @@ namespace PortFolion.ViewModels {
 		}
 		protected virtual string NameValidate(string newName) {
 			newName = newName.Trim();
-			if (Parent != Model.Parent && Parent.Children.Any(a => a.Name == newName))
+			if (Parent != null && Parent != Model.Parent && Parent.Children.Any(a => a.Name == newName))
 				return "名前が重複するため追加できません";
-			if(Parent == Model.Parent) {
+			if(Parent != null && Parent == Model.Parent) {
 				if (Parent.Children.Where(a => a != Model).Any(a => a.Name == newName))
 					return "名前が重複するため変更できません";
 				else

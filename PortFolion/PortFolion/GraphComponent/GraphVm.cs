@@ -125,16 +125,10 @@ namespace PortFolion.ViewModels {
 				if (_commonNode == value) return;
 				if (_commonNode?.Root() != value?.Root())
 					setRoot(value?.Root() as TotalRiskFundNode, value);
-				//var prvPath = _commonNode?.Path ?? Enumerable.Empty<string>();
-				//var curPath = value?.Path ?? Enumerable.Empty<string>();
 				_commonNode = value;
 				CurrentPath = value?.Path ?? Enumerable.Empty<string>();
 				RaisePropertyChanged(() => TargetLevel);
 				RaisePropertyChanged();
-				//RefreshBrakeDownList();
-				//if (!prvPath.SequenceEqual(curPath)) {
-					//RefreshHistoryList();
-				//}
 			}
 		}
 		IEnumerable<string> _currentPath = Enumerable.Empty<string>();
@@ -308,7 +302,11 @@ namespace PortFolion.ViewModels {
 				});
 				return t;
 			}
-			public IEnumerable<GraphValue> GraphData { get; private set; }
+			IEnumerable<GraphValue> _graphData;
+			public IEnumerable<GraphValue> GraphData {
+				get { return _graphData = _graphData ?? Enumerable.Empty<GraphValue>(); }
+				private set { _graphData = value; }
+			}
 		}
 	}
 	public class BrakeDownChart : SeriesCollection {

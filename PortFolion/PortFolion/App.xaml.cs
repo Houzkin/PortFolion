@@ -16,34 +16,17 @@ namespace PortFolion {
 	public partial class App : Application {
 
 		/// <summary>多重起動を防止する為のミューテックス。</summary>
-		private static Mutex _mutex;
+		//private static Mutex _mutex;
 
 		private void Application_Startup(object sender, StartupEventArgs e) {
 			DispatcherHelper.UIDispatcher = Dispatcher;
-			
-			var name = this.GetType().Assembly.GetName().Name;
-			_mutex = new Mutex(false, name);
- 
-			if (!_mutex.WaitOne(TimeSpan.Zero, false)) {
-				MessageBox.Show(name + "は既に起動しています。", "二重起動防止", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-				_mutex.Close();
-				_mutex = null;
-				this.Shutdown();
-				return;
-			}
 
 			var mainWindow = new PortFolion.Views.ModernMainWindow();
 			mainWindow.Show();
 		}
 		private void Application_Exit(object sender, ExitEventArgs e) {
-
-			if (_mutex == null) return;
-
 			//終了処理
 			PortFolion.IO.CacheManager.Clear();
-
-			App._mutex.ReleaseMutex();
-			App._mutex.Close();
 		}
 		public static void DoEvent() {
 			DispatcherFrame frame = new DispatcherFrame();

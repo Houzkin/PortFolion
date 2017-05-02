@@ -77,8 +77,7 @@
                         mah:TextBoxHelper.Watermark="Select a date" />
                     <Button Content="新規追加" HorizontalAlignment="Right"
                             Margin="5,3"
-                            Command="{Binding AddNewRootCommand}"
-                            CommandParameter="{Binding ElementName=PickedDate, Path=SelectedDate}"/>
+                            Command="{Binding AddNewRootCommand}"/>
                 </StackPanel>
             </Grid>
         </Expander><!--{Binding IsTreeLoading, Converter={StaticResource BooleanToVisibilityConverter}}-->

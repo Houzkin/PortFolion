@@ -38,7 +38,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Houzkin.Tree, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Houzkin.Tree.1.0.9\lib\Houzkin.Tree.dll</HintPath>
+      <HintPath>..\packages\Houzkin.Tree.1.0.10\lib\Houzkin.Tree.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
