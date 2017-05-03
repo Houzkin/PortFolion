@@ -5,6 +5,12 @@
 ## Demo
 ![Graph](https://github.com/Houzkin/PortFolion/blob/images/demo01.gif)
 
+## Usage
+### キャッシュフローの扱い
+配当、税金などを外部キャッシュフローとして扱うと辻褄合わせが面倒です。編集ウィンドウから余力の値のみを変更することをおすすめします。  
+### 株式分割
+分割情報は自動更新されません。編集ウィンドウから分割または併合後の保有数を書き込んでください。
+
 ## Download
 リリースノートは[こちら](https://github.com/Houzkin/PortFolion/releases)。  
 サンプルデータを同封しています。
