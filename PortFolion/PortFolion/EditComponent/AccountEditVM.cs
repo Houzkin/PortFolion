@@ -66,6 +66,11 @@ namespace PortFolion.ViewModels {
 			StatusComment = comment;
 			OnPropertyChanged(nameof(StatusComment));
 		}
+		bool _isLoading;
+		public bool IsLoading {
+			get { return _isLoading; }
+			set { this.SetProperty(ref _isLoading, value); }
+		}
 		public new AccountNode Model => base.Model;
 		public CashEditVM CashElement => Elements.First(a => a.IsCash);
 		public ObservableCollection<CashEditVM> Elements { get; } = new ObservableCollection<CashEditVM>();
@@ -221,8 +226,10 @@ namespace PortFolion.ViewModels {
 				return applyCurrentPerPrice;
 			}
 		}
-		void applyCurrentPrice() {
-			var r = ApplyPerPrice();
+		async void applyCurrentPrice() {
+			IsLoading = true;
+			var r = await ApplyPerPrice();
+			IsLoading = false;
 			if (r.Any()) {
 				string msg = "以下の銘柄は値を更新できませんでした。";
 				var m = r.Aggregate(msg, (seed, ele) => seed + "\n" + ele);
@@ -236,7 +243,7 @@ namespace PortFolion.ViewModels {
 
 		/// <summary>現在の単価を更新する</summary>
 		/// <returns>更新できなかった銘柄リスト</returns>
-		public IEnumerable<string> ApplyPerPrice() {
+		public async Task<IEnumerable<string>> ApplyPerPrice() {
 			var pfs = Elements.OfType<StockEditVM>();
 			if (!pfs.Any()) return Enumerable.Empty<string>();
 			//var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
@@ -244,7 +251,7 @@ namespace PortFolion.ViewModels {
 			
 			StockInfo[] ary; 
 			try {
-				ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
+				ary = await Task.Run(() => Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray());
 			} catch {
 				return new string[] { "通信状態を確認して再度実行してください。" };
 			}
@@ -442,11 +449,11 @@ namespace PortFolion.ViewModels {
 			if (value.Count() != 4) return "4桁";
 			return null;
 		}
-		string setNameAndPrice(int r, DateTime d) {
+		async Task<string> setNameAndPrice(int r, DateTime d) {
 			//this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
-				siis = Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray();
+				siis = await Task.Run(() => Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
 			} catch {
 				return "通信状態を確認して再度実行してください。";
 			} finally { }
@@ -475,9 +482,15 @@ namespace PortFolion.ViewModels {
 		public ViewModelCommand ApplySymbol
 			=> applySymbolCmd = applySymbolCmd ?? new ViewModelCommand(applySymbol, canApplySymbol);
 
-		void applySymbol()
-			=> ResultWithValue.Of<int>(int.TryParse, Code)
-				.TrueOrNot(o => AccountVM.SetStatusComment(setNameAndPrice(o, AccountVM.CurrentDate)));
+		void applySymbol() {
+			ResultWithValue.Of<int>(int.TryParse, Code)
+			   .TrueOrNot(async o => {
+				   this.AccountVM.IsLoading = true;
+				   var t = await setNameAndPrice(o, AccountVM.CurrentDate);
+				   this.AccountVM.IsLoading = false;
+				   AccountVM.SetStatusComment(t);
+			   });
+		}
 
 		bool canApplySymbol()
 			=> string.IsNullOrEmpty(codeValidate(this.Code));

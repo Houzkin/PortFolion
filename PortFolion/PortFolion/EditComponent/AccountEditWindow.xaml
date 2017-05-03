@@ -80,6 +80,13 @@
     </mah:MetroWindow.Flyouts>
     <mah:MetroWindow.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <DataTemplate x:Key="LoadingTemplate">
+            <Grid>
+                <!--<Grid Panel.ZIndex="2" Grid.Column="1" Background="Black" Opacity="0.2"/>-->
+                <Grid Background="DarkGray" Opacity="0.1"/>
+                <mah:ProgressRing Panel.ZIndex="3" Grid.Column="1" IsActive="True"/>
+            </Grid>
+        </DataTemplate>
     </mah:MetroWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -94,6 +101,10 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <ContentControl d:IsHidden="true"  Panel.ZIndex="1" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="5"
+                        Content="{Binding}" ContentTemplate="{StaticResource LoadingTemplate}"
+                        Visibility="{Binding IsLoading,Converter={StaticResource BoolToVisibility},Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
             <TextBlock Text="{Binding CurrentDate, StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="40"/>
         </StackPanel>

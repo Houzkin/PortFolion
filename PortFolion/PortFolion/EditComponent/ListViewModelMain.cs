@@ -147,7 +147,7 @@ namespace PortFolion.ViewModels {
 		#endregion
 
 		#region tree menu
-		public void ApplyCurrentPerPrice() {
+		public async void ApplyCurrentPerPrice() {
 			IsTreeLoading = true;
 			var acs = this.Root.FirstOrDefault()?
 				.Levelorder().Select(a => a.Model)
@@ -157,7 +157,7 @@ namespace PortFolion.ViewModels {
 			var acse = acs.Select(a => new AccountEditVM(a));
 			var lstLg = new List<string>();
 			foreach(var a in acse) {
-				lstLg.AddRange(a.ApplyPerPrice());
+				lstLg.AddRange(await a.ApplyPerPrice());
 				a.Apply.Execute(null);
 			}
 			IO.HistoryIO.SaveRoots((DateTime)this.CurrentDate);

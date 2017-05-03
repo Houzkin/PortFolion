@@ -161,17 +161,6 @@ namespace PortFolion.ViewModels {
 					yield return vm.ToHistoryVm();
 				}
 			}
-			//var dics = await _com(ps1);
-			//var t = Task.Run(() => {
-			//	var lst = new List<VmCoreBase>();
-			//	foreach(var dic in dics) {
-			//		CommonNodeVM vm;
-			//		if (dic.TryGetValue(p, out vm))
-			//			lst.Add(vm.ToHistoryVm());
-			//	}
-			//	return lst as IEnumerable<VmCoreBase>;
-			//});
-			//return await t;
 		}
 		public static void ReCalcurate(CommonNodeVM tgt) {
 			DateTime date = (DateTime)tgt.CurrentDate;
@@ -189,9 +178,6 @@ namespace PortFolion.ViewModels {
 			
 		}
 		static void _setTotal(bool r,CommonNodeVM pr,CommonNodeVM cu) {
-			//if (!cu.Model.IsRoot()) {
-			//	cu.CoreData.AmountRate = ((double)cu.Model.Amount / (double)cu.Model.Parent.Amount) * 100;
-			//}
 			if (0 < cu.Model.InvestmentValue)
 				cu.CoreData.InvestmentTotal = cu.Model.InvestmentValue;
 			else if (cu.Model.InvestmentValue < 0)
