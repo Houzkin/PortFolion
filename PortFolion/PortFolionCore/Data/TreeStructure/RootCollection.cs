@@ -29,9 +29,7 @@ namespace PortFolion.Core {
 				}else if(ins.Any()) {
 					var d = ins.Max();
 					var a1 = Instance[d] as CommonNode;
-					var a2 = a1.Convert(a => a.Clone(),(a,b)=>a.AddChild(b));
-
-					var trfn = a2 as TotalRiskFundNode;
+					var trfn = a1.Convert(a => a.Clone(), (a, b) => a.AddChild(b)) as TotalRiskFundNode;
 					var rl = trfn.Levelorder().Skip(1).Where(a => !a.HasPosition && !a.HasTrading).ToArray();
 					foreach (var r in rl) r.MaybeRemoveOwn();
 					//trfn.RemoveDescendant(a => !a.HasPosition && !a.HasTrading);
@@ -40,12 +38,19 @@ namespace PortFolion.Core {
 				}else if (pns.Any()) {
 					var d = pns.Min();
 					var trfn = ((Instance[d] as CommonNode).Convert(a => a.Clone(),(a,b)=>a.AddChild(b))) as TotalRiskFundNode;
+					foreach(var nd in trfn.Levelorder().OfType<FinancialValue>()) {
+						nd.SetAmount(0);
+						var ndp = nd as FinancialProduct;
+						if (ndp != null) ndp.SetQuantity(0);
+					}
 					trfn.CurrentDate = date;
 					Instance.Insert(0, trfn);
 				}
 			}
 			return Instance[date];
 		}
+		/// <summary>指定した位置に存在するノードを全て取得する。</summary>
+		/// <param name="path">位置を示すパス</param>
 		public static Dictionary<DateTime,CommonNode> GetNodeLine(IEnumerable<string> path) {
 			return Instance
 				.SelectMany(
@@ -56,13 +61,13 @@ namespace PortFolion.Core {
 				.ToDictionary(b => (b.Root() as TotalRiskFundNode).CurrentDate);
 		}
 		/// <summary>指定した時間において、指定した位置に存在するノードを取得する</summary>
-		public static CommonNode GetNode(NodePath<string> path, DateTime date) {
+		public static CommonNode GetNode(IEnumerable<string> path, DateTime date) {
 			var nn = GetNodeLine(path);//.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate);
 			return nn.LastOrDefault(a => a.Key <= date).Value;
 		}
 		
 		/// <summary>指定した時間を含む指定位置のポジション単位のノードを取得する</summary>
-		public static Dictionary<DateTime,CommonNode> GetNodeLine(NodePath<string> path,DateTime currentTenure) {
+		public static Dictionary<DateTime,CommonNode> GetNodeLine(IEnumerable<string> path, DateTime currentTenure) {
 			var lne = GetNodeLine(path);
 			//指定した日付を含んだノードを取得
 			var curNd = lne.LastOrDefault(a => currentTenure <= a.Key);
@@ -77,7 +82,7 @@ namespace PortFolion.Core {
 		/// <param name="path">変更対象を示すパス</param>
 		/// <param name="name">新しい名前</param>
 		/// <returns>重複があった日付</returns>
-		public static ResultWithValue<IEnumerable<DateTime>> CanChangeNodeName(NodePath<string> path,string name) {
+		public static ResultWithValue<IEnumerable<DateTime>> CanChangeNodeName(IEnumerable<string> path,string name) {
 			var src = GetNodeLine(path)
 				.Select(a => new { Date = a.Key, Sigls = a.Value.Siblings().Except(new CommonNode[] { a.Value }) })
 				.Select(a => new { Date = a.Date, Rst = a.Sigls.All(b => b.Name != name) })
@@ -92,7 +97,7 @@ namespace PortFolion.Core {
 		/// <param name="path">変更対象を示すパス</param>
 		/// <param name="newName">新しい名前</param>
 		/// <returns>変更を行った日付</returns>
-		public static IEnumerable<DateTime> ChangeNodeName(NodePath<string> path,string newName) {
+		public static IEnumerable<DateTime> ChangeNodeName(IEnumerable<string> path,string newName) {
 			List<DateTime> lst = new List<DateTime>();
 			foreach (var t in GetNodeLine(path)) {
 				if (t.Value.Siblings().All(a => a.Name != newName)) {

@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using PortFolion.IO;
 
 namespace PortFolion.Core {
+	/// <summary>共通ノード</summary>
 	public abstract class CommonNode : ObservableTreeNode<CommonNode>, INotifyPropertyChanged {
 		internal CommonNode() { }
 		internal CommonNode(CushionNode cushion) {
