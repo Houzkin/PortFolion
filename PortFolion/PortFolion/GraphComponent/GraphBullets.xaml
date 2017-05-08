@@ -28,7 +28,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
                                 <Path Width="15" Height="15" Stretch="Fill"
                                       StrokeThickness="{Binding StrokeThickness}" Fill="{Binding Fill}"
                                       Stroke="{Binding Stroke}" Data="{Binding PointGeometry}"/>
@@ -85,7 +85,7 @@
                         </StackPanel>
 
                         <Button DockPanel.Dock="Right"
-                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10}">
+                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10,Height=10}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Click">
                                     <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
@@ -96,7 +96,7 @@
                         <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/><!-- Content="{StaticResource GraphLegends}"-->
 
                     </DockPanel>
-                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}" LegendLocation="None" MinHeight="250" Zoom="X">
+                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}" LegendLocation="None" MinHeight="250">
                         <lvc:CartesianChart.DataTooltip>
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
@@ -158,8 +158,8 @@
             </mah:SplitView.Pane>
             <ScrollViewer x:Name="viewer" Grid.Column="0" Margin="0" VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Graphs}" 
-                              Width="{Binding Width,ElementName=viewer}" 
-                              ItemTemplate="{StaticResource GraphContent}"><!--ItemTemplateSelector="{StaticResource GraphTemplateSelector}"-->
+                                Width="{Binding Width,ElementName=viewer}" 
+                                ItemTemplate="{StaticResource GraphContent}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical"/>

@@ -39,11 +39,15 @@ namespace PortFolion.ViewModels {
 
 
 			this.PropertyChanged += (o, e) => {
-				var t = _mng.Update();
-				this.BrakeDown.Update();
-				t.Wait();
-				foreach(var g in this.Graphs) {
-					g.Update(_mng.GraphData);
+				if (e.PropertyName == nameof(this.CurrentPath) || e.PropertyName == nameof(this.CurrentNode)
+				|| e.PropertyName == nameof(this.Divide) || e.PropertyName == nameof(this.TimePeriod)
+				|| e.PropertyName == nameof(this.TargetLevel)) {
+					var t = _mng.Update();
+					this.BrakeDown.Update();
+					t.Wait();
+					foreach (var g in this.Graphs) {
+						g.Update(_mng.GraphData);
+					}
 				}
 			};
 			_mng = new gvMng(this);
