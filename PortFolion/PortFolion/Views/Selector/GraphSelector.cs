@@ -14,7 +14,7 @@ namespace PortFolion.Views.Selector {
 			var viewModel = item as GraphVmBase;
 			if (element == null || viewModel == null) return null;
 
-			var templateName = "TransitionTemplate";
+			var templateName = "DefaultGraphTemplate";// "TransitionTemplate";
 			//var t = viewModel.GetType();
 			//if (t == typeof(TransitionSeries)) {
 			//	templateName = "TransitionTemplate";

@@ -403,6 +403,15 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(Labels)));
 			}
 		}
+		IEnumerable<SeriesViewModel> _legend = Enumerable.Empty<SeriesViewModel>();
+		public IEnumerable<SeriesViewModel> Legends {
+			get { return _legend; }
+			set {
+				if (_legend.SequenceEqual(value)) return;
+				_legend = value;
+				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(Legends)));
+			}
+		}
 		double min = double.NaN;
 		public double DisplayMinValue {
 			get { return min; }
@@ -465,6 +474,8 @@ namespace PortFolion.ViewModels {
 			Labels = this.GetLabels(src).ToArray();// src.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
 
 			Draw(src);
+			Legends = this.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
+
 			this.DisplayMaxValue = double.NaN;
 			this.DisplayMinValue = double.NaN;
 		}
@@ -472,6 +483,21 @@ namespace PortFolion.ViewModels {
 
 		protected virtual IEnumerable<string> GetLabels(IEnumerable<GraphValue> src) {
 			return src.Select(a => a.Date.ToString("yyyy/M/d"));
+		}
+		protected virtual SeriesViewModel ToLegends(Series seri) {
+			var vm = new SeriesViewModel {
+				Title = seri.Title,
+				Fill = seri.Fill,
+				Stroke = seri.Stroke,
+				StrokeThickness = seri.StrokeThickness,
+				PointGeometry = seri.PointGeometry,
+			};
+			var ls = seri as LineSeries;
+			if(ls != null) {
+				vm.Fill = ls.PointForeground;
+				return vm;
+			}
+			return vm;
 		}
 	}
 
