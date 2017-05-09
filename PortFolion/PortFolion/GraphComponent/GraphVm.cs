@@ -395,7 +395,9 @@ namespace PortFolion.ViewModels {
 			RangeChangedCmd = new ViewModelCommand(rangeChanged);
 		}
 		/// <summary>変更があった場合更新する</summary>
-		public abstract void Update(IEnumerable<GraphValue> src);
+		public virtual void Update(IEnumerable<GraphValue> src) {
+			this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.MaxLimit)));
+		}
 		/// <summary>現在の条件で再描画する</summary>
 		public abstract void Refresh(IEnumerable<GraphValue> src);
 		protected void RemoveAll() {
@@ -443,7 +445,7 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(DisplayMaxValue)));
 			}
 		}
-		protected virtual double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
+		public virtual double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		//public Func<double,string> XFormatter { get; set; }
 		public virtual Func<double, string> YFormatter => y => y.ToString("#,0.#");
 
@@ -505,6 +507,7 @@ namespace PortFolion.ViewModels {
 		public override void Update(IEnumerable<GraphValue> src) {
 			if (!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
 				Refresh(src);
+				base.Update(src);
 			}
 		}
 		public override void Refresh(IEnumerable<GraphValue> src) {
@@ -546,7 +549,7 @@ namespace PortFolion.ViewModels {
 	public class TransitionSeries : PathPeriodGraph {
 		public TransitionSeries(GraphTabViewModel viewModel) : base(viewModel) {
 		}
-		protected override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
+		public override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
 		
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
