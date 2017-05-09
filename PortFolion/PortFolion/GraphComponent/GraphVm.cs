@@ -50,6 +50,15 @@ namespace PortFolion.ViewModels {
 					}
 				}
 			};
+
+			this.Graphs.CollectionChanged += (o, e) => {
+				foreach(var g in this.Graphs) {
+					g.IndexUpCommand.RaiseCanExecuteChanged();
+					g.IndexDownCommand.RaiseCanExecuteChanged();
+				}
+			};
+
+
 			_mng = new gvMng(this);
 			BrakeDown = new BrakeDownChart(this);
 			this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
@@ -458,6 +467,35 @@ namespace PortFolion.ViewModels {
 			Disposed?.Invoke(this, new EventArgs());
 		}
 		public event EventHandler Disposed;
+
+		ViewModelCommand _upcmd;
+		public ViewModelCommand IndexUpCommand {
+			get {
+				if(_upcmd == null) {
+					_upcmd = new ViewModelCommand(() => {
+						var i = this.ViewModel.Graphs.IndexOf(this);
+						this.ViewModel.Graphs.Move(i, i - 1);
+					}, () => 
+						0 < this.ViewModel.Graphs.IndexOf(this)
+					);
+				}
+				return _upcmd;
+			}
+		}
+		ViewModelCommand _downcmd;
+		public ViewModelCommand IndexDownCommand {
+			get {
+				if(_downcmd == null) {
+					_downcmd = new ViewModelCommand(() => {
+						var i = this.ViewModel.Graphs.IndexOf(this);
+						this.ViewModel.Graphs.Move(i, i + 1);
+					}, () =>
+						this.ViewModel.Graphs.IndexOf(this) < this.ViewModel.Graphs.Count - 1
+					);
+				}
+				return _downcmd;
+			}
+		}
 	}
 
 	public abstract class PathPeriodGraph : GraphVmBase {

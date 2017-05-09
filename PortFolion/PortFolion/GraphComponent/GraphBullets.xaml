@@ -80,8 +80,10 @@
                     </Grid.RowDefinitions>
                     <DockPanel HorizontalAlignment="Stretch" Grid.Row="0">
                         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left">
-                            <Button/>
-                            <Button/>
+                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"
+                                    Command="{Binding IndexUpCommand}"/>
+                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}"
+                                    Command="{Binding IndexDownCommand}"/>
                         </StackPanel>
 
                         <Button DockPanel.Dock="Right"
@@ -96,7 +98,7 @@
                         <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/><!-- Content="{StaticResource GraphLegends}"-->
 
                     </DockPanel>
-                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}" LegendLocation="None" MinHeight="250">
+                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}" LegendLocation="None" MinHeight="250" Zoom="X">
                         <lvc:CartesianChart.DataTooltip>
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
