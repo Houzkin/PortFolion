@@ -395,11 +395,13 @@ namespace PortFolion.ViewModels {
 			RangeChangedCmd = new ViewModelCommand(rangeChanged);
 		}
 		/// <summary>変更があった場合更新する</summary>
-		public virtual void Update(IEnumerable<GraphValue> src) {
-			this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.MaxLimit)));
-		}
+		public abstract void Update(IEnumerable<GraphValue> src);
 		/// <summary>現在の条件で再描画する</summary>
-		public abstract void Refresh(IEnumerable<GraphValue> src);
+		public virtual void Refresh(IEnumerable<GraphValue> src) {
+			this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.MaxLimit)));
+			this.DisplayMinValue = 0;
+			this.DisplayMaxValue = this.MaxLimit;
+		}
 		protected void RemoveAll() {
 			var cnt = this.Count;
 			while (0 < cnt) {
@@ -427,7 +429,7 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(Legends)));
 			}
 		}
-		double min = double.NaN;
+		double min;
 		public double DisplayMinValue {
 			get { return min; }
 			set {
@@ -436,7 +438,7 @@ namespace PortFolion.ViewModels {
 				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(DisplayMinValue)));
 			}
 		}
-		double max = double.NaN;
+		double max;
 		public double DisplayMaxValue {
 			get { return max; }
 			set {
@@ -507,7 +509,6 @@ namespace PortFolion.ViewModels {
 		public override void Update(IEnumerable<GraphValue> src) {
 			if (!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
 				Refresh(src);
-				base.Update(src);
 			}
 		}
 		public override void Refresh(IEnumerable<GraphValue> src) {
@@ -521,8 +522,9 @@ namespace PortFolion.ViewModels {
 			Draw(src);
 			Legends = this.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
 
-			this.DisplayMaxValue = double.NaN;
-			this.DisplayMinValue = double.NaN;
+			base.Refresh(src);
+			//this.DisplayMaxValue = double.NaN;
+			//this.DisplayMinValue = double.NaN;
 		}
 		protected abstract void Draw(IEnumerable<GraphValue> src);
 
