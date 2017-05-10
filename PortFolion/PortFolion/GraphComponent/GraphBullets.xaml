@@ -99,17 +99,18 @@
                         <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/><!-- Content="{StaticResource GraphLegends}"-->
 
                     </DockPanel>
-                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}" LegendLocation="None" MinHeight="250">
+                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}"
+                                        LegendLocation="None" MinHeight="250" Zoom="X">
                         <lvc:CartesianChart.DataTooltip>
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
                         <lvc:CartesianChart.AxisX>
-                            <!--<lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom" RangeChangedCommand="{Binding RangeChangedCmd}"
-                                      MinValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
-                                      MaxValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">-->
-                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom"
+                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom" RangeChangedCommand="{Binding RangeChangedCmd}"
+                                      MinValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=OneWayToSource}"
+                                      MaxValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=OneWayToSource}">
+                            <!--<lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom"
                                       MinValue="{Binding LowerValue,ElementName=RangeSlider,Mode=OneWay}"
-                                      MaxValue="{Binding UpperValue,ElementName=RangeSlider,Mode=OneWay}">
+                                      MaxValue="{Binding UpperValue,ElementName=RangeSlider,Mode=OneWay}">-->
                                 <lvc:Axis.Separator>
                                     <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
                                 </lvc:Axis.Separator>
@@ -125,8 +126,8 @@
                     </lvc:CartesianChart>
                     <mah:RangeSlider x:Name="RangeSlider" Grid.Row="2" AutoToolTipPlacement="TopLeft" SmallChange="1" LargeChange="5"
                                      Minimum="0" Maximum="{Binding MaxLimit,Mode=OneWay}" 
-                                     LowerValue="{Binding Minimum,ElementName=RangeSlider,Mode=OneWay}" 
-                                     UpperValue="{Binding Maximum,ElementName=RangeSlider,Mode=OneWay}"/>
+                                     LowerValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                     UpperValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"/>
                 </Grid>
             </DataTemplate>
 
