@@ -392,7 +392,6 @@ namespace PortFolion.ViewModels {
 
 		public GraphVmBase(GraphTabViewModel viewModel) {
 			ViewModel = viewModel;
-			RangeChangedCmd = new ViewModelCommand(rangeChanged);
 		}
 		/// <summary>変更があった場合更新する</summary>
 		public abstract void Update(IEnumerable<GraphValue> src);
@@ -402,6 +401,7 @@ namespace PortFolion.ViewModels {
 			this.DisplayMinValue = 0;
 			this.DisplayMaxValue = this.MaxLimit;
 		}
+		
 		protected void RemoveAll() {
 			var cnt = this.Count;
 			while (0 < cnt) {
@@ -451,18 +451,7 @@ namespace PortFolion.ViewModels {
 		//public Func<double,string> XFormatter { get; set; }
 		public virtual Func<double, string> YFormatter => y => y.ToString("#,0.#");
 
-		public ViewModelCommand RangeChangedCmd { get; set; }
-		void rangeChanged() {
-			double rng = max - min;
-			if(min < 0) {
-				DisplayMinValue = 0;
-				DisplayMaxValue = Math.Min(rng, MaxLimit);
-			}
-			if (MaxLimit < max) {
-				DisplayMaxValue = MaxLimit;
-				DisplayMinValue = Math.Max(0, MaxLimit - rng);
-			}
-		}
+		
 		public bool IsDisposed { get; private set; }
 		public void Dispose() {
 			if (IsDisposed) return;
@@ -523,8 +512,6 @@ namespace PortFolion.ViewModels {
 			Legends = this.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
 
 			base.Refresh(src);
-			//this.DisplayMaxValue = double.NaN;
-			//this.DisplayMinValue = double.NaN;
 		}
 		protected abstract void Draw(IEnumerable<GraphValue> src);
 
@@ -577,8 +564,7 @@ namespace PortFolion.ViewModels {
 		public TransitionStackCFSeries(GraphTabViewModel viewModel) : base(viewModel) {
 		}
 		protected override void Draw(IEnumerable<GraphValue> src) {
-			//var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
-			//				   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
+			
 			var cls = Ext.BrushOrder();
 			this.Add(
 				new LineSeries() {
