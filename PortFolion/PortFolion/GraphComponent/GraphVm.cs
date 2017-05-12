@@ -330,10 +330,8 @@ namespace PortFolion.ViewModels {
 
 		GraphTabViewModel _vm;
 
-		public BrakeDownChart(GraphTabViewModel viewModel) {
+		public BrakeDownChart(GraphTabViewModel viewModel):base(Mappers.Pie<TempValue>().Value(tv=>tv.Amount)) {
 			_vm = viewModel;
-			var cmp = Mappers.Pie<TempValue>().Value(tv => tv.Amount);
-			Charting.For<TempValue>(cmp);
 			Refresh();
 		}
 		/// <summary>変更があった場合、更新する</summary>
