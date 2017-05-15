@@ -39,39 +39,6 @@
                 </ItemsControl>
             </DataTemplate>
             
-            <DataTemplate x:Key="TransitionTemplate" DataType="{x:Type vm:GraphVmBase}">
-                    <DockPanel>
-                        <Button DockPanel.Dock="Right"  Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10}" VerticalAlignment="Top" HorizontalAlignment="Right">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="Click">
-                                    <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </Button>
-                        <lvc:CartesianChart x:Name="TransGraph" Grid.Column="0" Series="{Binding}" LegendLocation="Top" MinHeight="250" Zoom="X">
-                            <lvc:CartesianChart.DataTooltip>
-                                <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
-                            </lvc:CartesianChart.DataTooltip>
-                            <lvc:CartesianChart.AxisX>
-                                <lvc:Axis IsMerged="True" MinRange="2" Labels="{Binding Labels}" RangeChangedCommand="{Binding RangeChangedCmd}" Position="LeftBottom"
-                                            MinValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
-                                            MaxValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
-                                    <lvc:Axis.Separator>
-                                        <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
-                                    </lvc:Axis.Separator>
-                                </lvc:Axis>
-                            </lvc:CartesianChart.AxisX>
-                            <lvc:CartesianChart.AxisY>
-                                <lvc:Axis LabelFormatter="{Binding YFormatter}">
-                                    <lvc:Axis.Separator>
-                                        <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
-                                    </lvc:Axis.Separator>
-                                </lvc:Axis>
-                            </lvc:CartesianChart.AxisY>
-                        </lvc:CartesianChart>
-                    </DockPanel>
-            </DataTemplate>
-            
             <DataTemplate x:Key="DefaultGraphTemplate" DataType="{x:Type vm:GraphVmBase}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -82,9 +49,21 @@
                     <DockPanel HorizontalAlignment="Stretch" Grid.Row="0">
                         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left">
                             <Button Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"
-                                    Command="{Binding IndexUpCommand}"/>
+                                    IsEnabled="{Binding IndexUpCommand.CanExecute}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding IndexUpCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Button>
                             <Button Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}"
-                                    Command="{Binding IndexDownCommand}"/>
+                                    IsEnabled="{Binding IndexDownCommand.CanExecute}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding IndexDownCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Button>
                         </StackPanel>
 
                         <Button DockPanel.Dock="Right"
@@ -96,10 +75,10 @@
                             </i:Interaction.Triggers>
                         </Button>
                         
-                        <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/><!-- Content="{StaticResource GraphLegends}"-->
+                        <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/>
 
                     </DockPanel>
-                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding}"
+                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding SeriesList}"
                                         LegendLocation="None" MinHeight="230" Zoom="None">
                         <lvc:CartesianChart.DataTooltip>
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
@@ -129,13 +108,6 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate x:Key="GraphContent">
-                <Border Margin="1,1,3,1" BorderThickness="1" BorderBrush="{StaticResource {x:Static SystemColors.HighlightBrushKey}}" >
-                    <ContentControl ContentTemplateSelector="{StaticResource GraphTemplateSelector}" 
-                                    Content="{Binding}"/>
-                </Border>
-            </DataTemplate>
-            
         </GroupBox.Resources>
         <GroupBox.Header>
             <Grid>
@@ -143,7 +115,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="推移" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="0" Text="推 移" HorizontalAlignment="Center"/>
                 <ToggleButton x:Name="menu" IsChecked="True" Grid.Column="1"  HorizontalAlignment="Right" Background="Transparent"
                               Style="{StaticResource MetroFlatToggleButton}"
                               Content="{iconPacks:PackIconMaterial Kind=Menu,Height=10}"/>
@@ -167,13 +139,20 @@
             </mah:SplitView.Pane>
             <ScrollViewer x:Name="viewer" Grid.Column="0" Margin="0" VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Graphs}" 
-                                Width="{Binding Width,ElementName=viewer}" 
-                                ItemTemplate="{StaticResource GraphContent}">
+                              Width="{Binding Width,ElementName=viewer}" >
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="1,1,3,1" BorderThickness="1" BorderBrush="{StaticResource {x:Static SystemColors.HighlightBrushKey}}" >
+                                <ContentControl ContentTemplateSelector="{StaticResource GraphTemplateSelector}" 
+                                        Content="{Binding}"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
         </mah:SplitView>

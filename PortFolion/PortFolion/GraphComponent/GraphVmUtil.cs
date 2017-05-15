@@ -145,7 +145,7 @@ namespace PortFolion.ViewModels {
 		static IEnumerable<DateTime> weeklyAxis(DateTime start, DateTime end) {
 			DateTime cur = start.DayOfWeek == DayOfWeek.Sunday ? start : start.AddDays(7 - (int)start.DayOfWeek);
 			yield return cur;
-			while (cur <= end) {
+			while(cur < end) {
 				cur = cur.AddDays(7);
 				yield return cur;
 			}
@@ -154,7 +154,7 @@ namespace PortFolion.ViewModels {
 		static IEnumerable<DateTime> monthlyAxis(DateTime start, DateTime end) {
 			var c = EndOfMonth(start);
 			yield return c;
-			while (c <= end) {
+			while (c < end) {
 				c = NextEndOfMonth(c, 1);
 				yield return c;
 			}
@@ -164,7 +164,7 @@ namespace PortFolion.ViewModels {
 			int q = start.Month / 3;
 			var c = EndOfMonth(new DateTime(start.Year, (q + 1) * 3, 1));
 			yield return c;
-			while (c <= end) {
+			while (c < end) {
 				c = NextEndOfMonth(c, 3);
 				yield return c;
 			}
@@ -173,7 +173,7 @@ namespace PortFolion.ViewModels {
 		static IEnumerable<DateTime> yearlyAxis(DateTime start, DateTime end) {
 			var c = new DateTime(start.Year, 12, 31);
 			yield return c;
-			while (c <= end) {
+			while (c < end) {
 				c = c.AddYears(1);
 				yield return c;
 			}

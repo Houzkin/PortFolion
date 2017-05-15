@@ -385,27 +385,29 @@ namespace PortFolion.ViewModels {
 		}
 	}
 
-	public abstract class GraphVmBase : SeriesCollection , IDisposable {
+	public abstract class GraphVmBase : NotificationObject, IDisposable {
 		protected GraphTabViewModel ViewModel { get; }
 
 		public GraphVmBase(GraphTabViewModel viewModel) {
+			this.SeriesList = new SeriesCollection();
 			ViewModel = viewModel;
 		}
 		/// <summary>変更があった場合更新する</summary>
 		public abstract void Update(IEnumerable<GraphValue> src);
 		/// <summary>現在の条件で再描画する</summary>
 		public virtual void Refresh(IEnumerable<GraphValue> src) {
-			this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.MaxLimit)));
+			//this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.MaxLimit)));
+			this.RaisePropertyChanged(nameof(MaxLimit));
 			this.DisplayMinValue = 0;
 			this.DisplayMaxValue = this.MaxLimit;
 		}
-		
+		public SeriesCollection SeriesList { get; private set; }
 		protected void RemoveAll() {
-			var cnt = this.Count;
+			var cnt = this.SeriesList.Count;
 			while (0 < cnt) {
 				cnt--;
 				try {
-					this.RemoveAt(cnt);
+					this.SeriesList.RemoveAt(cnt);
 				} catch { /*ignore*/ }
 			}
 		}
@@ -415,7 +417,7 @@ namespace PortFolion.ViewModels {
 			set {
 				if (_labels.SequenceEqual(value)) return;
 				_labels = value;
-				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(Labels)));
+				this.RaisePropertyChanged();
 			}
 		}
 		IEnumerable<SeriesViewModel> _legend = Enumerable.Empty<SeriesViewModel>();
@@ -424,7 +426,7 @@ namespace PortFolion.ViewModels {
 			set {
 				if (_legend.SequenceEqual(value)) return;
 				_legend = value;
-				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(Legends)));
+				this.RaisePropertyChanged();
 			}
 		}
 		double min;
@@ -433,7 +435,7 @@ namespace PortFolion.ViewModels {
 			set {
 				if (min == value) return;
 				min = value;
-				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(DisplayMinValue)));
+				this.RaisePropertyChanged();
 			}
 		}
 		double max;
@@ -442,7 +444,7 @@ namespace PortFolion.ViewModels {
 			set {
 				if (max == value) return;
 				max = value;
-				base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(DisplayMaxValue)));
+				this.RaisePropertyChanged();
 			}
 		}
 		public virtual double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
@@ -504,10 +506,10 @@ namespace PortFolion.ViewModels {
 
 			RemoveAll();
 
-			Labels = this.GetLabels(src).ToArray();// src.Select(a => a.Date.ToString("yyyy/M/d")).ToArray();
+			Labels = this.GetLabels(src).ToArray();
 
 			Draw(src);
-			Legends = this.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
+			Legends = this.SeriesList.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
 
 			base.Refresh(src);
 		}
@@ -541,14 +543,14 @@ namespace PortFolion.ViewModels {
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
 
-			this.Add(new LineSeries() {
+			this.SeriesList.Add(new LineSeries() {
 				Title = ViewModel.CurrentNode?.Name,
 				Values = new ChartValues<double>(src.Select(a => a.Amount)),
 				LineSmoothness = 0,
 				Stroke = new SolidColorBrush(cls[0]),
 				Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 			});
-			this.Add(new ColumnSeries() {
+			this.SeriesList.Add(new ColumnSeries() {
 				Title = "キャッシュフロー",
 				Values = new ChartValues<double>(src.Select(a=>a.Flow)),
 
@@ -564,7 +566,7 @@ namespace PortFolion.ViewModels {
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			
 			var cls = Ext.BrushOrder();
-			this.Add(
+			this.SeriesList.Add(
 				new LineSeries() {
 					Title = ViewModel.CurrentNode?.Name,
 					Values = new ChartValues<double>(src.Select(a=>a.Amount)),
@@ -572,7 +574,7 @@ namespace PortFolion.ViewModels {
 					Stroke = new SolidColorBrush(cls[0]),
 					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
-			this.Add(
+			this.SeriesList.Add(
 				new LineSeries() {
 					Title = "累積キャッシュフロー",
 					Values = new ChartValues<double>(src.Scan(0d,(ac,el)=>ac + el.Flow)),
@@ -589,7 +591,7 @@ namespace PortFolion.ViewModels {
 			var cls = Ext.BrushOrder();
 			var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
 							   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
-			this.Add(
+			this.SeriesList.Add(
 				new LineSeries() {
 					Title = "損益",
 					Values = new ChartValues<double>(ssrc.Select(a=>a.Item2 - a.Item1)),
@@ -606,9 +608,9 @@ namespace PortFolion.ViewModels {
 		}
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
-			this.Add(
+			this.SeriesList.Add(
 				new LineSeries() {
-					Title = "指数",
+					Title = "指数(基準価額)",
 					LineSmoothness = 0,
 					Values = new ChartValues<double>(
 						src.Select(a=>a.Dietz+1.0)
@@ -625,7 +627,7 @@ namespace PortFolion.ViewModels {
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
 			var dz = src.Select(a => a.Dietz).ToArray();
-			this.Add(
+			this.SeriesList.Add(
 				new LineSeries() {
 					Title = "収益率(修正ディーツ法)",
 					LineSmoothness = 0,
