@@ -489,6 +489,10 @@ namespace PortFolion.ViewModels {
 				return _downcmd;
 			}
 		}
+		#region menu
+		public virtual bool VisibilityMenu => false;
+		public bool IsMenuOpen { get; set; }
+		#endregion
 	}
 
 	public abstract class PathPeriodGraph : GraphVmBase {

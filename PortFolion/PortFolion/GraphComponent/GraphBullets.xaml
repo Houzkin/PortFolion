@@ -17,8 +17,12 @@
 
     <GroupBox Margin="0">
         <GroupBox.Resources>
-            <selector:GraphTemplateSelector x:Key="GraphTemplateSelector"/>
+            <!--<selector:GraphTemplateSelector x:Key="GraphTemplateSelector"/>-->
+            <selector:ChartTemplateSelector x:Key="ChartTemplateSelector"/>
+            <!--<selector:MenuTemplateSelector x:Key="MenuTemplateSelector"/>-->
             
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConv"/>
+
             <DataTemplate x:Key="GraphLegends">
                 <ItemsControl ItemsSource="{Binding Legends}" VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
@@ -38,47 +42,10 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </DataTemplate>
-            
-            <DataTemplate x:Key="DefaultGraphTemplate" DataType="{x:Type vm:GraphVmBase}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
-                    <DockPanel HorizontalAlignment="Stretch" Grid.Row="0">
-                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left">
-                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"
-                                    IsEnabled="{Binding IndexUpCommand.CanExecute}">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="Click">
-                                        <i:InvokeCommandAction Command="{Binding IndexUpCommand}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Button>
-                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}"
-                                    IsEnabled="{Binding IndexDownCommand.CanExecute}">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="Click">
-                                        <i:InvokeCommandAction Command="{Binding IndexDownCommand}"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </Button>
-                        </StackPanel>
 
-                        <Button DockPanel.Dock="Right"
-                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10,Height=10}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="Click">
-                                    <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </Button>
-                        
-                        <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/>
-
-                    </DockPanel>
-                    <lvc:CartesianChart x:Name="TransGraph" Grid.Row="1" Series="{Binding SeriesList}"
+            <DataTemplate x:Key="NormalChartTemplate">
+                <StackPanel Orientation="Vertical">
+                    <lvc:CartesianChart x:Name="TransGraph" Series="{Binding SeriesList}"
                                         LegendLocation="None" MinHeight="230" Zoom="None">
                         <lvc:CartesianChart.DataTooltip>
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
@@ -100,11 +67,69 @@
                             </lvc:Axis>
                         </lvc:CartesianChart.AxisY>
                     </lvc:CartesianChart>
-                    <mah:RangeSlider x:Name="RangeSlider" Grid.Row="2" Minimum="0" Margin="25,0,25,2"
+                    <mah:RangeSlider x:Name="RangeSlider" Minimum="0" Margin="25,0,25,2"
                                      Maximum="{Binding MaxLimit,Mode=OneWay}" 
                                      LowerValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      UpperValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" SmallChange="1"/>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="BalanceCashFlowChartTemplate">
+                <mah:SplitView IsPaneOpen="{Binding IsMenuOpen}"
+                               DisplayMode="Overlay" PanePlacement="Left">
+                    <mah:SplitView.Pane>
+                        <Grid/>
+                    </mah:SplitView.Pane>
+                    <ContentControl ContentTemplate="{StaticResource NormalChartTemplate}" Content="{Binding}"/>
+                </mah:SplitView>
+            </DataTemplate>
+
+            <DataTemplate x:Key="WeightChartTemplate"></DataTemplate>
+            <DataTemplate x:Key="LogableChartTemplate"></DataTemplate>
+            
+            <DataTemplate x:Key="GraphTemplate" DataType="{x:Type vm:GraphVmBase}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel HorizontalAlignment="Stretch" Grid.Row="0">
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"
+                                    IsEnabled="{Binding IndexUpCommand.CanExecute}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding IndexUpCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Button>
+                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}"
+                                    IsEnabled="{Binding IndexDownCommand.CanExecute}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding IndexDownCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Button>
+                            <ToggleButton Content="{iconPacks:PackIconMaterial Kind=Settings,Width=10,Height=10}"
+                                          Visibility="{Binding VisibilityMenu,Converter={StaticResource BoolToVisibilityConv}}"
+                                          IsChecked="{Binding IsMenuOpen,Mode=TwoWay}" Margin="5,0,0,0">
+                            </ToggleButton>
+                        </StackPanel>
+
+                        <Button DockPanel.Dock="Right"
+                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10,Height=10}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Button>
+                        <ContentControl ContentTemplate="{StaticResource GraphLegends}" Content="{Binding}" HorizontalAlignment="Center"/>
+                    </DockPanel>
+                    <ContentControl Grid.Row="1" Content="{Binding}"
+                                    ContentTemplateSelector="{StaticResource ChartTemplateSelector}"/>
                 </Grid>
             </DataTemplate>
 
@@ -121,7 +146,7 @@
                               Content="{iconPacks:PackIconMaterial Kind=Menu,Height=10}"/>
             </Grid>
         </GroupBox.Header>
-        <mah:SplitView Margin="-4" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120"
+        <mah:SplitView Margin="-5" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120"
                        IsPaneOpen="{Binding IsChecked,ElementName=menu,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <mah:SplitView.Pane>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -148,8 +173,8 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Margin="1,1,3,1" BorderThickness="1" BorderBrush="{StaticResource {x:Static SystemColors.HighlightBrushKey}}" >
-                                <ContentControl ContentTemplateSelector="{StaticResource GraphTemplateSelector}" 
-                                        Content="{Binding}"/>
+                                <ContentControl ContentTemplate="{StaticResource GraphTemplate}" 
+                                                Content="{Binding}"/>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
