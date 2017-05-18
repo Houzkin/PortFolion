@@ -43,6 +43,37 @@
                 </ItemsControl>
             </DataTemplate>
 
+            <DataTemplate x:Key="LogChartTemplate">
+                <StackPanel Orientation="Vertical">
+                    <lvc:CartesianChart x:Name="TransGraph" Series="{Binding SeriesList}"
+                                        LegendLocation="None" MinHeight="230" Zoom="None">
+                        <lvc:CartesianChart.DataTooltip>
+                            <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
+                        </lvc:CartesianChart.DataTooltip>
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom" RangeChangedCommand="{Binding RangeChangedCmd}"
+                                      MinValue="{Binding DisplayMinValue,Mode=OneWay}"
+                                      MaxValue="{Binding DisplayMaxValue,Mode=OneWay}">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:LogarithmicAxis Base="10" LabelFormatter="{Binding YFormatter}">
+                                <lvc:LogarithmicAxis.Separator>
+                                    <lvc:Separator  StrokeThickness="1" StrokeDashArray="2"/>
+                                </lvc:LogarithmicAxis.Separator>
+                            </lvc:LogarithmicAxis>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                    <mah:RangeSlider x:Name="RangeSlider" Minimum="0" Margin="25,0,25,2"
+                                     Maximum="{Binding MaxLimit,Mode=OneWay}" 
+                                     LowerValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                     UpperValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                     AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" SmallChange="1"/>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate x:Key="NormalChartTemplate">
                 <StackPanel Orientation="Vertical">
                     <lvc:CartesianChart x:Name="TransGraph" Series="{Binding SeriesList}"
@@ -79,9 +110,24 @@
                 <mah:SplitView IsPaneOpen="{Binding IsMenuOpen}"
                                DisplayMode="Overlay" PanePlacement="Left">
                     <mah:SplitView.Pane>
-                        <Grid/>
+                        <Grid>
+                            <CheckBox>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <ei:ChangePropertyAction TargetName="Chart"
+                                                                 PropertyName="ContentTemplate"
+                                                                 Value="{StaticResource LogChartTemplate}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="Uncheked">
+                                        <ei:ChangePropertyAction TargetName="Chart"
+                                                                 PropertyName="ContentTemplate"
+                                                                 Value="{StaticResource NormalChartTemplate}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                        </Grid>
                     </mah:SplitView.Pane>
-                    <ContentControl ContentTemplate="{StaticResource NormalChartTemplate}" Content="{Binding}"/>
+                    <ContentControl x:Name="Chart" ContentTemplate="{StaticResource NormalChartTemplate}" Content="{Binding}"/>
                 </mah:SplitView>
             </DataTemplate>
 

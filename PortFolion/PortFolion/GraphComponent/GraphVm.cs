@@ -46,7 +46,7 @@ namespace PortFolion.ViewModels {
 					this.BrakeDown.Update();
 					t.Wait();
 					foreach (var g in this.Graphs) {
-						g.Update(_mng.GraphData);
+						g.Update();
 					}
 				}
 			};
@@ -78,7 +78,7 @@ namespace PortFolion.ViewModels {
 			BrakeDown.Refresh();
 			Ext.ResetColorIndex();
 			t.Wait();
-			foreach (var g in Graphs) g.Refresh(_mng.GraphData);
+			foreach (var g in Graphs) g.Refresh();
 		}
 		
 
@@ -200,13 +200,13 @@ namespace PortFolion.ViewModels {
 			set {
 				if (value) {
 					if (!VisibleTransition) {
-						ts = new TransitionSeries(this);
+						ts = new TransitionSeries(this, a => _mng.GraphData);
 						Graphs.Insert(0, ts);
 						ts.Disposed += (o, e) => {
 							Graphs.Remove(ts);
 							RaisePropertyChanged();
 						};
-						ts.Refresh(this._mng.GraphData);
+						ts.Refresh();
 					}
 				} else {
 					ts?.Dispose();
@@ -221,14 +221,14 @@ namespace PortFolion.ViewModels {
 				if (!value) {
 					tscfs?.Dispose();
 				}else if(value && !VisibleTransitionStackCF) {
-					tscfs = new TransitionStackCFSeries(this);
+					tscfs = new TransitionStackCFSeries(this, a => _mng.GraphData);
 					Graphs.Insert(0, tscfs);
 					tscfs.Disposed += (o, e) => {
 						Graphs.Remove(tscfs);
 						RaisePropertyChanged();
 					};
 					//Refresh
-					tscfs.Refresh(this._mng.GraphData);
+					tscfs.Refresh();
 				}
 			}
 		}
@@ -240,13 +240,13 @@ namespace PortFolion.ViewModels {
 				if (!value) {
 					tpls?.Dispose();
 				}else if(value && !VisibleTransitionPL) {
-					tpls = new TransitionPLSeries(this);
+					tpls = new TransitionPLSeries(this, a => _mng.GraphData);
 					Graphs.Insert(0, tpls);
 					tpls.Disposed += (o, e) => {
 						Graphs.Remove(tpls);
 						RaisePropertyChanged();
 					};
-					tpls.Refresh(_mng.GraphData);
+					tpls.Refresh();
 				}
 			}
 		}
@@ -258,13 +258,13 @@ namespace PortFolion.ViewModels {
 				if (!value) {
 					igvm?.Dispose();
 				}else if(value && !VisibleIndex) {
-					igvm = new IndexGraphVm(this);
+					igvm = new IndexGraphVm(this, a => _mng.GraphData);
 					Graphs.Insert(0, igvm);
 					igvm.Disposed += (o, e) => {
 						Graphs.Remove(igvm);
 						RaisePropertyChanged();
 					};
-					igvm.Refresh(_mng.GraphData);
+					igvm.Refresh();
 				}
 			}
 		}
@@ -276,13 +276,13 @@ namespace PortFolion.ViewModels {
 				if (!value) {
 					vgvm?.Dispose();
 				}else if(value && !VisibleVolatility) {
-					vgvm = new VolatilityGraphVm(this);
+					vgvm = new VolatilityGraphVm(this, a => _mng.GraphData);
 					Graphs.Insert(0, vgvm);
 					vgvm.Disposed += (o, e) => {
 						Graphs.Remove(vgvm);
 						RaisePropertyChanged();
 					};
-					vgvm.Refresh(_mng.GraphData);
+					vgvm.Refresh();
 				}
 			}
 		}
@@ -388,19 +388,24 @@ namespace PortFolion.ViewModels {
 	public abstract class GraphVmBase : NotificationObject, IDisposable {
 		protected GraphTabViewModel ViewModel { get; }
 
-		public GraphVmBase(GraphTabViewModel viewModel) {
+		public GraphVmBase(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) {
 			this.SeriesList = new SeriesCollection();
 			ViewModel = viewModel;
+			_getSrc = getSrc;
+		}
+		Func<GraphTabViewModel, IEnumerable<object>> _getSrc { get; }
+		protected IEnumerable<object> GetSource() {
+			return _getSrc(ViewModel);
 		}
 		/// <summary>変更があった場合更新する</summary>
-		public abstract void Update(IEnumerable<GraphValue> src);
+		public abstract void Update();
 		/// <summary>現在の条件で再描画する</summary>
-		public virtual void Refresh(IEnumerable<GraphValue> src) {
-			//this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.MaxLimit)));
+		public virtual void Refresh() {
 			this.RaisePropertyChanged(nameof(MaxLimit));
 			this.DisplayMinValue = 0;
 			this.DisplayMaxValue = this.MaxLimit;
 		}
+		
 		public SeriesCollection SeriesList { get; private set; }
 		protected void RemoveAll() {
 			var cnt = this.SeriesList.Count;
@@ -449,9 +454,10 @@ namespace PortFolion.ViewModels {
 		}
 		public virtual double MaxLimit => Math.Max(0d, Labels?.Count() -1 ?? 0d);
 		//public Func<double,string> XFormatter { get; set; }
-		public virtual Func<double, string> YFormatter => y => y.ToString("#,0.#");
+		public Func<double, string> YFormatter => IsLogChart ? LogYFormatter : NormalYFormatter;
+		protected virtual Func<double,string> NormalYFormatter => y => y.ToString("#,0.#");
+		Func<double, string> LogYFormatter => y => NormalYFormatter(Math.Pow(10, y));
 
-		
 		public bool IsDisposed { get; private set; }
 		public void Dispose() {
 			if (IsDisposed) return;
@@ -491,20 +497,63 @@ namespace PortFolion.ViewModels {
 		}
 		#region menu
 		public virtual bool VisibilityMenu => false;
-		public bool IsMenuOpen { get; set; }
+		bool _isMenuOpen;
+		public bool IsMenuOpen {
+			get { return _isMenuOpen; }
+			set {
+				if (_isMenuOpen == value) return;
+				_isMenuOpen = value;
+				this.RaisePropertyChanged();
+			}
+		}
+
+		bool _isLogChart;
+		public bool IsLogChart {
+			get { return _isLogChart; }
+			set {
+				if (_isLogChart == value) return;
+				_isLogChart = value;
+				if (value) {
+					this.SeriesList.Configuration = Mappers.Xy<double>().Y(a => Math.Log10(a));
+				}else {
+					this.SeriesList.Configuration = null;
+				}
+				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(YFormatter));
+			}
+		}
+		//public void ToLogChart() {
+		//	RaisePropertyChanged(nameof(YFormatter));
+		//	var mapper = Mappers.Xy<double>().Y(a => a);
+		//	this.SeriesList.Configuration = mapper;
+		//	this.Refresh();
+		//}
+		//public void ToNormalChart() {
+		//	RaisePropertyChanged(nameof(YFormatter));
+		//}
 		#endregion
 	}
 
 	public abstract class PathPeriodGraph : GraphVmBase {
 		IEnumerable<string> _curPath;
 		Period _period;
-		public PathPeriodGraph(GraphTabViewModel viewModel) : base(viewModel) { }
-		public override void Update(IEnumerable<GraphValue> src) {
+		public PathPeriodGraph(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
+
+		public override void Update() {
+			this.update(GetSource().OfType<GraphValue>());
+		}
+		public override void Refresh() {
+			this.refresh(GetSource().OfType<GraphValue>());
+			base.Refresh();
+		}
+
+		void update(IEnumerable<GraphValue> src) {
 			if (!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
-				Refresh(src);
+				refresh(src);
+				base.Refresh();
 			}
 		}
-		public override void Refresh(IEnumerable<GraphValue> src) {
+		void refresh(IEnumerable<GraphValue> src) {
 			_curPath = ViewModel.CurrentPath;
 			_period = ViewModel.TimePeriod;
 
@@ -514,9 +563,8 @@ namespace PortFolion.ViewModels {
 
 			Draw(src);
 			Legends = this.SeriesList.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
-
-			base.Refresh(src);
 		}
+		
 		protected abstract void Draw(IEnumerable<GraphValue> src);
 
 		protected virtual IEnumerable<string> GetLabels(IEnumerable<GraphValue> src) {
@@ -540,7 +588,7 @@ namespace PortFolion.ViewModels {
 	}
 
 	public class TransitionSeries : PathPeriodGraph {
-		public TransitionSeries(GraphTabViewModel viewModel) : base(viewModel) {
+		public TransitionSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
 		}
 		public override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
 		
@@ -565,7 +613,7 @@ namespace PortFolion.ViewModels {
 		}
 	}
 	public class TransitionStackCFSeries : PathPeriodGraph {
-		public TransitionStackCFSeries(GraphTabViewModel viewModel) : base(viewModel) {
+		public TransitionStackCFSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
 		}
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			
@@ -590,7 +638,7 @@ namespace PortFolion.ViewModels {
 		}
 	}
 	public class TransitionPLSeries : PathPeriodGraph {
-		public TransitionPLSeries(GraphTabViewModel viewModel) : base(viewModel) { }
+		public TransitionPLSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
 			var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
@@ -608,7 +656,7 @@ namespace PortFolion.ViewModels {
 
 	public class IndexGraphVm : PathPeriodGraph {
 		
-		public IndexGraphVm(GraphTabViewModel viewModel) : base(viewModel) {
+		public IndexGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
 		}
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
@@ -624,10 +672,10 @@ namespace PortFolion.ViewModels {
 					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
 		}
-		public override Func<double, string> YFormatter => y => y.ToString("#,0.##");
+		protected override Func<double, string> NormalYFormatter => y => y.ToString("#,0.##");
 	}
 	public class VolatilityGraphVm : PathPeriodGraph {
-		public VolatilityGraphVm(GraphTabViewModel viewModel) : base(viewModel) { }
+		public VolatilityGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
 			var dz = src.Select(a => a.Dietz).ToArray();
@@ -640,6 +688,6 @@ namespace PortFolion.ViewModels {
 					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
 		}
-		public override Func<double, string> YFormatter => y => y.ToString("0.00%");
+		protected override Func<double, string> NormalYFormatter => y => y.ToString("0.00%");
 	}
 }
