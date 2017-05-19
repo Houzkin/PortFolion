@@ -514,7 +514,7 @@ namespace PortFolion.ViewModels {
 				if (_isLogChart == value) return;
 				_isLogChart = value;
 				if (value) {
-					this.SeriesList.Configuration = Mappers.Xy<double>().Y(a => Math.Log10(a));
+					this.SeriesList.Configuration = Mappers.Xy<double>().Y(a => a== 0 ? 1 : Math.Log10(a));
 				}else {
 					this.SeriesList.Configuration = null;
 				}
@@ -522,15 +522,6 @@ namespace PortFolion.ViewModels {
 				RaisePropertyChanged(nameof(YFormatter));
 			}
 		}
-		//public void ToLogChart() {
-		//	RaisePropertyChanged(nameof(YFormatter));
-		//	var mapper = Mappers.Xy<double>().Y(a => a);
-		//	this.SeriesList.Configuration = mapper;
-		//	this.Refresh();
-		//}
-		//public void ToNormalChart() {
-		//	RaisePropertyChanged(nameof(YFormatter));
-		//}
 		#endregion
 	}
 
@@ -589,7 +580,10 @@ namespace PortFolion.ViewModels {
 
 	public class TransitionSeries : PathPeriodGraph {
 		public TransitionSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
+			
 		}
+		public override bool VisibilityMenu => true;
+
 		public override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
 		
 		protected override void Draw(IEnumerable<GraphValue> src) {

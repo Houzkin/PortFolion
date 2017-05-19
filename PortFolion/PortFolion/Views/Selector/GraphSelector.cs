@@ -34,7 +34,7 @@ namespace PortFolion.Views.Selector {
 			var viewModel = item as GraphVmBase;
 			if (element == null || viewModel == null) return null;
 			// BalanceCashFlowChartTemplate,WeightChartTemplate,LogChartTemplate
-			var templateName = "NormalChartTemplate";
+			var templateName = "BalanceChartTemplate";// "NormalChartTemplate";
 			return element.FindResource(templateName) as DataTemplate;
 		}
 	}

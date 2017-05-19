@@ -51,7 +51,7 @@
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
                         <lvc:CartesianChart.AxisX>
-                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom" RangeChangedCommand="{Binding RangeChangedCmd}"
+                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom"
                                       MinValue="{Binding DisplayMinValue,Mode=OneWay}"
                                       MaxValue="{Binding DisplayMaxValue,Mode=OneWay}">
                                 <lvc:Axis.Separator>
@@ -73,6 +73,7 @@
                                      UpperValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" SmallChange="1"/>
                 </StackPanel>
+                            
             </DataTemplate>
             <DataTemplate x:Key="NormalChartTemplate">
                 <StackPanel Orientation="Vertical">
@@ -82,7 +83,7 @@
                             <lvc:DefaultTooltip Background="Black" Opacity="0.7"/>
                         </lvc:CartesianChart.DataTooltip>
                         <lvc:CartesianChart.AxisX>
-                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom" RangeChangedCommand="{Binding RangeChangedCmd}"
+                            <lvc:Axis x:Name="GraphXAxis" MinRange="2" Labels="{Binding Labels}" Position="LeftBottom"
                                       MinValue="{Binding DisplayMinValue,Mode=OneWay}"
                                       MaxValue="{Binding DisplayMaxValue,Mode=OneWay}">
                                 <lvc:Axis.Separator>
@@ -106,28 +107,42 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate x:Key="BalanceCashFlowChartTemplate">
-                <mah:SplitView IsPaneOpen="{Binding IsMenuOpen}"
-                               DisplayMode="Overlay" PanePlacement="Left">
+            <DataTemplate x:Key="BalanceChartTemplate">
+                <mah:SplitView IsPaneOpen="{Binding IsMenuOpen,Mode=TwoWay}"
+                               OpenPaneLength="150" DisplayMode="Inline" PanePlacement="Left">
                     <mah:SplitView.Pane>
                         <Grid>
-                            <CheckBox>
+                            <CheckBox Content="対数軸" IsChecked="{Binding IsLogChart}">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Checked">
-                                        <ei:ChangePropertyAction TargetName="Chart"
-                                                                 PropertyName="ContentTemplate"
-                                                                 Value="{StaticResource LogChartTemplate}"/>
+                                        <ei:ChangePropertyAction TargetName="Normalc"
+                                                                 PropertyName="Visibility"
+                                                                 Value="Collapsed"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="Checked">
+                                        <ei:ChangePropertyAction TargetName="Logc"
+                                                                 PropertyName="Visibility"
+                                                                 Value="Visible"/>
+                                    </i:EventTrigger>
+                                    
+                                    <i:EventTrigger EventName="Uncheked">
+                                        <ei:ChangePropertyAction TargetName="Normalc"
+                                                                 PropertyName="Visibility"
+                                                                 Value="Visible"/>
                                     </i:EventTrigger>
                                     <i:EventTrigger EventName="Uncheked">
-                                        <ei:ChangePropertyAction TargetName="Chart"
-                                                                 PropertyName="ContentTemplate"
-                                                                 Value="{StaticResource NormalChartTemplate}"/>
+                                        <ei:ChangePropertyAction TargetName="Logc"
+                                                                 PropertyName="Visibility"
+                                                                 Value="Collapsed"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </CheckBox>
                         </Grid>
                     </mah:SplitView.Pane>
-                    <ContentControl x:Name="Chart" ContentTemplate="{StaticResource NormalChartTemplate}" Content="{Binding}"/>
+                    <StackPanel>
+                        <ContentControl x:Name="Normalc" Visibility="Visible" ContentTemplate="{StaticResource NormalChartTemplate}" Content="{Binding}"/>
+                        <ContentControl x:Name="Logc" Visibility="Collapsed" ContentTemplate="{StaticResource LogChartTemplate}" Content="{Binding}"/>
+                    </StackPanel>
                 </mah:SplitView>
             </DataTemplate>
 
