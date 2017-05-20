@@ -108,42 +108,40 @@
             </DataTemplate>
 
             <DataTemplate x:Key="BalanceChartTemplate">
-                <mah:SplitView IsPaneOpen="{Binding IsMenuOpen,Mode=TwoWay}"
-                               OpenPaneLength="150" DisplayMode="Inline" PanePlacement="Left">
-                    <mah:SplitView.Pane>
-                        <Grid>
-                            <CheckBox Content="対数軸" IsChecked="{Binding IsLogChart}">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="Checked">
-                                        <ei:ChangePropertyAction TargetName="Normalc"
-                                                                 PropertyName="Visibility"
-                                                                 Value="Collapsed"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="Checked">
-                                        <ei:ChangePropertyAction TargetName="Logc"
-                                                                 PropertyName="Visibility"
-                                                                 Value="Visible"/>
-                                    </i:EventTrigger>
-                                    
-                                    <i:EventTrigger EventName="Uncheked">
-                                        <ei:ChangePropertyAction TargetName="Normalc"
-                                                                 PropertyName="Visibility"
-                                                                 Value="Visible"/>
-                                    </i:EventTrigger>
-                                    <i:EventTrigger EventName="Uncheked">
-                                        <ei:ChangePropertyAction TargetName="Logc"
-                                                                 PropertyName="Visibility"
-                                                                 Value="Collapsed"/>
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-                            </CheckBox>
-                        </Grid>
-                    </mah:SplitView.Pane>
+                <StackPanel Orientation="Horizontal">
+                    <Grid Visibility="{Binding IsMenuOpen,Converter={StaticResource BoolToVisibilityConv},Mode=TwoWay}">
+                        <CheckBox Content="対数軸" IsChecked="{Binding IsLogChart}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Checked">
+                                    <ei:ChangePropertyAction TargetName="Normalc"
+                                                                PropertyName="Visibility"
+                                                                Value="Collapsed"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="Checked">
+                                    <ei:ChangePropertyAction TargetName="Logc"
+                                                                PropertyName="Visibility"
+                                                                Value="Visible"/>
+                                </i:EventTrigger>
+
+                                <i:EventTrigger EventName="Uncheked">
+                                    <ei:ChangePropertyAction TargetName="Normalc"
+                                                                PropertyName="Visibility"
+                                                                Value="Visible"/>
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="Uncheked">
+                                    <ei:ChangePropertyAction TargetName="Logc"
+                                                                PropertyName="Visibility"
+                                                                Value="Collapsed"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </CheckBox>
+                    </Grid>
                     <StackPanel>
                         <ContentControl x:Name="Normalc" Visibility="Visible" ContentTemplate="{StaticResource NormalChartTemplate}" Content="{Binding}"/>
                         <ContentControl x:Name="Logc" Visibility="Collapsed" ContentTemplate="{StaticResource LogChartTemplate}" Content="{Binding}"/>
                     </StackPanel>
-                </mah:SplitView>
+                </StackPanel>
+                
             </DataTemplate>
 
             <DataTemplate x:Key="WeightChartTemplate"></DataTemplate>
@@ -213,6 +211,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Orientation="Vertical" x:Name="menuItems">
                         
+                        <ToggleButton Content="残高/CF/PL" Margin="0,2" IsChecked="{Binding VisibleBalance}" Style="{StaticResource MetroFlatToggleButton}"/>
                         <ToggleButton Content="残高&amp;CF" Margin="0,2" IsChecked="{Binding VisibleTransition}" Style="{StaticResource MetroFlatToggleButton}"/>
                         <ToggleButton Content="残高&amp;累積CF"  Margin="0,2" IsChecked="{Binding VisibleTransitionStackCF}" Style="{StaticResource MetroFlatToggleButton}"/>
                         <ToggleButton Content="損益" Margin="0,2" IsChecked="{Binding VisibleTransitionPL}" Style="{StaticResource MetroFlatToggleButton}"/>

@@ -33,8 +33,14 @@ namespace PortFolion.Views.Selector {
 			var element = container as FrameworkElement;
 			var viewModel = item as GraphVmBase;
 			if (element == null || viewModel == null) return null;
+			var t = viewModel.GetType();
 			// BalanceCashFlowChartTemplate,WeightChartTemplate,LogChartTemplate
-			var templateName = "BalanceChartTemplate";// "NormalChartTemplate";
+			string templateName;
+			if(t == typeof(BalanceSeries)) {
+				templateName = "BalanceChartTemplate";
+			}else {
+				templateName = "NormalChartTemplate";
+			}
 			return element.FindResource(templateName) as DataTemplate;
 		}
 	}

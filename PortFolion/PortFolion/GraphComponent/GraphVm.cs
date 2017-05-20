@@ -194,6 +194,23 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<GraphVmBase> Graphs { get; } = new ObservableCollection<GraphVmBase>();
 
 		#region graphs
+		BalanceSeries bls;
+		public bool VisibleBalance {
+			get { return !(bls == null || bls.IsDisposed); }
+			set {
+				if (!value) {
+					bls?.Dispose();
+				} else if(value && !VisibleBalance) {
+					bls = new BalanceSeries(this, a => _mng.GraphData);
+					Graphs.Insert(0, bls);
+					bls.Disposed += (o, e) => {
+						Graphs.Remove(bls);
+						RaisePropertyChanged();
+					};
+					bls.Refresh();
+				}
+			}
+		}
 		TransitionSeries ts;
 		public bool VisibleTransition {
 			get { return !(ts == null || ts.IsDisposed); }
@@ -578,17 +595,93 @@ namespace PortFolion.ViewModels {
 		}
 	}
 
-	public class TransitionSeries : PathPeriodGraph {
-		public TransitionSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
-			
+	public enum BalanceCashFlow {
+		None,
+		Flow,
+		Stack,
+	}
+	public class BalanceSeries : PathPeriodGraph {
+		public BalanceSeries(GraphTabViewModel viewModel, Func<GraphTabViewModel, IEnumerable<object>> getSrc) : base(viewModel, getSrc) {
 		}
 		public override bool VisibilityMenu => true;
+		public override double MaxLimit => 
+			this.CashFlowDrawPattern == BalanceCashFlow.Stack 
+			? Math.Max(0d, Labels?.Count() - 1 ?? 0d) + 1.0 
+			: base.MaxLimit;
 
-		public override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
-		
+		bool _visiblePl = true;
+		public bool VisiblePL {
+			get { return _visiblePl; }
+			set {
+				if (_visiblePl == value) return;
+				_visiblePl = value;
+				this.RaisePropertyChanged();
+				this.Refresh();
+			}
+		}
+
+		BalanceCashFlow _cfp = BalanceCashFlow.Flow;
+		public BalanceCashFlow CashFlowDrawPattern {
+			get { return _cfp; }
+			set {
+				if (_cfp == value) return;
+				_cfp = value;
+				this.RaisePropertyChanged();
+				this.RaisePropertyChanged(nameof(MaxLimit));
+				this.Refresh();
+			}
+		}
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
-
+			this.SeriesList.Add(new LineSeries() {
+				Title = ViewModel.CurrentNode?.Name,
+				Values = new ChartValues<double>(src.Select(a => a.Amount)),
+				LineSmoothness = 0,
+				Stroke = new SolidColorBrush(cls[0]),
+				Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
+			});
+			switch (this.CashFlowDrawPattern) {
+			case BalanceCashFlow.Flow:
+				this.SeriesList.Add(new ColumnSeries() {
+					Title = "キャッシュフロー",
+					Values = new ChartValues<double>(src.Select(a=>a.Flow)),
+					Stroke = new SolidColorBrush(cls[1]),
+					Fill = new SolidColorBrush(cls[1]) { Opacity = 0.5 },
+					StrokeThickness = 2,
+					});
+				break;
+			case BalanceCashFlow.Stack:
+				this.SeriesList.Add(new LineSeries() {
+						Title = "累積キャッシュフロー",
+						Values = new ChartValues<double>(src.Scan(0d,(ac,el)=>ac + el.Flow)),
+						LineSmoothness = 0,
+						Stroke = new SolidColorBrush(cls[1]),
+						Fill = new SolidColorBrush(cls[1]) { Opacity = 0.1 },
+						PointGeometry = DefaultGeometries.Square,
+					});
+				break;
+			}
+			if (this.VisiblePL) {
+				var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
+							   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
+				this.SeriesList.Add(
+					new LineSeries() {
+						Title = "損益",
+						Values = new ChartValues<double>(ssrc.Select(a=>a.Item2 - a.Item1)),
+						LineSmoothness = 0,
+						Stroke = new SolidColorBrush(cls[2]),
+						Fill = new SolidColorBrush(cls[2]) { Opacity = 0.1 },
+					});
+			}
+		}
+	}
+	public class TransitionSeries : PathPeriodGraph {
+		public TransitionSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
+		}
+		public override bool VisibilityMenu => true;
+		public override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
+		protected override void Draw(IEnumerable<GraphValue> src) {
+			var cls = Ext.BrushOrder();
 			this.SeriesList.Add(new LineSeries() {
 				Title = ViewModel.CurrentNode?.Name,
 				Values = new ChartValues<double>(src.Select(a => a.Amount)),
@@ -656,12 +749,12 @@ namespace PortFolion.ViewModels {
 			var cls = Ext.BrushOrder();
 			this.SeriesList.Add(
 				new LineSeries() {
-					Title = "指数(基準価額)",
+					Title = "基準価額(指数)",
 					LineSmoothness = 0,
 					Values = new ChartValues<double>(
-						src.Select(a=>a.Dietz+1.0)
+						src.Select(a => a.Dietz + 1.0)
 							.Scan(1d, (a, b) => a * b)
-							.Select(a=>a*1000)),
+							.Select(a => a * 1000)),
 					Stroke = new SolidColorBrush(cls[0]),
 					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
 				});
