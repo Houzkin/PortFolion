@@ -26,29 +26,15 @@ namespace PortFolion.ViewModels {
 		Monthly,
 		Quarterly,
 		Yearly,
-		//EachWrittenDate,
 	}
 	public enum DividePattern {
 		Location,
 		Tag,
 	}
-	public enum TransitionStatus {
-		/// <summary>推移</summary>
-		BalanceOnly,
-		/// <summary>推移のラインと外部キャッシュフローをカラムにして表す</summary>
-		SingleCashFlow,
-		/// <summary>推移のラインと外部キャッシュフローの累積を表す</summary>
-		StackCashFlow,
-		/// <summary>損益のみ</summary>
-		ProfitLossOnly,
-	}
 
 	public class TempValue : SeriesViewModel {
-		//public string Title { get; set; }
 		public double Amount { get; set; }
 		public double Rate { get; set; }
-		//public double Invest { get; set; }
-		//public NodeType Type { get; set; }
 	}
 	public class GraphValue {
 		/// <summary>残高</summary>

@@ -8,27 +8,26 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace PortFolion.Views.Converter {
-	public class TransitionStatusToStringConverter : IValueConverter {
+	
+	public class BalanceCFToStringConverter : IValueConverter {
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-			if(value is TransitionStatus) {
-				var ts = (TransitionStatus)value;
-				switch (ts) {
-				case TransitionStatus.BalanceOnly:
-					return "残高推移";
-				case TransitionStatus.ProfitLossOnly:
-					return "損益";
-				case TransitionStatus.SingleCashFlow:
-					return "残高推移＆外部CF";
-				case TransitionStatus.StackCashFlow:
-					return "残高推移＆累積外部CF";
+			if(value is BalanceCashFlow) {
+				var bc = (BalanceCashFlow)value;
+				switch (bc) {
+				case BalanceCashFlow.Flow:
+					return "単独";
+				case BalanceCashFlow.Stack:
+					return "累積";
+				default:
+					return "表示なし";
 				}
 			}
 			return value.ToString();
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
-			if (value is TransitionStatus) return value;
-			throw new ArgumentException("引数がおかしい");
+			if (value is BalanceCashFlow) return value;
+			throw new ArgumentException("不正な値が入力されました");
 		}
 	}
 	public class PeriodToStringConverter : IValueConverter {

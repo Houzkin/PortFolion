@@ -32,12 +32,12 @@
             </ObjectDataProvider>
             <cnv:PeriodToStringConverter x:Key="PeriodConverter"/>
             
-            <ObjectDataProvider x:Key="TransitionStatusKey" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <!--<ObjectDataProvider x:Key="TransitionStatusKey" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
                 <ObjectDataProvider.MethodParameters>
                     <x:Type TypeName="vm:TransitionStatus"/>
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
-            <cnv:TransitionStatusToStringConverter x:Key="TransitionStatusConverter"/>
+            <cnv:TransitionStatusToStringConverter x:Key="TransitionStatusConverter"/>-->
             
         </Grid.Resources>
         <Grid.ColumnDefinitions>
@@ -162,7 +162,7 @@
         <!--<local:GraphContents Grid.Column="1"/>-->
         <Expander x:Name="BrakeDownExp" Grid.Column="1" IsExpanded="True" ExpandDirection="Right" mah:ControlsHelper.ContentCharacterCasing="Normal">
             <Expander.Header>
-                <TextBlock Text="内訳" TextAlignment="Right">
+                <TextBlock Text="内 訳" TextAlignment="Right">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>

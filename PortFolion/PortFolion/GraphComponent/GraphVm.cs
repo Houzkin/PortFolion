@@ -211,62 +211,6 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
-		TransitionSeries ts;
-		public bool VisibleTransition {
-			get { return !(ts == null || ts.IsDisposed); }
-			set {
-				if (value) {
-					if (!VisibleTransition) {
-						ts = new TransitionSeries(this, a => _mng.GraphData);
-						Graphs.Insert(0, ts);
-						ts.Disposed += (o, e) => {
-							Graphs.Remove(ts);
-							RaisePropertyChanged();
-						};
-						ts.Refresh();
-					}
-				} else {
-					ts?.Dispose();
-				}
-			}
-		}
-
-		TransitionStackCFSeries tscfs;
-		public bool VisibleTransitionStackCF {
-			get { return !(tscfs == null || tscfs.IsDisposed); }
-			set {
-				if (!value) {
-					tscfs?.Dispose();
-				}else if(value && !VisibleTransitionStackCF) {
-					tscfs = new TransitionStackCFSeries(this, a => _mng.GraphData);
-					Graphs.Insert(0, tscfs);
-					tscfs.Disposed += (o, e) => {
-						Graphs.Remove(tscfs);
-						RaisePropertyChanged();
-					};
-					//Refresh
-					tscfs.Refresh();
-				}
-			}
-		}
-
-		TransitionPLSeries tpls;
-		public bool VisibleTransitionPL {
-			get { return !(tpls == null || tpls.IsDisposed); }
-			set {
-				if (!value) {
-					tpls?.Dispose();
-				}else if(value && !VisibleTransitionPL) {
-					tpls = new TransitionPLSeries(this, a => _mng.GraphData);
-					Graphs.Insert(0, tpls);
-					tpls.Disposed += (o, e) => {
-						Graphs.Remove(tpls);
-						RaisePropertyChanged();
-					};
-					tpls.Refresh();
-				}
-			}
-		}
 
 		IndexGraphVm igvm;
 		public bool VisibleIndex {
@@ -531,7 +475,7 @@ namespace PortFolion.ViewModels {
 				if (_isLogChart == value) return;
 				_isLogChart = value;
 				if (value) {
-					this.SeriesList.Configuration = Mappers.Xy<double>().Y(a => a== 0 ? 1 : Math.Log10(a));
+					this.SeriesList.Configuration = Mappers.Xy<double>().Y(a => a <= 0 ? 0 : Math.Log10(a));
 				}else {
 					this.SeriesList.Configuration = null;
 				}
@@ -604,10 +548,9 @@ namespace PortFolion.ViewModels {
 		public BalanceSeries(GraphTabViewModel viewModel, Func<GraphTabViewModel, IEnumerable<object>> getSrc) : base(viewModel, getSrc) {
 		}
 		public override bool VisibilityMenu => true;
-		public override double MaxLimit => 
-			this.CashFlowDrawPattern == BalanceCashFlow.Stack 
-			? Math.Max(0d, Labels?.Count() - 1 ?? 0d) + 1.0 
-			: base.MaxLimit;
+		public override double MaxLimit =>
+			//this.CashFlowDrawPattern == BalanceCashFlow.Flow ? Math.Max(0d, Labels?.Count() - 1 ?? 0d) + 1.0 : 
+			base.MaxLimit + 1.0;
 
 		bool _visiblePl = true;
 		public bool VisiblePL {
@@ -627,7 +570,6 @@ namespace PortFolion.ViewModels {
 				if (_cfp == value) return;
 				_cfp = value;
 				this.RaisePropertyChanged();
-				this.RaisePropertyChanged(nameof(MaxLimit));
 				this.Refresh();
 			}
 		}
@@ -675,76 +617,14 @@ namespace PortFolion.ViewModels {
 			}
 		}
 	}
-	public class TransitionSeries : PathPeriodGraph {
-		public TransitionSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
-		}
-		public override bool VisibilityMenu => true;
-		public override double MaxLimit =>  Math.Max(0d, Labels?.Count() -1 ?? 0d) + 1.0;
-		protected override void Draw(IEnumerable<GraphValue> src) {
-			var cls = Ext.BrushOrder();
-			this.SeriesList.Add(new LineSeries() {
-				Title = ViewModel.CurrentNode?.Name,
-				Values = new ChartValues<double>(src.Select(a => a.Amount)),
-				LineSmoothness = 0,
-				Stroke = new SolidColorBrush(cls[0]),
-				Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
-			});
-			this.SeriesList.Add(new ColumnSeries() {
-				Title = "キャッシュフロー",
-				Values = new ChartValues<double>(src.Select(a=>a.Flow)),
-
-				Stroke = new SolidColorBrush(cls[1]),
-				Fill = new SolidColorBrush(cls[1]) { Opacity = 0.5 },
-				StrokeThickness = 2,
-			});
-		}
-	}
-	public class TransitionStackCFSeries : PathPeriodGraph {
-		public TransitionStackCFSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
-		}
-		protected override void Draw(IEnumerable<GraphValue> src) {
-			
-			var cls = Ext.BrushOrder();
-			this.SeriesList.Add(
-				new LineSeries() {
-					Title = ViewModel.CurrentNode?.Name,
-					Values = new ChartValues<double>(src.Select(a=>a.Amount)),
-					LineSmoothness = 0,
-					Stroke = new SolidColorBrush(cls[0]),
-					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
-				});
-			this.SeriesList.Add(
-				new LineSeries() {
-					Title = "累積キャッシュフロー",
-					Values = new ChartValues<double>(src.Scan(0d,(ac,el)=>ac + el.Flow)),
-					LineSmoothness = 0,
-					Stroke = new SolidColorBrush(cls[1]),
-					Fill = new SolidColorBrush(cls[1]) { Opacity = 0.1 },
-					PointGeometry = DefaultGeometries.Square,
-				});
-		}
-	}
-	public class TransitionPLSeries : PathPeriodGraph {
-		public TransitionPLSeries(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
-		protected override void Draw(IEnumerable<GraphValue> src) {
-			var cls = Ext.BrushOrder();
-			var ssrc = src.Scan(new Tuple<double, double>(0, 0), (ac, el) =>
-							   new Tuple<double, double>(ac.Item1 + el.Flow, el.Amount));
-			this.SeriesList.Add(
-				new LineSeries() {
-					Title = "損益",
-					Values = new ChartValues<double>(ssrc.Select(a=>a.Item2 - a.Item1)),
-					LineSmoothness = 0,
-					Stroke = new SolidColorBrush(cls[0]),
-					Fill = new SolidColorBrush(cls[0]) { Opacity = 0.1 },
-				});
-		}
-	}
 
 	public class IndexGraphVm : PathPeriodGraph {
 		
-		public IndexGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) {
-		}
+		public IndexGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc)
+			: base(viewModel,getSrc) { }
+
+		public override bool VisibilityMenu => true;
+
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
 			this.SeriesList.Add(
@@ -762,7 +642,9 @@ namespace PortFolion.ViewModels {
 		protected override Func<double, string> NormalYFormatter => y => y.ToString("#,0.##");
 	}
 	public class VolatilityGraphVm : PathPeriodGraph {
-		public VolatilityGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
+		public VolatilityGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc)
+			: base(viewModel,getSrc) { }
+
 		protected override void Draw(IEnumerable<GraphValue> src) {
 			var cls = Ext.BrushOrder();
 			var dz = src.Select(a => a.Dietz).ToArray();
