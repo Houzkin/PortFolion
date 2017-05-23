@@ -276,11 +276,37 @@ namespace PortFolion.ViewModels {
 				});
 				return t;
 			}
-			IEnumerable<GraphValue> _graphData;
-			public IEnumerable<GraphValue> GraphData {
-				get { return _graphData = _graphData ?? Enumerable.Empty<GraphValue>(); }
+			IEnumerable<PlotValue> _graphData;
+			public IEnumerable<PlotValue> GraphData {
+				get { return _graphData = _graphData ?? Enumerable.Empty<PlotValue>(); }
 				private set { _graphData = value; }
 			}
+		}
+		class bdMng {
+			IEnumerable<string> _curPath = Enumerable.Empty<string>();
+			Period _period;
+			DividePattern _divide;
+			int _lvl;
+			CommonNode _curNode;
+			GraphTabViewModel gtvm;
+
+			public bdMng(GraphTabViewModel vm) {
+				gtvm = vm;
+			}
+			public Task Refresh() {
+				_curPath = gtvm.CurrentPath;
+				_period = gtvm.TimePeriod;
+				_curNode = gtvm.CurrentNode;
+				_divide = gtvm.Divide;
+				_lvl = gtvm.TargetLevel;
+				var t = Task.Run(() => {
+					if (_curNode == null) return;
+					//var m = _curNode.MargeNodes(_lvl, _divide);
+					//GraphData = RootCollection.GetNodeLine(_curPath);
+				});
+				return t;
+			}
+			public object GraphData { get; set; }
 		}
 	}
 	public class BrakeDownChart : SeriesCollection {
@@ -291,7 +317,7 @@ namespace PortFolion.ViewModels {
 
 		GraphTabViewModel _vm;
 
-		public BrakeDownChart(GraphTabViewModel viewModel):base(Mappers.Pie<TempValue>().Value(tv=>tv.Amount)) {
+		public BrakeDownChart(GraphTabViewModel viewModel):base(Mappers.Pie<SeriesValue>().Value(tv=>tv.Amount)) {
 			_vm = viewModel;
 			Refresh();
 		}
@@ -322,7 +348,7 @@ namespace PortFolion.ViewModels {
 					a.Data.StrokeThickness = 5;
 					var ps = new PieSeries() {
 						Title = a.Data.Title,
-						Values = new ChartValues<TempValue>() { a.Data },
+						Values = new ChartValues<SeriesValue>() { a.Data },
 						DataLabels = true,
 						LabelPoint = cp => a.Data.Title,
 						LabelPosition = PieLabelPosition.OutsideSlice,
@@ -335,8 +361,8 @@ namespace PortFolion.ViewModels {
 				});
 			this.BrakeDownLegend = tgnss;
 		}
-		IEnumerable<TempValue> _legend;
-		public IEnumerable<TempValue> BrakeDownLegend {
+		IEnumerable<SeriesValue> _legend;
+		public IEnumerable<SeriesValue> BrakeDownLegend {
 			get { return _legend; }
 			private set {
 				if (_legend == value) return;
@@ -492,20 +518,20 @@ namespace PortFolion.ViewModels {
 		public PathPeriodGraph(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
 
 		public override void Update() {
-			this.update(GetSource().OfType<GraphValue>());
+			this.update(GetSource().OfType<PlotValue>());
 		}
 		public override void Refresh() {
-			this.refresh(GetSource().OfType<GraphValue>());
+			this.refresh(GetSource().OfType<PlotValue>());
 			base.Refresh();
 		}
 
-		void update(IEnumerable<GraphValue> src) {
+		void update(IEnumerable<PlotValue> src) {
 			if (!_curPath.SequenceEqual(ViewModel.CurrentPath) || _period != ViewModel.TimePeriod) {
 				refresh(src);
 				base.Refresh();
 			}
 		}
-		void refresh(IEnumerable<GraphValue> src) {
+		void refresh(IEnumerable<PlotValue> src) {
 			_curPath = ViewModel.CurrentPath;
 			_period = ViewModel.TimePeriod;
 
@@ -517,9 +543,9 @@ namespace PortFolion.ViewModels {
 			Legends = this.SeriesList.OfType<Series>().Select(a => this.ToLegends(a)).ToArray();
 		}
 		
-		protected abstract void Draw(IEnumerable<GraphValue> src);
+		protected abstract void Draw(IEnumerable<PlotValue> src);
 
-		protected virtual IEnumerable<string> GetLabels(IEnumerable<GraphValue> src) {
+		protected virtual IEnumerable<string> GetLabels(IEnumerable<PlotValue> src) {
 			return src.Select(a => a.Date.ToString("yyyy/M/d"));
 		}
 		protected virtual SeriesViewModel ToLegends(Series seri) {
@@ -539,11 +565,6 @@ namespace PortFolion.ViewModels {
 		}
 	}
 
-	public enum BalanceCashFlow {
-		None,
-		Flow,
-		Stack,
-	}
 	public class BalanceSeries : PathPeriodGraph {
 		public BalanceSeries(GraphTabViewModel viewModel, Func<GraphTabViewModel, IEnumerable<object>> getSrc) : base(viewModel, getSrc) {
 		}
@@ -573,7 +594,7 @@ namespace PortFolion.ViewModels {
 				this.Refresh();
 			}
 		}
-		protected override void Draw(IEnumerable<GraphValue> src) {
+		protected override void Draw(IEnumerable<PlotValue> src) {
 			var cls = Ext.BrushOrder();
 			this.SeriesList.Add(new LineSeries() {
 				Title = ViewModel.CurrentNode?.Name,
@@ -625,7 +646,7 @@ namespace PortFolion.ViewModels {
 
 		public override bool VisibilityMenu => true;
 
-		protected override void Draw(IEnumerable<GraphValue> src) {
+		protected override void Draw(IEnumerable<PlotValue> src) {
 			var cls = Ext.BrushOrder();
 			this.SeriesList.Add(
 				new LineSeries() {
@@ -645,7 +666,7 @@ namespace PortFolion.ViewModels {
 		public VolatilityGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc)
 			: base(viewModel,getSrc) { }
 
-		protected override void Draw(IEnumerable<GraphValue> src) {
+		protected override void Draw(IEnumerable<PlotValue> src) {
 			var cls = Ext.BrushOrder();
 			var dz = src.Select(a => a.Dietz).ToArray();
 			this.SeriesList.Add(

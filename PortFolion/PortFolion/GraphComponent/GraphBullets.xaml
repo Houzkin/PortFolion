@@ -276,7 +276,7 @@
                               Content="{iconPacks:PackIconMaterial Kind=Menu,Height=10}"/>
             </Grid>
         </GroupBox.Header>
-        <mah:SplitView Margin="-5" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120" PaneBackground="Transparent"
+        <mah:SplitView Margin="-5" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120" Opacity="0.9"
                        IsPaneOpen="{Binding IsChecked,ElementName=menu,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <mah:SplitView.Pane>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">

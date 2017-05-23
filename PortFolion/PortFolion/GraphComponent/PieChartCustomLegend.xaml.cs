@@ -28,7 +28,7 @@ namespace PortFolion.Views {
 			DataContext = this;
 
 		}
-		IEnumerable<ViewModels.TempValue> tryGetVm() {
+		IEnumerable<ViewModels.SeriesValue> tryGetVm() {
 			var p = this.Parent as FrameworkElement;
 			while(p != null) {
 				var dc = p as PieChart;
@@ -37,11 +37,11 @@ namespace PortFolion.Views {
 					continue;
 				}else {
 					return dc.Series
-						.Select(a => a.Values.OfType<ViewModels.TempValue>())
+						.Select(a => a.Values.OfType<ViewModels.SeriesValue>())
 						.SelectMany(a => a);
 				}
 			}
-			return Enumerable.Empty<ViewModels.TempValue>();
+			return Enumerable.Empty<ViewModels.SeriesValue>();
 		}
 		List<SeriesViewModel> _series;
 		public List<SeriesViewModel> Series {

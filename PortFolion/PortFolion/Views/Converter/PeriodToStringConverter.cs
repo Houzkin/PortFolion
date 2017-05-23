@@ -19,7 +19,7 @@ namespace PortFolion.Views.Converter {
 				case BalanceCashFlow.Stack:
 					return "累積";
 				default:
-					return "表示なし";
+					return "非表示";
 				}
 			}
 			return value.ToString();

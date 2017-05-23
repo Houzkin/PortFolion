@@ -21,22 +21,30 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace PortFolion.ViewModels {
+	/// <summary>期間</summary>
 	public enum Period {
 		Weekly,
 		Monthly,
 		Quarterly,
 		Yearly,
 	}
+	/// <summary>識別方法</summary>
 	public enum DividePattern {
 		Location,
 		Tag,
 	}
+	/// <summary>残高に対するキャッシュフローの扱い方</summary>
+	public enum BalanceCashFlow {
+		Ignore,
+		Flow,
+		Stack,
+	}
 
-	public class TempValue : SeriesViewModel {
+	public class SeriesValue : SeriesViewModel {
 		public double Amount { get; set; }
 		public double Rate { get; set; }
 	}
-	public class GraphValue {
+	public class PlotValue {
 		/// <summary>残高</summary>
 		public double Amount { get; set; }
 		/// <summary>外部キャッシュフロー</summary>
@@ -68,14 +76,14 @@ namespace PortFolion.ViewModels {
 			return lst;
 		}
 
-		public static IEnumerable<GraphValue> ToGraphValues(this Dictionary<DateTime, CommonNode> src, Period period) {
-			if (src == null || !src.Any()) return Enumerable.Empty<GraphValue>();
+		public static IEnumerable<PlotValue> ToGraphValues(this Dictionary<DateTime, CommonNode> src, Period period) {
+			if (src == null || !src.Any()) return Enumerable.Empty<PlotValue>();
 			var ax = Ext.GetTimeAxis(period, src.Keys);
 			var srcs = new Queue<KeyValuePair<DateTime, CommonNode>>(src);
 			//var lst = new List<GraphValue>();
 
-			var rslt = ax.Scan(new GraphValue(), (prev, ds) => {
-				var gv = new GraphValue() { Date = ds.End };
+			var rslt = ax.Scan(new PlotValue(), (prev, ds) => {
+				var gv = new PlotValue() { Date = ds.End };
 				var tmp = srcs.Dequeue(a => ds.Start <= a.Key && a.Key <= ds.End);
 				if (tmp.IsEmpty()) {
 					gv.Amount = prev.Amount;
@@ -185,13 +193,13 @@ namespace PortFolion.ViewModels {
 				.TakeWhile(a => a.NodeIndex().CurrentDepth == tg);
 		}
 		/// <summary>指定した項目種別で括る。</summary>
-		public static IEnumerable<TempValue> MargeNodes(this CommonNode current, int tgtLv, DividePattern div) {
+		public static IEnumerable<SeriesValue> MargeNodes(this CommonNode current, int tgtLv, DividePattern div) {
 			return current.TargetLevels(tgtLv).MargeNodes(div);
 		}
-		private class CashNodeCountedTempValue : TempValue {
+		private class CashNodeCountedSeriesValue : SeriesValue {
 			public int CashCount { get; set; }
 		}
-		public static IEnumerable<TempValue> MargeNodes(this IEnumerable<CommonNode> collection, DividePattern div) {
+		public static IEnumerable<SeriesValue> MargeNodes(this IEnumerable<CommonNode> collection, DividePattern div) {
 			Func<CommonNode, string> DivFunc;
 			switch (div) {
 			case DividePattern.Location:
@@ -202,11 +210,11 @@ namespace PortFolion.ViewModels {
 				break;
 			}
 			var ttl = (double)(collection.Sum(a => (a.Amount)));
-			if (ttl == 0) return Enumerable.Empty<TempValue>();
+			if (ttl == 0) return Enumerable.Empty<SeriesValue>();
 			return collection
 				.ToLookup(DivFunc)
 				.Select(a => {
-					var tv = new CashNodeCountedTempValue();
+					var tv = new CashNodeCountedSeriesValue();
 					tv.Title = a.Key;
 					tv.Amount = a.Sum(b => b.Amount);
 					tv.Rate = ((double)tv.Amount / (double)ttl);
