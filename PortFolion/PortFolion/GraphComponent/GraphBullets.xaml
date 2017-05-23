@@ -68,7 +68,7 @@
                             </lvc:Axis>
                         </lvc:CartesianChart.AxisX>
                         <lvc:CartesianChart.AxisY>
-                            <lvc:LogarithmicAxis Base="10" LabelFormatter="{Binding YFormatter}">
+                            <lvc:LogarithmicAxis Base="10" LabelFormatter="{Binding YFormatter}" Position="RightTop">
                                 <lvc:LogarithmicAxis.Separator>
                                     <lvc:Separator  StrokeThickness="1" StrokeDashArray="2"/>
                                 </lvc:LogarithmicAxis.Separator>
@@ -100,7 +100,7 @@
                             </lvc:Axis>
                         </lvc:CartesianChart.AxisX>
                         <lvc:CartesianChart.AxisY>
-                            <lvc:Axis LabelFormatter="{Binding YFormatter}">
+                            <lvc:Axis LabelFormatter="{Binding YFormatter}" Position="RightTop">
                                 <lvc:Axis.Separator>
                                     <lvc:Separator StrokeThickness="1" StrokeDashArray="2"/>
                                 </lvc:Axis.Separator>
@@ -116,10 +116,10 @@
             </DataTemplate>
 
             <DataTemplate x:Key="BalanceChartTemplate">
-                <mah:SplitView x:Name="Pane" IsPaneOpen="{Binding IsMenuOpen,Mode=TwoWay}" OpenPaneLength="130" PanePlacement="Left" DisplayMode="Inline" 
+                <mah:SplitView x:Name="Pane" IsPaneOpen="{Binding IsMenuOpen,Mode=TwoWay}" OpenPaneLength="130" PanePlacement="Left" DisplayMode="Overlay" 
                                PaneBackground="Transparent">
                     <mah:SplitView.Pane>
-                        <DockPanel>
+                        <DockPanel  Background="{StaticResource {x:Static SystemColors.DesktopBrushKey}}" Opacity="0.8">
                             <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
                                 <CheckBox Content="対数軸" IsChecked="{Binding IsLogChart}" Margin="5">
                                     <i:Interaction.Triggers>
@@ -148,8 +148,8 @@
                                 </CheckBox>
                                 <CheckBox Content="損益表示" IsChecked="{Binding VisiblePL}" Margin="5"/>
                                 <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="キャッシュフロー :" HorizontalAlignment="Left"/>
-                                    <ComboBox ItemsSource="{Binding Source={StaticResource BalanceCFKey}}" SelectedValue="{Binding CashFlowDrawPattern}" HorizontalAlignment="Right">
+                                    <TextBlock Text="キャッシュフロー :" HorizontalAlignment="Left" Margin="3,0"/>
+                                    <ComboBox ItemsSource="{Binding Source={StaticResource BalanceCFKey}}" SelectedValue="{Binding CashFlowDrawPattern}" HorizontalAlignment="Right" Margin="3,0">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Converter={StaticResource BalanceCFConv}}"/>
@@ -178,10 +178,10 @@
             </DataTemplate>
 
             <DataTemplate x:Key="IndexChartTemplate">
-                <mah:SplitView IsPaneOpen="{Binding IsMenuOpen,Mode=TwoWay}" OpenPaneLength="100" PanePlacement="Left" DisplayMode="Inline"
+                <mah:SplitView IsPaneOpen="{Binding IsMenuOpen,Mode=TwoWay}" OpenPaneLength="100" PanePlacement="Left" DisplayMode="Overlay"
                                PaneBackground="Transparent">
                     <mah:SplitView.Pane>
-                        <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" Background="{StaticResource {x:Static SystemColors.DesktopBrushKey}}" Opacity="0.8">
                             <CheckBox Content="対数軸" IsChecked="{Binding IsLogChart}" Margin="5">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="Checked">
@@ -276,7 +276,7 @@
                               Content="{iconPacks:PackIconMaterial Kind=Menu,Height=10}"/>
             </Grid>
         </GroupBox.Header>
-        <mah:SplitView Margin="-5" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120" Opacity="0.9"
+        <mah:SplitView Margin="-5" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120"
                        IsPaneOpen="{Binding IsChecked,ElementName=menu,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <mah:SplitView.Pane>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
