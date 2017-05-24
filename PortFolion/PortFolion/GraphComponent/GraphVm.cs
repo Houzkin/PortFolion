@@ -341,7 +341,7 @@ namespace PortFolion.ViewModels {
 			}
 			if (_curNode == null) return;
 			var tgnss = _curNode.MargeNodes(_targetLv, _divide).ToArray();
-			tgnss.Zip(Ext.BrushColors().Repeat(), (a, b) => new { Data = a, Brush = b })
+			tgnss.Zip(Ext.PieBrushColors(tgnss.Length), (a, b) => new { Data = a, Brush = b })
 				.ForEach(a => {
 					a.Data.Fill = new SolidColorBrush(a.Brush);
 					a.Data.Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f));

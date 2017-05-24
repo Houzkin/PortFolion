@@ -244,40 +244,82 @@ namespace PortFolion.ViewModels {
 			if (rdmIdx < 0) ResetColorIndex();
 			return BrushColors().Repeat().Skip(rdmIdx).Take(BrushColors().Count).ToList();
 		}
+		static List<Color> pieColors;
+		public static List<Color> PieBrushColors(int length) {
+			if(pieColors == null) {
+				pieColors = new List<Color>() {
+					Color.FromRgb(17,140,18),
+					Color.FromRgb(214,54,96),
+					Color.FromRgb(59,67,255),
+					Color.FromRgb(167,68,227),
+					Color.FromRgb(237,103,30),
+
+					Color.FromRgb(98,129,19),
+					Color.FromRgb(57,63,158),
+					Color.FromRgb(248,63,27),
+					Color.FromRgb(130,16,142),
+					Color.FromRgb(21,157,184),
+
+					Color.FromRgb(175,176,0),
+					Color.FromRgb(221,39,124),
+					Color.FromRgb(132,79,175),
+					Color.FromRgb(7,190,48),
+					Color.FromRgb(216,105,26),
+
+					Color.FromRgb(33,145,242),
+					Color.FromRgb(225,116,223),
+					Color.FromRgb(95,44,159),
+					Color.FromRgb(170,119,10),
+					Color.FromRgb(69,202,212),
+
+					Color.FromRgb(199,27,76),
+					Color.FromRgb(212,200,11),
+					Color.FromRgb(11,186,94),
+					Color.FromRgb(97,37,241),
+					Color.FromRgb(255,81,5),
+				};
+			}
+			var c = pieColors.Repeat().Take(length).ToList();
+			if(length % pieColors.Count == 1 && 1 < length) {
+				c.RemoveAt(length - 1);
+				c.Add(Colors.Gray);
+			}
+			return pieColors;
+		}
 		static List<Color> colors;
 		public static List<Color> BrushColors() {
 			//object obj = ColorConverter.ConvertFromString("#51000000");
 			//SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
 			return colors = colors ?? new List<Color>() {
-				Color.FromRgb(17,140,18),
-				Color.FromRgb(214,54,96),
-				Color.FromRgb(59,67,255),
-				Color.FromRgb(167,68,227),
-				Color.FromRgb(237,103,30),
+				Color.FromRgb(22,207,53),
+				Color.FromRgb(255,72,185),
+				Color.FromRgb(91,108,247),
+				Color.FromRgb(255,156,64),
+				Color.FromRgb(187,87,248),
 
-				Color.FromRgb(76,143,44),
-				Color.FromRgb(44,50,143),
-				Color.FromRgb(248,63,27),
-				Color.FromRgb(130,16,142),
-				Color.FromRgb(21,157,184),
+				Color.FromRgb(28,247,194),
+				Color.FromRgb(242,212,24),
+				Color.FromRgb(212,49,149),
+				Color.FromRgb(144,198,43),
+				Color.FromRgb(117,92,246),
 
-				Color.FromRgb(201,15,41),
-				Color.FromRgb(216,105,26),
-				Color.FromRgb(7,109,48),
-				Color.FromRgb(73,13,147),
-				Color.FromRgb(221,39,124),
+				Color.FromRgb(246,92,100),
+				Color.FromRgb(211,138,62),
+				Color.FromRgb(190,99,243),
+				Color.FromRgb(197,228,23),
+				Color.FromRgb(26,199,146),
 
-				Color.FromRgb(225,116,223),
-				Color.FromRgb(98,183,189),
-				Color.FromRgb(132,79,175),
-				Color.FromRgb(255,239,0),
-				Color.FromRgb(175,176,0),
+				Color.FromRgb(248,59,13),
+				Color.FromRgb(88,112,255),
+				Color.FromRgb(253,88,254),
+				Color.FromRgb(220,150,20),
+				Color.FromRgb(20,157,53),
 
-				Color.FromRgb(199,27,76),
-				Color.FromRgb(170,119,10),
-				Color.FromRgb(49,226,239),
-				Color.FromRgb(33,145,242),
-				Color.FromRgb(21,234,152),
+				Color.FromRgb(142,55,151),
+				Color.FromRgb(235,59,70),
+				Color.FromRgb(248,157,13),
+				Color.FromRgb(40,185,199),
+				
 			};
 		}
 	}
