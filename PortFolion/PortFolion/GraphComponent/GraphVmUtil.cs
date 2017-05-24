@@ -75,7 +75,16 @@ namespace PortFolion.ViewModels {
 			}
 			return lst;
 		}
+		public static IEnumerable<IEnumerable<PlotValue>> ToStackGraphValues(this Dictionary<DateTime, CommonNode> src,
+			CommonNode cur, Period period, int level, DividePattern divide) {
+			var curR = new SeriesValue[] { new SeriesValue() { Title = "" } }.Concat(cur.MargeNodes(level, divide)).ToArray();
 
+
+			throw new NotImplementedException();
+		}
+		static IEnumerable<PlotValue> assign(IEnumerable<PlotValue> model,IEnumerable<PlotValue> data) {
+			throw new NotImplementedException();
+		}
 		public static IEnumerable<PlotValue> ToGraphValues(this Dictionary<DateTime, CommonNode> src, Period period) {
 			if (src == null || !src.Any()) return Enumerable.Empty<PlotValue>();
 			var ax = Ext.GetTimeAxis(period, src.Keys);
