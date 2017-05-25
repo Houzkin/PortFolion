@@ -75,14 +75,39 @@ namespace PortFolion.ViewModels {
 			}
 			return lst;
 		}
-		public static IEnumerable<IEnumerable<PlotValue>> ToStackGraphValues(this Dictionary<DateTime, CommonNode> src,
+		public static Dictionary<SeriesValue,Dictionary<DateTime,double>> ToStackGraphValues(this Dictionary<DateTime, CommonNode> src,
 			CommonNode cur, Period period, int level, DividePattern divide) {
-			var curR = new SeriesValue[] { new SeriesValue() { Title = "" } }.Concat(cur.MargeNodes(level, divide)).ToArray();
+			var curR = cur.MargeNodes(level, divide).Concat(new SeriesValue[] { new SeriesValue() { Title = "" } }).ToArray();
+			var temp = curR.Select(a => new SeriesValue {
+				Amount = 0,
+				Title = a.Title,
+			});
+			var axs = GetTimeAxis(period, src.Keys);
+			var srcs = new Queue<KeyValuePair<DateTime, CommonNode>>(src);
 
+			var gv = axs.Scan(temp, (prv, ds) => prv);
+
+			var lst = new List<object>();
+			foreach(var ax in axs) {
+				var tmp = srcs.Dequeue(a => ax.Start <= a.Key && a.Key <= ax.End);
+
+			}
+
+			//var r = assign(curR, src.Select(a => Tuple.Create(a.Key, a.Value.MargeNodes(level, divide))));
 
 			throw new NotImplementedException();
 		}
-		static IEnumerable<PlotValue> assign(IEnumerable<PlotValue> model,IEnumerable<PlotValue> data) {
+		static Dictionary<string,Dictionary<DateTime,SeriesValue>> assign(IEnumerable<SeriesValue> model,
+			IEnumerable<Tuple<DateTime,IEnumerable<SeriesValue>>> data) {
+			var dic = new Dictionary<string, Dictionary<DateTime, SeriesValue>>();
+			foreach(var m in model) {
+				dic.Add(m.Title, new Dictionary<DateTime, SeriesValue>());
+			}
+			foreach(var sm in data) {
+				foreach(var ss in sm.Item2) {
+
+				}
+			}
 			throw new NotImplementedException();
 		}
 		public static IEnumerable<PlotValue> ToGraphValues(this Dictionary<DateTime, CommonNode> src, Period period) {
@@ -282,7 +307,7 @@ namespace PortFolion.ViewModels {
 			var c = pieColors.Repeat().Take(length).ToList();
 			if(length % pieColors.Count == 1 && 1 < length) {
 				c.RemoveAt(length - 1);
-				c.Add(Colors.Gray);
+				c.Add(pieColors[2]);
 			}
 			return pieColors;
 		}

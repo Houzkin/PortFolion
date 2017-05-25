@@ -342,10 +342,10 @@ namespace PortFolion.ViewModels {
 			if (_curNode == null) return;
 			var tgnss = _curNode.MargeNodes(_targetLv, _divide).ToArray();
 			tgnss.Zip(Ext.PieBrushColors(tgnss.Length), (a, b) => new { Data = a, Brush = b })
-				.ForEach(a => {
+				.ForEach((a,i) => {
 					a.Data.Fill = new SolidColorBrush(a.Brush);
 					a.Data.Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f));
-					a.Data.StrokeThickness = 5;
+					a.Data.StrokeThickness = 3;
 					var ps = new PieSeries() {
 						Title = a.Data.Title,
 						Values = new ChartValues<SeriesValue>() { a.Data },
@@ -356,6 +356,7 @@ namespace PortFolion.ViewModels {
 						Fill = a.Data.Fill,
 						Stroke = a.Data.Stroke,
 					};
+					//if (i % 2 == 0) ps.LabelPosition = PieLabelPosition.InsideSlice;
 					a.Data.PointGeometry = ps.PointGeometry;
 					this.Add(ps);
 				});
