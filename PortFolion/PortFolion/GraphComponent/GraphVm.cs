@@ -431,12 +431,13 @@ namespace PortFolion.ViewModels {
 				this.RaisePropertyChanged();
 			}
 		}
-		double max;
+		double max = 1;
 		public double DisplayMaxValue {
-			get { return max; }
+			get { return Math.Max(1,max); }
 			set {
 				if (max == value) return;
-				max = value;
+				//if (value < 1) max = 1;
+				else max = value;
 				this.RaisePropertyChanged();
 			}
 		}

@@ -109,6 +109,7 @@
                     </lvc:CartesianChart>
                     <mah:RangeSlider x:Name="RangeSlider" Minimum="0" Margin="25,0,25,2"
                                      Maximum="{Binding MaxLimit,Mode=OneWay}" 
+                                     MinRange="1"
                                      LowerValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      UpperValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" SmallChange="1"/>
@@ -227,7 +228,7 @@
                     <DockPanel HorizontalAlignment="Stretch" Grid.Row="0">
                         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left">
                             <Button Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"
-                                    IsEnabled="{Binding IndexUpCommand.CanExecute}" ToolTip="上へ移動">
+                                    IsEnabled="{Binding IndexUpCommand.CanExecute}" ToolTip="上へ移動" VerticalAlignment="Top">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <i:InvokeCommandAction Command="{Binding IndexUpCommand}"/>
@@ -235,7 +236,7 @@
                                 </i:Interaction.Triggers>
                             </Button>
                             <Button Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}"
-                                    IsEnabled="{Binding IndexDownCommand.CanExecute}" ToolTip="下へ移動">
+                                    IsEnabled="{Binding IndexDownCommand.CanExecute}" ToolTip="下へ移動" VerticalAlignment="Top">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <i:InvokeCommandAction Command="{Binding IndexDownCommand}"/>
@@ -244,12 +245,12 @@
                             </Button>
                             <ToggleButton Content="{iconPacks:PackIconMaterial Kind=Settings,Width=10,Height=10}"
                                           Visibility="{Binding VisibilityMenu,Converter={StaticResource BoolToVisibilityConv}}"
-                                          IsChecked="{Binding IsMenuOpen,Mode=TwoWay}" Margin="5,0,0,0" ToolTip="表示設定">
+                                          IsChecked="{Binding IsMenuOpen,Mode=TwoWay}" Margin="5,0,0,0" ToolTip="表示設定" VerticalAlignment="Top">
                             </ToggleButton>
                         </StackPanel>
 
                         <Button DockPanel.Dock="Right"
-                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10,Height=10}" ToolTip="閉じる">
+                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10,Height=10}" ToolTip="閉じる" VerticalAlignment="Top">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Click">
                                     <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
