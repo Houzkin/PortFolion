@@ -77,6 +77,7 @@
                     </lvc:CartesianChart>
                     <mah:RangeSlider x:Name="RangeSlider" Minimum="0" Margin="25,0,25,2"
                                      Maximum="{Binding MaxLimit,Mode=OneWay}" 
+                                     MinRange="1"
                                      LowerValue="{Binding DisplayMinValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      UpperValue="{Binding DisplayMaxValue,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                                      AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" SmallChange="1"/>

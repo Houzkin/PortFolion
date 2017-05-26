@@ -65,7 +65,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
-                    <Button DockPanel.Dock="Right">
+                    <Button DockPanel.Dock="Right" ToolTip="表示データを更新">
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">

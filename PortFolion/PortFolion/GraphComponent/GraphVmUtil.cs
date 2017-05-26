@@ -85,7 +85,11 @@ namespace PortFolion.ViewModels {
 			var axs = GetTimeAxis(period, src.Keys);
 			var srcs = new Queue<KeyValuePair<DateTime, CommonNode>>(src);
 
-			var gv = axs.Scan(temp, (prv, ds) => prv);
+			var gv = axs.Scan(temp, (prv, ds) => {
+				var s = srcs.Dequeue(a => ds.Start <= a.Key && a.Key <= ds.End);
+				if (s.IsEmpty()) return  prv;
+				else return s.Last().Value.MargeNodes(level, divide);
+			});
 
 			var lst = new List<object>();
 			foreach(var ax in axs) {
@@ -97,19 +101,41 @@ namespace PortFolion.ViewModels {
 
 			throw new NotImplementedException();
 		}
-		static Dictionary<string,Dictionary<DateTime,SeriesValue>> assign(IEnumerable<SeriesValue> model,
-			IEnumerable<Tuple<DateTime,IEnumerable<SeriesValue>>> data) {
-			var dic = new Dictionary<string, Dictionary<DateTime, SeriesValue>>();
-			foreach(var m in model) {
-				dic.Add(m.Title, new Dictionary<DateTime, SeriesValue>());
-			}
-			foreach(var sm in data) {
-				foreach(var ss in sm.Item2) {
-
+		private class stackGenerator {
+			class eqal : IEqualityComparer<SeriesValue> {
+				public bool Equals(SeriesValue x, SeriesValue y) {
+					return x.Title == y.Title;
+				}
+				public int GetHashCode(SeriesValue obj) {
+					return obj.Title.GetHashCode();
 				}
 			}
-			throw new NotImplementedException();
+			SeriesValue emp = new SeriesValue() { Title = "", Amount = 0, };
+			Dictionary<SeriesValue, Dictionary<DateTime, double>> dic;
+			public stackGenerator(IEnumerable<SeriesValue> model) {
+				dic = new Dictionary<SeriesValue, Dictionary<DateTime, double>>(new eqal());
+				foreach(var m in model) {
+					dic.Add(m, new Dictionary<DateTime, double>());
+				}
+				dic.Add(emp, new Dictionary<DateTime, double>());
+			}
+			public void Stack(DateTime date,IEnumerable<SeriesValue> items) {
+				foreach(var itm in items) {
+					if (dic.Keys.Any(a => a.Title == itm.Title)) {
+						dic[itm].Add(date, itm.Amount);
+					} else {
+						double am;
+						if(dic[emp].TryGetValue(date,out am)) {
+							dic[emp][date] = am + itm.Amount;
+						}else {
+							dic[emp].Add(date, itm.Amount);
+						}
+					}
+				}
+			}
+			public Dictionary<SeriesValue, Dictionary<DateTime, double>> Quit() => dic;
 		}
+		
 		public static IEnumerable<PlotValue> ToGraphValues(this Dictionary<DateTime, CommonNode> src, Period period) {
 			if (src == null || !src.Any()) return Enumerable.Empty<PlotValue>();
 			var ax = Ext.GetTimeAxis(period, src.Keys);
