@@ -77,29 +77,30 @@ namespace PortFolion.ViewModels {
 		}
 		public static Dictionary<SeriesValue,Dictionary<DateTime,double>> ToStackGraphValues(this Dictionary<DateTime, CommonNode> src,
 			CommonNode cur, Period period, int level, DividePattern divide) {
-			var curR = cur.MargeNodes(level, divide).Concat(new SeriesValue[] { new SeriesValue() { Title = "" } }).ToArray();
-			var temp = curR.Select(a => new SeriesValue {
+
+			var axs = GetTimeAxis(period, src.Keys);
+			if (axs.IsEmpty() || cur == null)
+				return new Dictionary<SeriesValue, Dictionary<DateTime, double>>();
+
+			var curR = cur.MargeNodes(level, divide).ToArray();
+			var initValue = curR.Select(a => new SeriesValue {
 				Amount = 0,
 				Title = a.Title,
 			});
-			var axs = GetTimeAxis(period, src.Keys);
+
 			var srcs = new Queue<KeyValuePair<DateTime, CommonNode>>(src);
 
-			var gv = axs.Scan(temp, (prv, ds) => {
+			var gv = axs.Scan(initValue, (prv, ds) => {
 				var s = srcs.Dequeue(a => ds.Start <= a.Key && a.Key <= ds.End);
-				if (s.IsEmpty()) return  prv;
+				if (s.IsEmpty()) return prv;
 				else return s.Last().Value.MargeNodes(level, divide);
 			});
 
-			var lst = new List<object>();
-			foreach(var ax in axs) {
-				var tmp = srcs.Dequeue(a => ax.Start <= a.Key && a.Key <= ax.End);
-
-			}
-
-			//var r = assign(curR, src.Select(a => Tuple.Create(a.Key, a.Value.MargeNodes(level, divide))));
-
-			throw new NotImplementedException();
+			var lst = new stackGenerator((cur.Root() as TotalRiskFundNode).CurrentDate, curR);
+			axs.Zip(gv, (a, b) => Tuple.Create(a, b)).ForEach(a => {
+				lst.Stack(a.Item1.End, a.Item2);
+			});
+			return lst.Quit();
 		}
 		private class stackGenerator {
 			class eqal : IEqualityComparer<SeriesValue> {
@@ -112,12 +113,14 @@ namespace PortFolion.ViewModels {
 			}
 			SeriesValue emp = new SeriesValue() { Title = "", Amount = 0, };
 			Dictionary<SeriesValue, Dictionary<DateTime, double>> dic;
-			public stackGenerator(IEnumerable<SeriesValue> model) {
+			public stackGenerator(DateTime date, IEnumerable<SeriesValue> model) {
 				dic = new Dictionary<SeriesValue, Dictionary<DateTime, double>>(new eqal());
 				foreach(var m in model) {
 					dic.Add(m, new Dictionary<DateTime, double>());
+					dic[m].Add(date, m.Amount);
 				}
 				dic.Add(emp, new Dictionary<DateTime, double>());
+				dic[emp].Add(date, 0);
 			}
 			public void Stack(DateTime date,IEnumerable<SeriesValue> items) {
 				foreach(var itm in items) {
@@ -125,13 +128,13 @@ namespace PortFolion.ViewModels {
 						dic[itm].Add(date, itm.Amount);
 					} else {
 						double am;
-						if(dic[emp].TryGetValue(date,out am)) {
+						if(dic[emp].TryGetValue(date,out am)) 
 							dic[emp][date] = am + itm.Amount;
-						}else {
+						else 
 							dic[emp].Add(date, itm.Amount);
-						}
 					}
 				}
+				if (!dic[emp].ContainsKey(date)) dic[emp].Add(date, 0);
 			}
 			public Dictionary<SeriesValue, Dictionary<DateTime, double>> Quit() => dic;
 		}
