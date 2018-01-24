@@ -514,10 +514,52 @@ namespace PortFolion.ViewModels {
 		#endregion
 	}
 
+	public class RateTransition : GraphVmBase {
+		CommonNode _curNode;
+		Period _period;
+		DividePattern _divide;
+		int _level;
+
+		public RateTransition(GraphTabViewModel viewModel, Func<GraphTabViewModel, IEnumerable<object>> getSrc)
+			: base(viewModel, getSrc) { }
+
+		public override void Update() {
+			this.update(GetSource().OfType<KeyValuePair<SeriesValue,Dictionary<DateTime,double>>>());
+		}
+		public override void Refresh() {
+			this.refresh(GetSource().OfType<KeyValuePair<SeriesValue,Dictionary<DateTime,double>>>());
+			base.Refresh();
+		}
+		void update(IEnumerable<KeyValuePair<SeriesValue,Dictionary<DateTime,double>>> src) {
+			if(_curNode != ViewModel.CurrentNode
+				|| _level != ViewModel.TargetLevel
+				|| _divide != ViewModel.Divide
+				|| _period != ViewModel.TimePeriod) {
+				refresh(src);
+				base.Refresh();
+			}
+		}
+		void refresh(IEnumerable<KeyValuePair<SeriesValue,Dictionary<DateTime,double>>> src) {
+			_curNode = ViewModel.CurrentNode;
+			_level = ViewModel.TargetLevel;
+			_divide = ViewModel.Divide;
+			_period = ViewModel.TimePeriod;
+
+			RemoveAll();
+			//Labels = null;
+			foreach(var s in src) {
+				var st = new StackedAreaSeries();
+
+			}
+			//Legends = null;
+		}
+	}
+
 	public abstract class PathPeriodGraph : GraphVmBase {
 		IEnumerable<string> _curPath;
 		Period _period;
-		public PathPeriodGraph(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc) : base(viewModel,getSrc) { }
+		public PathPeriodGraph(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc)
+			: base(viewModel,getSrc) { }
 
 		public override void Update() {
 			this.update(GetSource().OfType<PlotValue>());
