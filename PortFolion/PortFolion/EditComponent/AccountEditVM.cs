@@ -251,7 +251,7 @@ namespace PortFolion.ViewModels {
 			
 			StockInfo[] ary; 
 			try {
-				ary = await Task.Run(() => Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray());
+				ary = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(this.CurrentDate).ToArray());
 			} catch {
 				return new string[] { "通信状態を確認して再度実行してください。" };
 			}
@@ -453,7 +453,7 @@ namespace PortFolion.ViewModels {
 			//this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
-				siis = await Task.Run(() => Web.KdbDataClient.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+				siis = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
 			} catch {
 				return "通信状態を確認して再度実行してください。";
 			} finally { }

@@ -25,23 +25,49 @@ namespace PortFolion.Web {
 
     public class DownloadSource {
         #region map
-        class MjzMap : CsvClassMap<StockInfo> {
+        class MjzMap : ClassMap<StockInfo> {
             public MjzMap() {
-                Map(m => m.Symbol).Index(1);//
-                Map(m => m.Name).Index(3);//
-                Map(m => m.Open).Index(4);
-                Map(m => m.High).Index(5);
-                Map(m => m.Low).Index(6);
-                Map(m => m.Close).Index(7);
-                Map(m => m.Turnover).Index(8);
-                Map(m => m.Market).Index(9);
+                Map(m => m.Symbol).Index(1).Default(0);//
+                Map(m => m.Name).Index(3).TypeConverter<TickerConverter>().Default("");//
+                Map(m => m.Open).Index(4).Default(0);
+                Map(m => m.High).Index(5).Default(0);
+                Map(m => m.Low).Index(6).Default(0);
+                Map(m => m.Close).Index(7).Default(0);
+                Map(m => m.Turnover).Index(8).Default(0);
+                Map(m => m.Market).Index(9).Default("");
             }
         }
         class SymbolConverter : DefaultTypeConverter {
-
+            public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData) {
+                return base.ConvertFromString(text, row, memberMapData);
+            }
+            //public override bool CanConvertFrom(Type type) {
+            //    return type == typeof(string);
+            //}
+            //public override object ConvertFromString(TypeConverterOptions options, string text) {
+            //    var s = text.Split(' ').FirstOrDefault();
+            //    var numberStyle = options.NumberStyle ?? System.Globalization.NumberStyles.Integer;
+            //    int i;
+            //    if(int.TryParse(s,numberStyle,options.CultureInfo,out i)) {
+            //        return i.ToString();
+            //    }
+            //    return "unknown";
+            //}
         }
         class TickerConverter : DefaultTypeConverter {
-
+            public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData) {
+                return base.ConvertFromString(text, row, memberMapData);
+            }
+            //public override bool CanConvertFrom(Type type) {
+            //    return type == typeof(string);
+            //}
+            //public override object ConvertFromString(TypeConverterOptions options, string text) {
+            //    var s = text.Split(' ').Skip(1);
+            //    if (s.Any())
+            //        return s.First();
+            //    else
+            //        return "unknown";
+            //}
         }
         #endregion
 
@@ -80,8 +106,9 @@ namespace PortFolion.Web {
             return (!fi.Exists);
         }
         static IEnumerable<StockInfo> getStockData(DateTime date) {
-            string[] dwPath = { "mujinzo", "zips", date.ToString("yyMMdd") };
-            string[] acPath = { "mujinzo", "acv" , date.ToString("yyMMdd") };
+            var ds = date.ToString("yyMMdd");
+            string[] dwPath = { "mujinzo", "zips", ds + ".zip" };
+            string[] acPath = { "mujinzo", "acv" , ds + ".csv" };
 
             var fi = CacheManager.GetFileInfo(dwPath);
             if (!isDownloadable(fi))
@@ -89,8 +116,15 @@ namespace PortFolion.Web {
             var rwv = _download(date, fi);
             if (!rwv.Result)
                 return Enumerable.Empty<StockInfo>();
+            rwv.Value.Refresh();
 
-            throw new NotImplementedException();
+            rwv = _unZipper(CacheManager.GetFileInfo(acPath).FullName, rwv.Value);
+            if (!rwv.Result)
+                return Enumerable.Empty<StockInfo>();
+            rwv.Value.Refresh();
+
+            var r = _toArray(rwv.Value);
+            return r;
         }
         static WebClient wc = new WebClient() { Encoding = Encoding.Default };
         static ResultWithValue<FileInfo> _download(DateTime dt,FileInfo dwnFi) {
@@ -106,16 +140,36 @@ namespace PortFolion.Web {
                 return new ResultWithValue<FileInfo>();
             }
         }
-        static ResultWithValue<FileInfo> _zipper(string acvPath, FileInfo dwnFi) {
+        static ResultWithValue<FileInfo> _unZipper(string acvPath, FileInfo dwnFi) {
+            if (dwnFi == null)
+                return new ResultWithValue<FileInfo>();
             using (ZipArchive zar = ZipFile.OpenRead(dwnFi.FullName)) {
                 var tgt = zar.Entries
-                    .Where(e => e.FullName.EndsWith("csv", StringComparison.OrdinalIgnoreCase));
-                foreach (var zae in tgt) {
-                    //書き出し
-
-                }
+                    .Where(e => e.FullName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
+                if (!tgt.Any())
+                    return new ResultWithValue<FileInfo>();
+                var za = tgt.First();
+                za.ExtractToFile(acvPath);
+                return new ResultWithValue<FileInfo>(new FileInfo(acvPath));
             }
-            throw new NotImplementedException();
         }
+        static IEnumerable<StockInfo> _toArray(FileInfo fi) {
+            //try {
+                using (StreamReader str = new StreamReader(fi.FullName))
+                using (var csv = new CsvReader(str)) {
+                    //csv.Configuration.HasHeaderRecord = false;
+                //csv.Configuration.IgnoreReadingExceptions = true;
+
+                csv.Configuration.RegisterClassMap<MjzMap>();
+                    //csv.Configuration.WillThrowOnMissingField = false;
+                    var c = csv.GetRecords<StockInfo>().ToArray();
+                    return c;
+                }
+            //} catch {
+            //    fi.Delete();
+            //    return Enumerable.Empty<StockInfo>();
+            //}
+        }
+        
     }
 }
