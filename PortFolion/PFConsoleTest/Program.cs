@@ -23,10 +23,10 @@ namespace PFConsoleTest {
 
 			//Console.WriteLine(rr.Name);
 
-			var d = PortFolion.Web.KdbDataClient.AcqireStockInfo(DateTime.Today.AddDays(-1));
-			foreach (var dd in d) {
-				Console.WriteLine(dd.Symbol);
-			}
+			//var d = PortFolion.Web.KdbDataClient.AcqireStockInfo(DateTime.Today.AddDays(-1));
+			//foreach (var dd in d) {
+			//	Console.WriteLine(dd.Symbol);
+			//}
 			Console.ReadLine();
 		}
 	}

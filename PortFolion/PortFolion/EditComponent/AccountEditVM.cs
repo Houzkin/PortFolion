@@ -246,14 +246,14 @@ namespace PortFolion.ViewModels {
 		public async Task<IEnumerable<string>> ApplyPerPrice() {
 			var pfs = Elements.OfType<StockEditVM>();
 			if (!pfs.Any()) return Enumerable.Empty<string>();
-			//var ary = Web.KdbDataClient.AcqireStockInfo(this.CurrentDate).ToArray();
 			var dic = new List<Tuple<string, string>>();
 			
 			StockInfo[] ary; 
 			try {
-				ary = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(this.CurrentDate).ToArray());
+                //ary = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(this.CurrentDate).ToArray());
+                ary = await Task.Run(() => Web.TickerTable.Create(this.CurrentDate).ToArray());
 			} catch {
-				return new string[] { "通信状態を確認して再度実行してください。" };
+				return new string[] { "ダウンロードできませんでした。" };
 			}
 			foreach(var p in pfs) {
 				var sym = ary.Where(a => a.Symbol == p.Code).OrderBy(a => a.Turnover).LastOrDefault();
@@ -453,9 +453,10 @@ namespace PortFolion.ViewModels {
 			//this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
-				siis = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+                //siis = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+                siis = await Task.Run(() => Web.TickerTable.Create(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
 			} catch {
-				return "通信状態を確認して再度実行してください。";
+				return "ダウンロードできませんでした。";
 			} finally { }
 
 			StockInfo si = null;

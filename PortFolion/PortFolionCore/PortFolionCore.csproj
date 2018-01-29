@@ -67,7 +67,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\TreeStructure\RootCollection.cs" />
     <Compile Include="Data\TreeStructure\TagInfo.cs" />
-    <Compile Include="Web\DownloadSource.cs" />
+    <Compile Include="Web\TickerTable.cs" />
     <Compile Include="Web\Kdb.cs" />
   </ItemGroup>
   <ItemGroup>
