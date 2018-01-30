@@ -26,11 +26,11 @@ namespace PortFolion.Web {
     
     public class TickerTable : IEnumerable<StockInfo> {
         #region map
-        
+        /// <summary>マップ</summary>
         class MjzMap : ClassMap<StockInfo> {
             public MjzMap() {
                 Map(m => m.Symbol).Index(1).Default("0000");
-                Map(m => m.Name).Index(3).TypeConverter<TickerConverter>().Default("");
+                Map(m => m.Name).Index(3).TypeConverter<TickerConverter>().Default("unknown");
                 Map(m => m.Open).Index(4).Default(0);
                 Map(m => m.High).Index(5).Default(0);
                 Map(m => m.Low).Index(6).Default(0);
@@ -39,17 +39,7 @@ namespace PortFolion.Web {
                 Map(m => m.Market).Index(9).Default("");
             }
         }
-        class SymbolConverter : DefaultTypeConverter {
-            public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData) {
-                var s = text.Split(' ').FirstOrDefault();
-                int i;
-                if(int.TryParse(s,out i)) {
-                    return i.ToString();
-                } else {
-                    return "0000";
-                }
-            }
-        }
+        
         /// <summary>
         /// 取得したテキストから銘柄名を抽出します。
         /// </summary>
@@ -59,7 +49,7 @@ namespace PortFolion.Web {
                 if (s.Any())
                     return s.First();
                 else
-                    return "";
+                    return "unknown";
             }
         }
         #endregion
@@ -160,7 +150,8 @@ namespace PortFolion.Web {
             if (!fi.Exists)
                 return Enumerable.Empty<StockInfo>();
             try {
-                using (StreamReader str = new StreamReader(fi.FullName))
+                var ecd = Encoding.GetEncoding("shift_jis");
+                using (StreamReader str = new StreamReader(fi.FullName,ecd))
                 using (var csv = new CsvReader(str)) {
                     csv.Configuration.HasHeaderRecord = false;
                     csv.Configuration.RegisterClassMap<MjzMap>();

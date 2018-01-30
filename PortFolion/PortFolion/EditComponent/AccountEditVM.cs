@@ -17,6 +17,7 @@ using System.Collections.Specialized;
 using Livet.Messaging;
 using System.Data;
 using ExpressionEvaluator;
+using System.Text.RegularExpressions;
 
 namespace PortFolion.ViewModels {
 	public static class ExpParse {
@@ -26,7 +27,8 @@ namespace PortFolion.ViewModels {
 				o => o,
 				x => {
 					try {
-						var expression = new CompiledExpression<double>(exp);
+                        exp = Regex.Matches(exp, "[0-9]+|[^0-9]+").OfType<Match>().Aggregate("", (a, b) => a + " " + b.Value);
+                        var expression = new CompiledExpression<double>(exp);
 						var result = expression.Eval();
 						return result;
 					} catch {

@@ -12,7 +12,7 @@
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                  x:Name="editWindow"
-                 mc:Ignorable="d" SaveWindowPosition="False"
+                 mc:Ignorable="d" SaveWindowPosition="True"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
                  TitleCaps="False"
                  Icon="/Portfolion;component/PortFolion.ico"
