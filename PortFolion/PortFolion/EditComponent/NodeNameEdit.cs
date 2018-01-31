@@ -17,7 +17,6 @@ namespace PortFolion.ViewModels {
 			: base(account.Model, model) {
 			acc = account;
 		}
-		//public FromAccountEditerNameEditVM(AccountEditVM account, CommonNode model) :base(account.Mo)
 		public override InteractionMessenger Messenger => acc.Messenger;
 		protected override string NameValidate(string newName) {
 			newName = newName.Trim();
@@ -95,19 +94,6 @@ namespace PortFolion.ViewModels {
 					else
 						return since.ToString("yyyy/MM/dd") + " から " + until.ToString("yyyy/MM/dd") + " の期間において名前が重複するため変更できません";
 				}
-				//var his = RootCollection.GetNodeLine(Parent.Path);
-				//Func<KeyValuePair<DateTime, CommonNode>, bool> fun =
-				//	a => a.Value.Children
-				//		.Where(b => b.Name != Model.Name)//名前の変更がない場合のエラー回避
-				//		.Any(c => !c.CanChangeName(newName));//.Any(c => c.Name == newName);
-				//if (his.Any(fun)) {
-				//	DateTime since = his.First(fun).Key;
-				//	DateTime until = his.Last(fun).Key;
-				//	if (since == until)
-				//		return since.ToString("yyyy/MM/dd") + " において名前が重複するため変更できません";
-				//	else
-				//		return since.ToString("yyyy/MM/dd") + " から " + until.ToString("yyyy/MM/dd") + " の期間において名前が重複するため変更できません";
-				//}
 			}
 			return null;
 		}
@@ -144,19 +130,6 @@ namespace PortFolion.ViewModels {
 					return;
 				}
 			}
-			//var his = RootCollection.GetNodeLine(Parent.Path).Values;
-			//if(his.Any(a=>a.Children.Any(b=>b.Name == name))) {
-			//	string msg = "[" + name + "] は別の時系列に既に存在します。\n["
-			//		+Model.Name+ "] は変更後、既存の ["+name+"] と同一のものとして扱われます。";
-			//	var r = MessageBox.Show(msg, "caption", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-			//	if (r == MessageBoxResult.Cancel) return;
-			//}
-
-			//foreach(var n in RootCollection.GetNodeLine(s).Values) {
-			//	n.Name = name;
-			//	var d = n.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
-			//	if (d != null) EdittingList.Add((DateTime)d);
-			//}
 			var d = RootCollection.ChangeNodeName(s, name);
 			foreach (var dd in d) EdittingList.Add(dd);
 			Messenger.Raise(new InteractionMessage("EditEndNodeName"));

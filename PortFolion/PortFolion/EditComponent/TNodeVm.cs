@@ -331,13 +331,7 @@ namespace PortFolion.ViewModels {
 	public class FinancialBasketVM : CommonNodeVM {
 		public FinancialBasketVM(CommonNode model) : base(model) {
 			var sp = new ViewModelCommand(() => DisplayHistory());
-			//var uri = new Uri("PortFolion;component/Resources/Icons.xaml", UriKind.Relative);
-			//StreamResourceInfo info = Application.GetResourceStream(uri);
-			//var  reader = new System.Windows.Markup.XamlReader();
-			//var dictionary = reader.LoadAsync(info.Stream) as ResourceDictionary;
-			//var element = dictionary["appbar_add"] as BitmapImage ;
-			//var img = new Image();
-			//img.Source = element;Icon = img 
+			
 			MenuList.Add(new MenuItemVm(sp) { Header = "履歴を表示",
 		});
 
