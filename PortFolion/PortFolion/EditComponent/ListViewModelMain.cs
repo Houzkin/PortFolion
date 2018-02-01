@@ -33,6 +33,7 @@ namespace PortFolion.ViewModels {
 				(s, e) => this.CurrentDate = e.SelectedDateTime);
 			this.CompositeDisposable.Add(d);
 		}
+        /// <summary>現在の日付</summary>
 		public DateTime? CurrentDate {
 			get { return controler.CurrentDate; }
 			set { controler.CurrentDate = value; }
@@ -57,11 +58,12 @@ namespace PortFolion.ViewModels {
 				App.DoEvent();
 			}
 		}
+        /// <summary>ロケーションツリーのルートを示す。</summary>
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 		void SetRoot(TotalRiskFundNode root) {
 			if (Root.Any(a => a.Model == root)) return;
 			Root.ForEach(r => {
-				r.ReCalcurated -= RefreshHistory;
+				r.ReCalcurated -= refreshHistory;
 				r.SetPath -= setPath;
 			});
 
@@ -73,7 +75,7 @@ namespace PortFolion.ViewModels {
 			Root.Clear();
 			if (root != null) {
 				var rt = CommonNodeVM.Create(root);
-				rt.ReCalcurated += RefreshHistory;
+				rt.ReCalcurated += refreshHistory;
 				rt.SetPath += setPath;
 				if (rt.CurrentDate != null) {
 					IsTreeLoading = true;
@@ -87,19 +89,25 @@ namespace PortFolion.ViewModels {
 			}
 
 		}
-
+        /// <summary>現在の日付</summary>
 		public IEnumerable<string> Path {
 			get { return controler.Path; }
 			set { controler.Path = value; }
 		}
 		void setPath(IEnumerable<string> path) => this.Path = path;
+        /// <summary>履歴データを更新する。</summary>
+        /// <param name="path">履歴データのパス</param>
 		public void RefreshHistory(IEnumerable<string> path) {
 			IsHistoryLoading = true;
 			_history =  CommonNodeVM.ReCalcHistory(path);
 			IsHistoryLoading = false;
 			this.RaisePropertyChanged(nameof(History));
 		}
-		public void RefreshHistory(CommonNodeVM src) {
+        /// <summary>
+        /// イベントハンドラ登録用の履歴データ更新メソッド。
+        /// 現在のロケーションツリーを再計算した後、履歴を更新する。
+        /// </summary>
+		void refreshHistory(CommonNodeVM src) {
 			IsTreeLoading = true;
 			if (this.CurrentDate != null) {
 				CommonNodeVM.ReCalcurate(src);
@@ -114,7 +122,7 @@ namespace PortFolion.ViewModels {
 		public IEnumerable<VmCoreBase> History
 			=> _history;
 
-		#region date
+		#region 現在の日付が変更された時の挙動
 		string _selectedDateText = DateTime.Today.ToShortDateString();
 		public string SelectedDateText {
 			get { return _selectedDateText; }
@@ -146,7 +154,7 @@ namespace PortFolion.ViewModels {
 
 		#endregion
 
-		#region tree menu
+		#region ロケーションツリーに対する操作
 		public async void ApplyCurrentPerPrice() {
 			IsTreeLoading = true;
 			var acs = this.Root.FirstOrDefault()?
@@ -214,6 +222,7 @@ namespace PortFolion.ViewModels {
 		#endregion
 
 		#region Controler as inner class
+        /// <summary>ListViewModelを操作するためのインナークラス</summary>
 		private class VmControler : NotificationObject {
 			ListviewModel lvm;
 			public VmControler(ListviewModel vm) {

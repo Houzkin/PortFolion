@@ -61,9 +61,6 @@ namespace PortFolion.Core {
 		public void RemoveTag() {
 			RootCollection.RemoveNodeTag(Path);
 		}
-		/// <summary>投資対象となるかどうか</summary>
-		//public virtual bool IsInvestmentTarget { get { return true; } }
-
 		long _investmentValue;
 		/// <summary>投資</summary>
 		public virtual void SetInvestmentValue(long value) {
@@ -188,6 +185,7 @@ namespace PortFolion.Core {
 		}
 		public AccountClass Account { get; private set; }
 		int levarage = 1;
+        /// <summary>口座に掛かるレバレッジ</summary>
 		public int Levarage {
 			get { return levarage; }
 			set {
