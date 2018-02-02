@@ -249,6 +249,7 @@ namespace PortFolion.ViewModels {
 		}
 		#endregion
 
+        /// <summary>推移グラフの描画に対して操作するためのクラス</summary>
 		class gvMng {
 			GraphTabViewModel gtvm;
 			IEnumerable<string> _curPath = Enumerable.Empty<string>();
@@ -282,6 +283,7 @@ namespace PortFolion.ViewModels {
 				private set { _graphData = value; }
 			}
 		}
+        /// <summary>内訳チャート部分を操作するクラス</summary>
 		class bdMng {
 			IEnumerable<string> _curPath = Enumerable.Empty<string>();
 			Period _period;
@@ -309,6 +311,7 @@ namespace PortFolion.ViewModels {
 			public object GraphData { get; set; }
 		}
 	}
+    /// <summary>内訳チャートのVM</summary>
 	public class BrakeDownChart : SeriesCollection {
 		
 		int _targetLv;
@@ -423,6 +426,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		double min;
+        /// <summary>表示最下端</summary>
 		public double DisplayMinValue {
 			get { return min; }
 			set {
@@ -457,6 +461,7 @@ namespace PortFolion.ViewModels {
 		public event EventHandler Disposed;
 
 		ViewModelCommand _upcmd;
+        /// <summary>グラフの位置を下へ移動</summary>
 		public ViewModelCommand IndexUpCommand {
 			get {
 				if(_upcmd == null) {
@@ -471,6 +476,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		ViewModelCommand _downcmd;
+        /// <summary>グラフの位置を上へ移動</summary>
 		public ViewModelCommand IndexDownCommand {
 			get {
 				if(_downcmd == null) {
@@ -485,8 +491,10 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		#region menu
+        /// <summary>表示方法に対してメニューを持つかどうかを示す値。</summary>
 		public virtual bool VisibilityMenu => false;
 		bool _isMenuOpen;
+        /// <summary>メニューの開閉</summary>
 		public bool IsMenuOpen {
 			get { return _isMenuOpen; }
 			set {
@@ -495,8 +503,8 @@ namespace PortFolion.ViewModels {
 				this.RaisePropertyChanged();
 			}
 		}
-
 		bool _isLogChart;
+        /// <summary>対数表示かどうかを示す値を返す。</summary>
 		public bool IsLogChart {
 			get { return _isLogChart; }
 			set {
@@ -513,8 +521,13 @@ namespace PortFolion.ViewModels {
 		}
 		#endregion
 	}
-
+    /// <summary>
+    /// 推移＋内訳(未完成
+    /// </summary>
 	public class RateTransition : GraphVmBase {
+        /*
+         * 指数ベース、残高ベース、百分率のパターン(案
+         * */
 		CommonNode _curNode;
 		Period _period;
 		DividePattern _divide;
@@ -554,7 +567,7 @@ namespace PortFolion.ViewModels {
 			//Legends = null;
 		}
 	}
-
+    /// <summary>推移を示すグラフのベースクラス</summary>
 	public abstract class PathPeriodGraph : GraphVmBase {
 		IEnumerable<string> _curPath;
 		Period _period;
@@ -609,6 +622,7 @@ namespace PortFolion.ViewModels {
 		}
 	}
 
+    /// <summary>残高推移を担うVM</summary>
 	public class BalanceSeries : PathPeriodGraph {
 		public BalanceSeries(GraphTabViewModel viewModel, Func<GraphTabViewModel, IEnumerable<object>> getSrc) : base(viewModel, getSrc) {
 		}
@@ -682,7 +696,7 @@ namespace PortFolion.ViewModels {
 			}
 		}
 	}
-
+    /// <summary>指数推移を担うVM</summary>
 	public class IndexGraphVm : PathPeriodGraph {
 		
 		public IndexGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc)
@@ -706,6 +720,7 @@ namespace PortFolion.ViewModels {
 		}
 		protected override Func<double, string> NormalYFormatter => y => y.ToString("#,0.##");
 	}
+    /// <summary>ボラティリティ推移を担うVM</summary>
 	public class VolatilityGraphVm : PathPeriodGraph {
 		public VolatilityGraphVm(GraphTabViewModel viewModel,Func<GraphTabViewModel,IEnumerable<object>> getSrc)
 			: base(viewModel,getSrc) { }

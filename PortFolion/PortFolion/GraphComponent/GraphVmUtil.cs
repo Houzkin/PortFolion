@@ -336,9 +336,9 @@ namespace PortFolion.ViewModels {
 			var c = pieColors.Repeat().Take(length).ToList();
 			if(length % pieColors.Count == 1 && 1 < length) {
 				c.RemoveAt(length - 1);
-				c.Add(pieColors[2]);
+				c.Add(pieColors[3]);
 			}
-			return pieColors;
+            return c;
 		}
 		static List<Color> colors;
 		public static List<Color> BrushColors() {

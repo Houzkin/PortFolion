@@ -160,16 +160,6 @@
                                     </ComboBox>
                                 </StackPanel>
                             </StackPanel>
-                            <!--<ToggleButton DockPanel.Dock="Bottom" IsChecked="{Binding IsMenuOpen,Mode=TwoWay}" 
-                                          HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
-                                <ToggleButton.Template>
-                                    <ControlTemplate>
-                                        <Border BorderThickness="1" CornerRadius="3" BorderBrush="{StaticResource {x:Static SystemColors.ControlDarkBrushKey}}">
-                                            <TextBlock Text="閉じる" VerticalAlignment="Center" Margin="5,0"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </ToggleButton.Template>
-                            </ToggleButton>-->
                         </DockPanel>
                     </mah:SplitView.Pane>
                     <StackPanel Orientation="Vertical">
