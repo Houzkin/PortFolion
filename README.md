@@ -1,7 +1,7 @@
 # PortFolion
 ポートフォリオの推移を記録・可視化するためのアプリケーションです。
 ## Discription
-中・長期投資を前提としています。株式・投信には対応していますが、信用取引・FXには対応していません。株価情報は[k-db.com](http://k-db.com)さんから拝借しています。
+中・長期投資を前提としています。株式・投信には対応していますが、信用取引・FXには対応していません。株価情報は[無尽蔵](http://mujinzou.com/)さんから拝借しています。
 ## Demo
 ![Graph](https://github.com/Houzkin/PortFolion/blob/images/demo03.gif)  
 ![Graph](https://github.com/Houzkin/PortFolion/blob/images/demo02.gif)
