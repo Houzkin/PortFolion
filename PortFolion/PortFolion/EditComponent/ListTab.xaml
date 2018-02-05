@@ -347,6 +347,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    <GridViewColumn Header="タグ" Width="auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Tag}" HorizontalAlignment="Left"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
         </Grid>
@@ -391,7 +398,6 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    
                     <DataGridTextColumn Header="単価" Binding="{Binding PerPrice,StringFormat={}{0:N0}}" 
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Header="平均取得単価" Binding="{Binding PerBuyPriceAverage,StringFormat={}{0:N0}}" 
@@ -422,8 +428,9 @@
                     <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount,StringFormat={}{0:N0}}" CanUserReorder="True"
                                         CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False">
-                    </DataGridTextColumn>
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
+                    <DataGridTextColumn Header="タグ" Binding="{Binding Tag}"
+                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

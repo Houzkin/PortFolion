@@ -20,6 +20,9 @@ using System.Windows.Controls;
 using System.Windows.Resources;
 
 namespace PortFolion.ViewModels {
+    /// <summary>
+    /// 履歴表示時にVMとして振る舞うオブジェクト
+    /// </summary>
 	public class VmCoreBase : BindableObject {
 		protected VmCoreBase() : base(new object()) { }
 		public VmCoreBase(CommonNode node) : base(node) { }
@@ -59,6 +62,9 @@ namespace PortFolion.ViewModels {
 		#endregion
 
 	}
+    /// <summary>
+    /// 履歴表示時にブローカーまたはアカウントのVM
+    /// </summary>
 	public class VmCoreBasket : VmCoreBase {
 		protected VmCoreBasket() { }
 		public VmCoreBasket(CommonNode node) : base(node) { }
@@ -136,7 +142,9 @@ namespace PortFolion.ViewModels {
 		}
 		#endregion
 	}
-
+    /// <summary>
+    /// ツリー表示用のVMとして振る舞う
+    /// </summary>
 	public class CommonNodeVM : ReadOnlyBindableTreeNode<CommonNode, CommonNodeVM> {
 		#region static method
 		public static CommonNodeVM Create(CommonNode node) {
@@ -150,6 +158,11 @@ namespace PortFolion.ViewModels {
 				return new FinancialBasketVM(node);
 			}
 		}
+        /// <summary>
+        /// 履歴を再計算し、結果を表示用インスタンスとして返す。
+        /// </summary>
+        /// <param name="path">再計算するパス</param>
+        /// <returns>表示用インスタンス</returns>
 		public static IEnumerable<VmCoreBase> ReCalcHistory(IEnumerable<string> path) {
 			var ps = RootCollection.GetNodeLine(path).Values;
 			var ps1 = ps.Select(a=>CommonNodeVM.Create(a));
@@ -227,7 +240,6 @@ namespace PortFolion.ViewModels {
 				}
 		}
 		static IEnumerable<Dictionary<NodePath<string>,CommonNodeVM>> _com1(IEnumerable<CommonNodeVM> nodes) {
-			
 			var nd = nodes
 				.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
 				.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(), 
@@ -324,10 +336,12 @@ namespace PortFolion.ViewModels {
 			set { CoreData.InvestmentReturnTotal = value; }
 		}
 	}
+    /// <summary>キャッシュポジション</summary>
 	public class FinancialValueVM : CommonNodeVM {
 		public FinancialValueVM(CommonNode model) : base(model) {
 		}
 	}
+    /// <summary>非ポジション</summary>
 	public class FinancialBasketVM : CommonNodeVM {
 		public FinancialBasketVM(CommonNode model) : base(model) {
 			var sp = new ViewModelCommand(() => DisplayHistory());
@@ -427,6 +441,7 @@ namespace PortFolion.ViewModels {
 			set { CoreData.UnrealizedPLRatio = value; }
 		}
 	}
+    /// <summary>金融商品</summary>
 	public class FinancialProductVM : FinancialBasketVM {
 		public FinancialProductVM(CommonNode model) : base(model) {
 		}
