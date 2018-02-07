@@ -9,8 +9,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace PortFolion.ViewModels {
+    //public interface IHistoryEditer {
+    //    HashSet<DateTime> EdittingList { get; }
+    //    ICommand CancelCmd { get; }
+    //    ICommand ExecuteCmd { get; }
+    //}
 	public class FromAccountEditerNameEditVM : NodeNameEditerVM {
 		AccountEditVM acc;
 		public FromAccountEditerNameEditVM(AccountEditVM account, CommonNode model)

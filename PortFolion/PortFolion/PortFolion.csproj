@@ -133,6 +133,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EditComponent\NodeTagEdit.cs" />
+    <Compile Include="EditComponent\NodeTagEditWindow.xaml.cs">
+      <DependentUpon>NodeTagEditWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EditComponent\TNodeVm.cs" />
     <Compile Include="ViewModels\DateTree.cs" />
     <Compile Include="EditComponent\ListViewModelMain.cs" />
@@ -173,6 +177,10 @@
     <Compile Include="Views\Selector\GraphSelector.cs" />
     <Compile Include="Views\Selector\Selectors.cs" />
     <Page Include="EditComponent\AccountEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditComponent\NodeTagEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

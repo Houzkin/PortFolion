@@ -401,6 +401,15 @@ namespace PortFolion.ViewModels {
 				}
 			}, () => model.Parent != null);
 			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
+
+            var vmt = new ViewModelCommand(() => {
+                var vm = new NodeTagEditerVM(model);
+                var w = new Views.NodeTagEditWindow();
+                w.DataContext = vm;
+                if(w.ShowDialog()==true) { }
+                //書きかけ
+            });
+            MenuList.Add(new MenuItemVm(vmt) { Header = "タグを変更" });
 			
 			if(ty == NodeType.Broker || ty == NodeType.Account) {
 				var vc = new ViewModelCommand(() => {
