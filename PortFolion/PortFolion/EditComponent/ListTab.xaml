@@ -350,7 +350,7 @@
                     <GridViewColumn Header="タグ" Width="auto">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Tag}" HorizontalAlignment="Left"/>
+                                <TextBlock Text="{Binding Tag.TagName}" HorizontalAlignment="Left"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -429,7 +429,7 @@
                                         CanUserResize="True" CanUserSort="False"/>
                     <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="タグ" Binding="{Binding Tag}"
+                    <DataGridTextColumn Header="タグ" Binding="{Binding Tag.TagName}"
                                         CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
                 </DataGrid.Columns>
             </DataGrid>

@@ -406,8 +406,9 @@ namespace PortFolion.ViewModels {
                 var vm = new NodeTagEditerVM(model);
                 var w = new Views.NodeTagEditWindow();
                 w.DataContext = vm;
-                if(w.ShowDialog()==true) { }
-                //書きかけ
+                if(w.ShowDialog()==true && vm.EdittingList.Any()) {
+                    HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
+                }
             });
             MenuList.Add(new MenuItemVm(vmt) { Header = "タグを変更" });
 			

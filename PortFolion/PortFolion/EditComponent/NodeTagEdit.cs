@@ -26,6 +26,7 @@ namespace PortFolion.ViewModels {
         public InteractionMessenger Messenger
             => _messenger = _messenger ?? new InteractionMessenger();
 
+        public string Title => "タグの変更";
         /// <summary>変更前のタグ</summary>
         public string PresentTag { get; }
         string _tag;
@@ -43,23 +44,37 @@ namespace PortFolion.ViewModels {
             get { return _editOption; }
             set { SetProperty(ref _editOption, value); }
         }
+        public IEnumerable<string> TagCollection
+            => ReadOnlyBindableCollection.Create(TagInfo.GetList(), m => m.TagName);
 
         #region Commnad
         void _execute() {
+            var tg = _tag?.Trim() ?? "";
             //edittinglistを編集
             switch (EditOption) {
             case EditHistoryParam.CurrentOnly:
-                this.Model.Tag.EditTagName(_tag.Trim());
+                this.Model.Tag.EditTagName(tg);
+                EdittingList.Add((this.Model.Root() as TotalRiskFundNode).CurrentDate);
                 break;
             case EditHistoryParam.AllHistory:
                 var dic = RootCollection.GetNodeLine(this.Model.Path);
+                foreach(var d in dic) {
+                    d.Value.Tag.EditTagName(tg);
+                    EdittingList.Add(d.Key);
+                }
                 break;
             case EditHistoryParam.Position:
+                var dd = RootCollection.GetNodeLine(this.Model.Path, (this.Model.Root() as TotalRiskFundNode).CurrentDate);
+                foreach (var d in dd) {
+                    d.Value.Tag.EditTagName(tg);
+                    EdittingList.Add(d.Key);
+                }
                 break;
             }
+            Messenger.Raise(new InteractionMessage("EditEndNodeTag"));
         }
         bool _canexecute() {
-            var tg = _tag.Trim();
+            var tg = _tag?.Trim();
             if (tg == PresentTag || string.IsNullOrEmpty(tg) || string.IsNullOrWhiteSpace(tg))
                 return false;
             return true;
@@ -69,7 +84,8 @@ namespace PortFolion.ViewModels {
             => execute = execute ?? new ViewModelCommand(_execute, _canexecute);
         ViewModelCommand cancel;
         public ViewModelCommand CancelCmd
-            => cancel = cancel ?? new ViewModelCommand(() => { });
+            => cancel = cancel ?? new ViewModelCommand(
+                () => Messenger.Raise(new InteractionMessage("EditEndNodeTag")));
         #endregion
 
         HashSet<DateTime> _edit;

@@ -157,6 +157,7 @@
       <DependentUpon>PieChartCustomLegend.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Converter\PathToStringConverter.cs" />
+    <Compile Include="Views\Converter\BoolToEnumConverter.cs" />
     <Compile Include="Views\Converter\TransableComment.cs" />
     <Compile Include="Views\Converter\TryStringToNumberConverter.cs" />
     <Compile Include="GraphComponent\GraphTab.xaml.cs">

@@ -46,7 +46,7 @@
             <TextBox x:Name="editText" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,3"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
                 <Button Content="キャンセル" Command="{Binding CancelCmd}" Margin="3,0"/>
-                <Button Content="OK" Command="{Binding ExecuteCmd}" Margin="3,0"/>
+                <Button Content="  OK  " Command="{Binding ExecuteCmd}" Margin="3,0"/>
             </StackPanel>
         </StackPanel>
     </Grid>

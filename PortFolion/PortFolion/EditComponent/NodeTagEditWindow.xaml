@@ -10,11 +10,49 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:converter="clr-namespace:PortFolion.Views.Converter"
                  mc:Ignorable="d" SaveWindowPosition="true"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" 
                  FocusManager.FocusedElement="{Binding ElementName=editText}"
-                 Title="{Binding Title}" Height="180" Width="400" ResizeMode="NoResize">
+                 Title="{Binding Title}" Height="280" Width="400" ResizeMode="NoResize">
+    <i:Interaction.Triggers>
+        <!--Windowが閉じたタイミングでViewModelのDisposeメソッドを呼び出す-->
+        <i:EventTrigger EventName="Closed">
+            <l:DataContextDisposeAction/>
+        </i:EventTrigger>
+
+        <l:InteractionMessageTrigger MessageKey="EditEndNodeTag">
+            <ei:ChangePropertyAction TargetName="nameEditWindow" PropertyName="DialogResult" Value="true"/>
+        </l:InteractionMessageTrigger>
+    </i:Interaction.Triggers>
     <Grid>
-        
+        <StackPanel Orientation="Vertical" Margin="5">
+            <TextBlock Text="タグを変更します" FontSize="20" Margin="0,3"/>
+            <TextBlock Text="{Binding PresentTag, StringFormat=変更前 : {0}}" Margin="0,3"/>
+            <ComboBox x:Name="editText" SelectedValue="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                      IsEditable="True" TextSearch.TextPath="TagName"
+                      ItemsSource="{Binding TagCollection}" 
+                      DisplayMemberPath="{Binding TagName}"/>
+            <GroupBox Header="適用範囲">
+                <GroupBox.Resources>
+                    <converter:BoolToEnumConverter x:Key="BtoE"/>
+                </GroupBox.Resources>
+                <StackPanel Orientation="Vertical">
+                    <RadioButton Content="現在の項目のみ" Margin="3"
+                                 IsChecked="{Binding EditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
+                                 ConverterParameter=CurrentOnly}"/>
+                    <RadioButton Content="現在のポジションから連続する項目" Margin="3"
+                                 IsChecked="{Binding EditOption,Converter={StaticResource BtoE},Mode=TwoWay,
+                                 ConverterParameter=Position}"/>
+                    <RadioButton Content="全ての時系列" Margin="3"
+                                 IsChecked="{Binding EditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
+                                 ConverterParameter=AllHistory}"/>
+                </StackPanel>
+            </GroupBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
+                <Button Content="キャンセル" Command="{Binding CancelCmd}" Margin="3,0"/>
+                <Button Content="  OK  " Command="{Binding ExecuteCmd}" Margin="3,0"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </mah:MetroWindow>
