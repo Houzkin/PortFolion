@@ -21,18 +21,19 @@
             <l:DataContextDisposeAction/>
         </i:EventTrigger>
 
-        <l:InteractionMessageTrigger MessageKey="EditEndNodeTag">
-            <ei:ChangePropertyAction TargetName="nameEditWindow" PropertyName="DialogResult" Value="true"/>
+        <l:InteractionMessageTrigger MessageKey="EditEndNodeTag" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="tagEditWindow" PropertyName="DialogResult" Value="true"/>
         </l:InteractionMessageTrigger>
     </i:Interaction.Triggers>
     <Grid>
         <StackPanel Orientation="Vertical" Margin="5">
             <TextBlock Text="タグを変更します" FontSize="20" Margin="0,3"/>
             <TextBlock Text="{Binding PresentTag, StringFormat=変更前 : {0}}" Margin="0,3"/>
-            <ComboBox x:Name="editText" SelectedValue="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
-                      IsEditable="True" TextSearch.TextPath="TagName"
-                      ItemsSource="{Binding TagCollection}" 
-                      DisplayMemberPath="{Binding TagName}"/>
+            <ComboBox x:Name="editText" ItemsSource="{Binding TagCollection}"
+                      SelectedItem="{Binding TagInfo}"
+                      SelectedValuePath="TagName"
+                      SelectedValue="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                      IsEditable="True"/>
             <GroupBox Header="適用範囲">
                 <GroupBox.Resources>
                     <converter:BoolToEnumConverter x:Key="BtoE"/>

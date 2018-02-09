@@ -5,6 +5,7 @@ using Livet.Messaging;
 using PortFolion.Core;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,11 +45,13 @@ namespace PortFolion.ViewModels {
             get { return _editOption; }
             set { SetProperty(ref _editOption, value); }
         }
-        public IEnumerable<string> TagCollection
-            => ReadOnlyBindableCollection.Create(TagInfo.GetList(), m => m.TagName);
+        public IEnumerable<TagInfo> TagCollection { get; } = TagInfo.GetList();
+            //=> ReadOnlyBindableCollection.Create(TagInfo.GetList(), m => m.TagName);
 
         #region Commnad
         void _execute() {
+            if (!_canexecute())
+                return;
             var tg = _tag?.Trim() ?? "";
             //edittinglistを編集
             switch (EditOption) {
