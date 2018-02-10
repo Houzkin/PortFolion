@@ -14,7 +14,7 @@
                  mc:Ignorable="d" SaveWindowPosition="true"
                  GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" 
                  FocusManager.FocusedElement="{Binding ElementName=editText}"
-                 Title="{Binding Title}" Height="280" Width="400" ResizeMode="NoResize">
+                 Title="{Binding Title}" Height="290" Width="400" ResizeMode="NoResize">
     <i:Interaction.Triggers>
         <!--Windowが閉じたタイミングでViewModelのDisposeメソッドを呼び出す-->
         <i:EventTrigger EventName="Closed">
@@ -29,11 +29,18 @@
         <StackPanel Orientation="Vertical" Margin="5">
             <TextBlock Text="タグを変更します" FontSize="20" Margin="0,3"/>
             <TextBlock Text="{Binding PresentTag, StringFormat=変更前 : {0}}" Margin="0,3"/>
-            <ComboBox x:Name="editText" ItemsSource="{Binding TagCollection}"
-                      SelectedItem="{Binding TagInfo}"
+            <!-- ComboBox x:Name="editText" ItemsSource="{Binding TagCollection}"
                       SelectedValuePath="TagName"
                       SelectedValue="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
-                      IsEditable="True"/>
+                      IsEditable="True" IsReadOnly="False"-->
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="5,0"/>
+                <mah:DropDownButton Grid.Column="1" Content="タグを選択" Margin="5,0"/>
+            </Grid>
             <GroupBox Header="適用範囲">
                 <GroupBox.Resources>
                     <converter:BoolToEnumConverter x:Key="BtoE"/>

@@ -22,6 +22,14 @@ namespace PortFolion.ViewModels {
         public NodeTagEditerVM(CommonNode model) : base(model) {
             this.PresentTag = model.Tag.TagName;
             this._tag = model.Tag.TagName;
+
+            this.TagCollection = ReadOnlyBindableCollection.Create(
+                TagInfo.GetList(), 
+                ti => {
+                    var mi = new MenuItemVm(() => this.Tag = ti.TagName, () => this.Tag != ti.TagName);
+                    mi.Header = ti.TagName;
+                    return mi;
+                });
         }
         InteractionMessenger _messenger;
         public InteractionMessenger Messenger
@@ -35,7 +43,7 @@ namespace PortFolion.ViewModels {
         public string Tag {
             get { return _tag; }
             set {
-                SetProperty(ref _tag, value);
+               SetProperty(ref _tag, value);
                 this.ExecuteCmd.RaiseCanExecuteChanged();
             }
         }
@@ -45,31 +53,31 @@ namespace PortFolion.ViewModels {
             get { return _editOption; }
             set { SetProperty(ref _editOption, value); }
         }
-        public IEnumerable<TagInfo> TagCollection { get; } = TagInfo.GetList();
+        public IEnumerable<MenuItemVm> TagCollection { get; }
             //=> ReadOnlyBindableCollection.Create(TagInfo.GetList(), m => m.TagName);
 
         #region Commnad
         void _execute() {
             if (!_canexecute())
                 return;
-            var tg = _tag?.Trim() ?? "";
+            var tg = TagInfo.GetWithAdd(_tag.Trim());
             //edittinglistを編集
             switch (EditOption) {
             case EditHistoryParam.CurrentOnly:
-                this.Model.Tag.EditTagName(tg);
+                this.Model.Tag = tg;
                 EdittingList.Add((this.Model.Root() as TotalRiskFundNode).CurrentDate);
-                break;
-            case EditHistoryParam.AllHistory:
-                var dic = RootCollection.GetNodeLine(this.Model.Path);
-                foreach(var d in dic) {
-                    d.Value.Tag.EditTagName(tg);
-                    EdittingList.Add(d.Key);
-                }
                 break;
             case EditHistoryParam.Position:
                 var dd = RootCollection.GetNodeLine(this.Model.Path, (this.Model.Root() as TotalRiskFundNode).CurrentDate);
                 foreach (var d in dd) {
-                    d.Value.Tag.EditTagName(tg);
+                    d.Value.Tag = tg;
+                    EdittingList.Add(d.Key);
+                }
+                break;
+            case EditHistoryParam.AllHistory:
+                var dic = RootCollection.GetNodeLine(this.Model.Path);
+                foreach(var d in dic) {
+                    d.Value.Tag = tg;
                     EdittingList.Add(d.Key);
                 }
                 break;

@@ -49,7 +49,7 @@ namespace PortFolion.Core {
 		TagInfo _tag;
 		public TagInfo Tag {
 			get { return _tag ?? TagInfo.GetDefault(); }
-			internal set {
+			set {
 				if (_tag == value) return;
 				_tag = value;
 				RaisePropertyChanged();
