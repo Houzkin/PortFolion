@@ -18,6 +18,22 @@ namespace PortFolion.ViewModels {
         Position,
         AllHistory,
     }
+    public class FromAccountEditterTagEditVM: NodeTagEditerVM {
+        AccountEditVM acc;
+        public FromAccountEditterTagEditVM(AccountEditVM ae,CommonNode model)
+            : base(model) {
+            this.acc = ae;
+        }
+        public override InteractionMessenger Messenger
+            => this.acc.Messenger;
+        protected override void ExecuteFunc() {
+           if(acc.Model == Model.Parent) {
+                base.ExecuteFunc();
+                //かきかけ
+            } 
+        }
+    }
+
     public class NodeTagEditerVM : DynamicViewModel<CommonNode> {
         public NodeTagEditerVM(CommonNode model) : base(model) {
             this.PresentTag = model.Tag.TagName;
@@ -32,7 +48,7 @@ namespace PortFolion.ViewModels {
                 });
         }
         InteractionMessenger _messenger;
-        public InteractionMessenger Messenger
+        public virtual InteractionMessenger Messenger
             => _messenger = _messenger ?? new InteractionMessenger();
 
         public string Title => "タグの変更";
@@ -57,7 +73,7 @@ namespace PortFolion.ViewModels {
             //=> ReadOnlyBindableCollection.Create(TagInfo.GetList(), m => m.TagName);
 
         #region Commnad
-        void _execute() {
+        protected virtual void ExecuteFunc() {
             if (!_canexecute())
                 return;
             var tg = TagInfo.GetWithAdd(_tag.Trim());
@@ -92,7 +108,7 @@ namespace PortFolion.ViewModels {
         }
         ViewModelCommand execute;
         public ViewModelCommand ExecuteCmd
-            => execute = execute ?? new ViewModelCommand(_execute, _canexecute);
+            => execute = execute ?? new ViewModelCommand(ExecuteFunc, _canexecute);
         ViewModelCommand cancel;
         public ViewModelCommand CancelCmd
             => cancel = cancel ?? new ViewModelCommand(
