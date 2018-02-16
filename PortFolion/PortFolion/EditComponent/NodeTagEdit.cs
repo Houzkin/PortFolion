@@ -12,25 +12,23 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace PortFolion.ViewModels {
-    /// <summary>タグ編集オプション</summary>
-    public enum EditHistoryParam {
-        CurrentOnly,
-        Position,
-        AllHistory,
-    }
-    public class FromAccountEditterTagEditVM: NodeTagEditerVM {
+    
+    
+    public class FromAccountEditerTagEditVM: NodeTagEditerVM {
         AccountEditVM acc;
-        public FromAccountEditterTagEditVM(AccountEditVM ae,CommonNode model)
-            : base(model) {
+        public FromAccountEditerTagEditVM(AccountEditVM ae,CashEditVM cevm)
+            : base(cevm.Model) {
             this.acc = ae;
         }
         public override InteractionMessenger Messenger
             => this.acc.Messenger;
         protected override void ExecuteFunc() {
-           if(acc.Model == Model.Parent) {
-                base.ExecuteFunc();
+            if(acc.Model != Model.Parent) {
                 //かきかけ
-            } 
+                //Model.Tag;
+            } else {
+                base.ExecuteFunc();
+            }
         }
     }
 
@@ -51,7 +49,7 @@ namespace PortFolion.ViewModels {
         public virtual InteractionMessenger Messenger
             => _messenger = _messenger ?? new InteractionMessenger();
 
-        public string Title => "タグの変更";
+        public string Title => "タグを変更";
         /// <summary>変更前のタグ</summary>
         public string PresentTag { get; }
         string _tag;
@@ -63,9 +61,9 @@ namespace PortFolion.ViewModels {
                 this.ExecuteCmd.RaiseCanExecuteChanged();
             }
         }
-        EditHistoryParam _editOption = EditHistoryParam.Position;
+        TagEditParam _editOption = TagEditParam.Position;
         /// <summary>編集オプション</summary>
-        public EditHistoryParam EditOption {
+        public TagEditParam EditOption {
             get { return _editOption; }
             set { SetProperty(ref _editOption, value); }
         }
@@ -78,26 +76,9 @@ namespace PortFolion.ViewModels {
                 return;
             var tg = TagInfo.GetWithAdd(_tag.Trim());
             //edittinglistを編集
-            switch (EditOption) {
-            case EditHistoryParam.CurrentOnly:
-                this.Model.Tag = tg;
-                EdittingList.Add((this.Model.Root() as TotalRiskFundNode).CurrentDate);
-                break;
-            case EditHistoryParam.Position:
-                var dd = RootCollection.GetNodeLine(this.Model.Path, (this.Model.Root() as TotalRiskFundNode).CurrentDate);
-                foreach (var d in dd) {
-                    d.Value.Tag = tg;
-                    EdittingList.Add(d.Key);
-                }
-                break;
-            case EditHistoryParam.AllHistory:
-                var dic = RootCollection.GetNodeLine(this.Model.Path);
-                foreach(var d in dic) {
-                    d.Value.Tag = tg;
-                    EdittingList.Add(d.Key);
-                }
-                break;
-            }
+            var ds = TagInfo.Apply(this.Model, tg, this.EditOption);
+            foreach (var d in ds)
+                EdittingList.Add(d);
             Messenger.Raise(new InteractionMessage("EditEndNodeTag"));
         }
         bool _canexecute() {

@@ -4,12 +4,21 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Houzkin.Tree;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PortFolion.Core {
-	
-	public class TagInfo : INotifyPropertyChanged {
+    /// <summary>タグ編集オプション</summary>
+    public enum TagEditParam {
+        /// <summary>現在のノードのみ</summary>
+        CurrentOnly,
+        /// <summary>現在のノードから連続するポジション</summary>
+        Position,
+        /// <summary>現在のパスにおいて該当する全てのノード</summary>
+        AllHistory,
+    }
+    public class TagInfo : INotifyPropertyChanged {
 
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void raisePropertyChanged([CallerMemberName] string name = "") {
@@ -67,6 +76,39 @@ namespace PortFolion.Core {
 			tgt.TagName = newName;
 			return true;
 		}
+        public static IEnumerable<DateTime> Apply(CommonNode node,TagInfo tag, TagEditParam option) {
+            if (node == null) throw new ArgumentNullException("node");
+            if (tag == null) throw new ArgumentNullException("tag");
+
+            var lst = new List<DateTime>();
+            var root = (node.Root() as TotalRiskFundNode);
+            if(root == null) {
+                node.Tag = tag;
+                return lst;
+            } else {
+                switch (option) {
+                case TagEditParam.CurrentOnly:
+                    node.Tag = tag;
+                    lst.Add(root.CurrentDate);
+                    break;
+                case TagEditParam.Position:
+                    var dd = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
+                    foreach(var d in dd) {
+                        d.Value.Tag = tag;
+                        lst.Add(d.Key);
+                    }
+                    break;
+                case TagEditParam.AllHistory:
+                    var ddd = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
+                    foreach(var d in ddd) {
+                        d.Value.Tag = tag;
+                        lst.Add(d.Key);
+                    }
+                    break;
+                }
+                return lst;
+            }
+        }
 	}
 
 }

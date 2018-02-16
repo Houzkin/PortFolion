@@ -275,16 +275,21 @@ namespace PortFolion.ViewModels {
 		public CashEditVM(AccountEditVM ac, FinancialValue fv) : base(fv) {
 			AccountVM = ac;
 			_name = fv.Name;
+            _ti = fv.Tag;
 			_InvestmentValue = fv.InvestmentValue.ToString();
 			_Amount = fv.Amount.ToString();
-			MenuList.Add(new MenuItemVm(editName) { Header = "名前の変更" });
+			MenuList.Add(new MenuItemVm(editName) { Header = "名前を変更" });
+            MenuList.Add(new MenuItemVm(editTag) { Header = "タグを変更"});
 			MenuList.Add(new MenuItemVm(del2) { Header = "削除" });
 		}
 		void editName() {
 			var edi = new FromAccountEditerNameEditVM(AccountVM, Model);
 			AccountVM.NodeNameEditer = edi;
 		}
-		
+		void editTag() {
+            var tedi = new FromAccountEditerTagEditVM(AccountVM, this);
+            throw new NotImplementedException("まだ実装していない");
+        }
 		void del2() {
 			if (IsCash) {
 				MessageBox.Show("このポジションは削除できません。", "削除不可", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -313,6 +318,8 @@ namespace PortFolion.ViewModels {
 			Model.Name = Name.Trim();
 			Model.SetInvestmentValue((long)InvestmentValueView);
 			Model.SetAmount((long)AmountView);
+            if (Model.Tag != this._ti)
+                TagInfo.Apply(this.Model, _ti, TagEditOption);
 		}
 		public bool IsCash => GetType() == typeof(CashEditVM);
 		public bool IsStock => GetType() == typeof(StockEditVM);
@@ -320,6 +327,7 @@ namespace PortFolion.ViewModels {
 		public virtual bool IsEmptyElement => false;
 		public new FinancialValue Model => base.Model;
 		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
+
 		string _name = "";
 		[ReflectReferenceValue]
 		public string Name {
@@ -337,6 +345,15 @@ namespace PortFolion.ViewModels {
 			}
 			return null;
 		}
+
+        TagInfo _ti;
+        [ReflectReferenceValue]
+        public TagInfo Tag {
+            get { return _ti; }
+            set { if (_ti != value) _ti = value; }
+        }
+        TagEditParam TagEditOption { get; set; }
+
 		string _InvestmentValue = "";
 		public virtual double InvestmentValueView => ExpParse.Try(_InvestmentValue);
 		public virtual string InvestmentValue {
