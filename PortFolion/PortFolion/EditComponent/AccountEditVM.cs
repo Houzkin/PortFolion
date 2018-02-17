@@ -63,6 +63,18 @@ namespace PortFolion.ViewModels {
 				}
 			}
 		}
+        FromAccountNodeTagEditerVM nte;
+        public FromAccountNodeTagEditerVM NodeTagEditer {
+            get { return nte; }
+            set {
+                if(SetProperty(ref nte, value)) {
+                    if (nte == null)
+                        Messenger.Raise(new InteractionMessage("EditEndNodeTag"));
+                    else
+                        Messenger.Raise(new InteractionMessage("EditNodeTag"));
+                }
+            }
+        }
 		public string StatusComment { get; private set; }
 		public void SetStatusComment(string comment) {
 			StatusComment = comment;
@@ -287,7 +299,8 @@ namespace PortFolion.ViewModels {
 			AccountVM.NodeNameEditer = edi;
 		}
 		void editTag() {
-            var tedi = new FromAccountEditerTagEditVM(AccountVM, this);
+            var tedi = new FromAccountNodeTagEditerVM(AccountVM, this);
+            AccountVM.NodeTagEditer = tedi;
             throw new NotImplementedException("まだ実装していない");
         }
 		void del2() {
@@ -352,7 +365,7 @@ namespace PortFolion.ViewModels {
             get { return _ti; }
             set { if (_ti != value) _ti = value; }
         }
-        TagEditParam TagEditOption { get; set; }
+        public TagEditParam TagEditOption { get; set; }
 
 		string _InvestmentValue = "";
 		public virtual double InvestmentValueView => ExpParse.Try(_InvestmentValue);
