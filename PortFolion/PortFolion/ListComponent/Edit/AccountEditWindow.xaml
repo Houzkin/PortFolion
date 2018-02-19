@@ -43,15 +43,24 @@
         </i:EventTrigger>
 
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
-         
+        
+         <!--名前変更-->
         <l:InteractionMessageTrigger MessageKey="EditNodeName" Messenger="{Binding Messenger}">
             <ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="true"/>
         </l:InteractionMessageTrigger>
-         
         <l:InteractionMessageTrigger MessageKey="EditEndNodeName" Messenger="{Binding Messenger}">
             <ei:ChangePropertyAction TargetName="NameEditFlyout" PropertyName="IsOpen" Value="false"/>
         </l:InteractionMessageTrigger>
          
+        <!--タグ変更-->
+        <l:InteractionMessageTrigger MessageKey="EditNodeTag" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="TagEditFlyout" PropertyName="IsOpen" Value="true"/>
+        </l:InteractionMessageTrigger>
+        <l:InteractionMessageTrigger MessageKey="EditEndNodeTag" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="TagEditFlyout" PropertyName="IsOpen" Value="false"/>
+        </l:InteractionMessageTrigger>
+         
+        <!--ウィンドウ終了-->
         <l:InteractionMessageTrigger MessageKey="CloseAsTrue" Messenger="{Binding Messenger}">
             <ei:ChangePropertyAction TargetName="editWindow" PropertyName="DialogResult" Value="true"/>
         </l:InteractionMessageTrigger>
@@ -71,10 +80,15 @@
                     <TextBlock Text="{Binding NodeNameEditer.PresentName,StringFormat=変更前 : {0}}" Margin="0,3"/>
                     <TextBox  Text="{Binding NodeNameEditer.Name,UpdateSourceTrigger=PropertyChanged}" Margin="0.3"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
-                        <Button Content="Cancel" Command="{Binding NodeNameEditer.CancelCmd}" HorizontalAlignment="Right" Margin="3,0"/>
-                        <Button Content="OK" Command="{Binding NodeNameEditer.ExecuteCmd}" HorizontalAlignment="Right" Margin="3,0"/>
+                        <Button Content="キャンセル" Command="{Binding NodeNameEditer.CancelCmd}" HorizontalAlignment="Right" Margin="3,0"/>
+                        <Button Content="　O K　" Command="{Binding NodeNameEditer.ExecuteCmd}" HorizontalAlignment="Right" Margin="3,0"/>
                     </StackPanel>
                 </StackPanel>
+            </mah:Flyout>
+            <mah:Flyout x:Name="TagEditFlyout" IsModal="True" Header="タグの変更"
+                        Position="Right" AnimateOpacity="True"
+                        CloseCommand="{Binding TagNameEditer.CancelCmd}">
+                <v:TagEditFlyout DataContext="{Binding NodeTagEditer}"/>
             </mah:Flyout>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
@@ -156,7 +170,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                 <TextBlock Text="{Binding Code}" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding Name}" Margin="5,0,0,0" VerticalAlignment="Center"/>
-
+                                <TextBlock Text="{Binding Tag,StringFormat=({0})}" FontSize="10" Margin="3,0,0,0" VerticalAlignment="Center"/>
 
                                 <mah:DropDownButton VerticalContentAlignment="Center"
                                                 Width="auto" Margin="3,0,0,0"

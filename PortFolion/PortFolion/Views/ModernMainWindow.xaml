@@ -8,6 +8,7 @@
                 xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
                 xmlns:v="clr-namespace:PortFolion.Views"
+                xmlns:vc="clr-namespace:PortFolion.Views.Controls"
                 xmlns:vm="clr-namespace:PortFolion.ViewModels"
                 mc:Ignorable="d" SaveWindowPosition="True"
                 GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
@@ -24,7 +25,7 @@
 
         <!--Viewに特別な要件が存在しない限りは、トリガーやアクションの自作にこだわらず積極的にコードビハインドを使いましょう 
         Viewのコードビハインドは、基本的にView内で完結するロジックとViewModelからのイベントの受信(専用リスナを使用する)に限るとトラブルが少なくなります 
-        Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています--> 
+        Livet1.1からはコードビハインドでViewModelのイベントを受信するためのWeakEventLisnterサポートが追加されています-->
 
         <!--WindowのContentRenderedイベントのタイミングでViewModelのInitializeメソッドが呼ばれます-->
         <i:EventTrigger EventName="ContentRendered">
@@ -43,6 +44,28 @@
         <mah:WindowCommands>
             <!--<Button Content="settings"/>
             <Button Content="options"  Command="{Binding ShowLisence}"/>-->
+            <mah:DropDownButton Content="Menu" Background="{x:Null}" BorderBrush="{x:Null}" ItemsSource="{Binding MenuCollection}">
+                <mah:DropDownButton.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Header" Value="{Binding Header}"/>
+                        <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                    </Style>
+                </mah:DropDownButton.ItemContainerStyle>
+            </mah:DropDownButton>
+
+            <!--<vc:DropDownMenuButton Width="120" Height="32" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF424242">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Menu" />
+                    <Path Width="8" Height="6" Margin="8,0,0,0" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type vc:DropDownMenuButton}},Path=Foreground}" Data="F1 M 57.5692,88L 99.1384,16L 16,16L 57.5692,88 Z "/>
+                </StackPanel>
+                <vc:DropDownMenuButton.DropDownContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Item one" />
+                        <Separator />
+                        <MenuItem Header="Item two" />
+                    </ContextMenu>
+                </vc:DropDownMenuButton.DropDownContextMenu>
+            </vc:DropDownMenuButton>-->
             <ToggleButton Content="License" IsChecked="{Binding IsOpen,ElementName=LicenseFlyout}"/>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
@@ -52,9 +75,12 @@
             <mah:Flyout x:Name="LicenseFlyout" IsModal="False" Header="License" Position="Right" AnimateOpacity="True" Opacity="0.9">
                 <v:LicenseView />
             </mah:Flyout>
+            <mah:Flyout x:Name="MenuFlyout" IsModal="False" Header="Menu" Position="Top" AnimateOpacity="True">
+                <Grid></Grid>
+            </mah:Flyout>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -66,7 +92,7 @@
         <Grid.Resources>
             <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
         </Grid.Resources>
-        
+
         <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" TabStripPlacement="Left" mah:TabControlHelper.IsUnderlined="True" >
             <mah:MetroAnimatedSingleRowTabControl.Resources>
                 <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="{x:Type mah:MetroTabItem}">
@@ -90,6 +116,6 @@
                 <v:ListTab />
             </mah:MetroTabItem>
         </mah:MetroAnimatedSingleRowTabControl>
-        
+
     </Grid>
 </mah:MetroWindow>

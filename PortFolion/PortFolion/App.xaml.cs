@@ -22,6 +22,7 @@ namespace PortFolion {
 			DispatcherHelper.UIDispatcher = Dispatcher;
 
 			var mainWindow = new PortFolion.Views.ModernMainWindow();
+            mainWindow.DataContext = new PortFolion.ViewModels.MainWindowViewModel();
 			mainWindow.Show();
 		}
 		private void Application_Exit(object sender, ExitEventArgs e) {

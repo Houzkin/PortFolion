@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="PortFolion.Views.TagEditFlyout"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+             xmlns:v="clr-namespace:PortFolion.Views"
+             xmlns:vm="clr-namespace:PortFolion.ViewModels"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:converter="clr-namespace:PortFolion.Views.Converter"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closed">
+            <l:DataContextDisposeAction/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="5">
+            <TextBlock Text="{Binding Name, StringFormat=「{0}」のタグを変更します}" FontSize="20" Margin="0,3"/>
+            <TextBlock Text="{Binding PresentTag, StringFormat=変更前 : {0}}" Margin="0,3"/>
+            <!-- ComboBox x:Name="editText" ItemsSource="{Binding TagCollection}"
+                      SelectedValuePath="TagName"
+                      SelectedValue="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                      IsEditable="True" IsReadOnly="False"-->
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="5,0"/>
+                <mah:DropDownButton Grid.Column="1" Content="タグを選択" Margin="5,0" VerticalContentAlignment="Center"
+                                    ItemsSource="{Binding TagCollection}">
+                    <mah:DropDownButton.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding Header}"/>
+                            <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                        </Style>
+                    </mah:DropDownButton.ItemContainerStyle>
+                </mah:DropDownButton>
+            </Grid>
+            <GroupBox Header="適用範囲">
+                <GroupBox.Resources>
+                    <converter:BoolToEnumConverter x:Key="BtoE"/>
+                </GroupBox.Resources>
+                <StackPanel Orientation="Vertical">
+                    <RadioButton Content="現在の項目のみ" Margin="3"
+                                 IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
+                                 ConverterParameter=CurrentOnly}"/>
+                    <RadioButton Content="現在のポジションから連続する項目" Margin="3"
+                                 IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE},Mode=TwoWay,
+                                 ConverterParameter=Position}"/>
+                    <RadioButton Content="全ての時系列" Margin="3"
+                                 IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
+                                 ConverterParameter=AllHistory}"/>
+                </StackPanel>
+            </GroupBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
+                <Button Content="キャンセル" Command="{Binding CancelCmd}" Margin="3,0"/>
+                <Button Content="　O K　" Command="{Binding ExecuteCmd}" Margin="3,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

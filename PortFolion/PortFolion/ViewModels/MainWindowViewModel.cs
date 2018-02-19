@@ -58,12 +58,17 @@ namespace PortFolion.ViewModels {
          * LivetのViewModelではプロパティ変更通知(RaisePropertyChanged)やDispatcherCollectionを使ったコレクション変更通知は
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
-
+        
 		public void Initialize() {
-			//listContents = ListviewModel.Instance;
+            
 		}
-		
-		//public ICommand ShowLisence
-		//	=> new ViewModelCommand(() => { });
+        public MainWindowViewModel() {
+            MenuCollection = new List<MenuItemVm> {
+                new MenuItemVm() { Header = "Item one" },
+                new MenuItemVm() { Header = "Item two" }
+            };
+        }
+		/// <summary>選択可能なメニュー</summary>
+		public IEnumerable<MenuItemVm> MenuCollection { get; }
 	}
 }

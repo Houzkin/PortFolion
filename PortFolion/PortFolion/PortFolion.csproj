@@ -133,22 +133,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="EditComponent\NodeTagEdit.cs" />
-    <Compile Include="EditComponent\NodeTagEditWindow.xaml.cs">
+    <Compile Include="ListComponent\Edit\NodeTagEdit.cs" />
+    <Compile Include="ListComponent\Edit\NodeTagEditWindow.xaml.cs">
       <DependentUpon>NodeTagEditWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EditComponent\TNodeVm.cs" />
+    <Compile Include="ListComponent\TNodeVm.cs" />
     <Compile Include="ViewModels\DateTree.cs" />
-    <Compile Include="EditComponent\ListViewModelMain.cs" />
-    <Compile Include="EditComponent\AccountEditVM.cs" />
-    <Compile Include="EditComponent\NodeNameEdit.cs" />
-    <Compile Include="EditComponent\AccountEditWindow.xaml.cs">
+    <Compile Include="ListComponent\ListViewModelMain.cs" />
+    <Compile Include="ListComponent\Edit\AccountEditVM.cs" />
+    <Compile Include="ListComponent\Edit\NodeNameEdit.cs" />
+    <Compile Include="ListComponent\Edit\AccountEditWindow.xaml.cs">
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GraphComponent\GraphVm.cs" />
     <Compile Include="GraphComponent\GraphVmUtil.cs" />
     <Compile Include="ViewModels\LocationTree.cs" />
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
+    <Compile Include="Views\Controls\CustomDropDown.cs" />
     <Compile Include="Views\Converter\PeriodToStringConverter.cs" />
     <Compile Include="GraphComponent\GraphBullets.xaml.cs">
       <DependentUpon>GraphBullets.xaml</DependentUpon>
@@ -163,7 +164,7 @@
     <Compile Include="GraphComponent\GraphTab.xaml.cs">
       <DependentUpon>GraphTab.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EditComponent\ListTab.xaml.cs">
+    <Compile Include="ListComponent\ListTab.xaml.cs">
       <DependentUpon>ListTab.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LicenseView.xaml.cs">
@@ -172,16 +173,19 @@
     <Compile Include="Views\ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EditComponent\NodeNameEditWindow.xaml.cs">
+    <Compile Include="ListComponent\Edit\NodeNameEditWindow.xaml.cs">
       <DependentUpon>NodeNameEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Selector\GraphSelector.cs" />
     <Compile Include="Views\Selector\Selectors.cs" />
-    <Page Include="EditComponent\AccountEditWindow.xaml">
+    <Compile Include="ListComponent\Edit\TagEditFlyout.xaml.cs">
+      <DependentUpon>TagEditFlyout.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ListComponent\Edit\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EditComponent\NodeTagEditWindow.xaml">
+    <Page Include="ListComponent\Edit\NodeTagEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -197,7 +201,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EditComponent\ListTab.xaml">
+    <Page Include="ListComponent\ListTab.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -223,7 +227,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EditComponent\NodeNameEditWindow.xaml">
+    <Page Include="ListComponent\Edit\NodeNameEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ListComponent\Edit\TagEditFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -283,6 +291,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MenuComponent\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

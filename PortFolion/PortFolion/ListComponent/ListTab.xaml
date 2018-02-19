@@ -260,9 +260,9 @@
                             <mah:DropDownButton VerticalContentAlignment="Center" Content=""
                                                 ItemsSource="{Binding MenuList}" >
                                     <mah:DropDownButton.ItemContainerStyle>
-                                    <Style TargetType="MenuItem">
-                                        <Setter Property="Icon" Value="{Binding Icon}"/>
-                                        <Setter Property="Header" Value="{Binding Header}"/>
+                                        <Style TargetType="MenuItem">
+                                            <Setter Property="Icon" Value="{Binding Icon}"/>
+                                            <Setter Property="Header" Value="{Binding Header}"/>
                                             <Setter Property="Command" Value="{Binding MenuCommand}"/>
                                         </Style>
                                     </mah:DropDownButton.ItemContainerStyle>

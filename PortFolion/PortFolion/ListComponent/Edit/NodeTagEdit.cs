@@ -59,7 +59,7 @@ namespace PortFolion.ViewModels {
         }
         public override InteractionMessenger Messenger
             => acc.Messenger;
-
+        public string Name => Model.Name;
         void _executeFunc() {
             var tg = TagInfo.GetWithAdd(this.Tag.Trim());
             this.Model.Tag = tg;
@@ -120,6 +120,7 @@ namespace PortFolion.ViewModels {
         #endregion
 
         HashSet<DateTime> _edit;
+        /// <summary>変更しているリスト</summary>
         public HashSet<DateTime> EdittingList => _edit = _edit ?? new HashSet<DateTime>();
     }
 }

@@ -39,7 +39,15 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Text="{Binding Tag,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="5,0"/>
-                <mah:DropDownButton Grid.Column="1" Content="タグを選択" Margin="5,0"/>
+                <mah:DropDownButton Grid.Column="1" Content="タグを選択" Margin="5,0" VerticalContentAlignment="Center"
+                                    ItemsSource="{Binding TagCollection}">
+                    <mah:DropDownButton.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding Header}"/>
+                            <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                        </Style>
+                    </mah:DropDownButton.ItemContainerStyle>
+                </mah:DropDownButton>
             </Grid>
             <GroupBox Header="適用範囲">
                 <GroupBox.Resources>
@@ -47,13 +55,13 @@
                 </GroupBox.Resources>
                 <StackPanel Orientation="Vertical">
                     <RadioButton Content="現在の項目のみ" Margin="3"
-                                 IsChecked="{Binding EditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
+                                 IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
                                  ConverterParameter=CurrentOnly}"/>
                     <RadioButton Content="現在のポジションから連続する項目" Margin="3"
-                                 IsChecked="{Binding EditOption,Converter={StaticResource BtoE},Mode=TwoWay,
+                                 IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE},Mode=TwoWay,
                                  ConverterParameter=Position}"/>
                     <RadioButton Content="全ての時系列" Margin="3"
-                                 IsChecked="{Binding EditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
+                                 IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
                                  ConverterParameter=AllHistory}"/>
                 </StackPanel>
             </GroupBox>

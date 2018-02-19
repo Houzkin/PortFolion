@@ -301,7 +301,7 @@ namespace PortFolion.ViewModels {
 		void editTag() {
             var tedi = new FromAccountNodeTagEditerVM(AccountVM, this);
             AccountVM.NodeTagEditer = tedi;
-            throw new NotImplementedException("まだ実装していない");
+            //throw new NotImplementedException("まだ実装していない");
         }
 		void del2() {
 			if (IsCash) {
@@ -363,7 +363,10 @@ namespace PortFolion.ViewModels {
         [ReflectReferenceValue]
         public TagInfo Tag {
             get { return _ti; }
-            set { if (_ti != value) _ti = value; }
+            set {
+                if (_ti != value) _ti = value;
+                this.OnPropertyChanged();
+            }
         }
         public TagEditParam TagEditOption { get; set; }
 
