@@ -1,0 +1,20 @@
+﻿<mah:MetroWindow x:Class="PortFolion.Views.TagSettingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+        xmlns:v="clr-namespace:PortFolion.Views"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        x:Name="TagSetting"
+        mc:Ignorable="d" SaveWindowPosition="True"
+        TitleCaps="False" Icon="/Portfolion;component/PortFolion.ico"
+        GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
+        Title="タグを編集" Height="300" Width="300">
+    <Grid>
+        <ListBox></ListBox>
+    </Grid>
+</mah:MetroWindow>

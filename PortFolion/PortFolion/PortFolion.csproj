@@ -149,6 +149,7 @@
     <Compile Include="GraphComponent\GraphVmUtil.cs" />
     <Compile Include="ViewModels\LocationTree.cs" />
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
+    <Compile Include="MenuComponent\TagSettingViewModel.cs" />
     <Compile Include="Views\Controls\CustomDropDown.cs" />
     <Compile Include="Views\Converter\PeriodToStringConverter.cs" />
     <Compile Include="GraphComponent\GraphBullets.xaml.cs">
@@ -180,6 +181,9 @@
     <Compile Include="Views\Selector\Selectors.cs" />
     <Compile Include="ListComponent\Edit\TagEditFlyout.xaml.cs">
       <DependentUpon>TagEditFlyout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MenuComponent\TagSettingWindow.xaml.cs">
+      <DependentUpon>TagSettingWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="ListComponent\Edit\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
@@ -232,6 +236,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ListComponent\Edit\TagEditFlyout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MenuComponent\TagSettingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -292,9 +300,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MenuComponent\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
