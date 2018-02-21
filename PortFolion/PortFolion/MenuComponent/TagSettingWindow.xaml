@@ -15,6 +15,14 @@
         GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
         Title="タグを編集" Height="300" Width="300">
     <Grid>
-        <ListBox></ListBox>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <ListBox Grid.Row="0"></ListBox>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,5,0">
+            <Button Content="キャンセル" Margin="0,3,5,3"/>
+            <Button Content="　O K　" Margin="0,3,5,3"/>
+        </StackPanel>
     </Grid>
 </mah:MetroWindow>
