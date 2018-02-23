@@ -185,6 +185,9 @@
     <Compile Include="MenuComponent\TagSettingWindow.xaml.cs">
       <DependentUpon>TagSettingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MenuComponent\TagSettingFlyout.xaml.cs">
+      <DependentUpon>TagSettingFlyout.xaml</DependentUpon>
+    </Compile>
     <Page Include="ListComponent\Edit\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -240,6 +243,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MenuComponent\TagSettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MenuComponent\TagSettingFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

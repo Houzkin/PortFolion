@@ -65,7 +65,8 @@ namespace PortFolion.ViewModels {
         public MainWindowViewModel() {
             MenuCollection = new List<MenuItemVm> {
                 new MenuItemVm(() => {
-                    new Views.TagSettingWindow().ShowDialog();
+                    var tsw = new Views.TagSettingWindow();
+                    tsw.ShowDialog();
                 }) { Header = "タグを編集" },
                 new MenuItemVm() { Header = "Item two" }
             };

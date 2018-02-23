@@ -12,14 +12,32 @@ using Livet.Commands;
 
 namespace PortFolion.ViewModels{
     public class TagSettingViewModel : ViewModel {
+        public TagSettingViewModel() {
+            Tags = ReadOnlyBindableCollection
+                .Create(TagInfo.GetList(), m => new TagItem(this, m));
+            this.CompositeDisposable.Add(Tags as IDisposable);
+        }
+
         public IEnumerable<TagItem> Tags { get; }
         ViewModelCommand _execute;
+        /// <summary>一連の編集を完了する</summary>
         public ViewModelCommand ExecuteCmd =>
-            _execute = _execute ?? new ViewModelCommand(() => { });
+            _execute = _execute ?? new ViewModelCommand(_executeFunc, _canExecuteFunc);
         ViewModelCommand _cancel;
+        /// <summary>一連の編集をキャンセルする</summary>
         public ViewModelCommand CancelCmd =>
-            _cancel = _cancel ?? new ViewModelCommand(() => { });
+            _cancel = _cancel ?? new ViewModelCommand(_closeWindow);
 
+        void _executeFunc() {
+            Tags.ForEach(a => a.ApplyChange());
+            _closeWindow();
+        }
+        bool _canExecuteFunc() =>
+            this.Tags.Any(a => a.HasChanged);
+
+        void _closeWindow() =>
+            this.Messenger.Raise(new InteractionMessage("CloseWindow"));
+        
         TagItem _edittingItem;
         public TagItem EdittingItem {
             get { return _edittingItem; }
@@ -29,17 +47,17 @@ namespace PortFolion.ViewModels{
             }
         }
 
+        /// <summary>個別編集の開始</summary>
+        /// <param name="ti">編集する対象</param>
         public void EditOrder(TagItem ti) {
             this.EdittingItem = ti;
             this.Messenger.Raise(new InteractionMessage("EditOrder"));
         }
+        /// <summary>個別編集の終了</summary>
         public void QuitOrder() {
             this.EdittingItem = null;
             this.Messenger.Raise(new InteractionMessage("QuitOrder"));
-        }
-        void _executeFunc() {
-            Tags.Where(a => a.PresentTagName != a.NewTagName).ForEach(a => { });
-            
+            this.ExecuteCmd.RaiseCanExecuteChanged();
         }
     }
 
@@ -48,7 +66,7 @@ namespace PortFolion.ViewModels{
         public TagItem(TagSettingViewModel vm, TagInfo tag): base(tag) {
             _vm = vm;
             _edittingTagName = tag.TagName;
-            _presentTagName = tag.TagName;
+            _previousTagName = tag.TagName;
             NewTagName = tag.TagName;
         }
         private string isAllowName() {
@@ -59,14 +77,24 @@ namespace PortFolion.ViewModels{
                 return "";
             }
         }
+        /// <summary>変更がある場合はtrueを返す</summary>
+        public bool HasChanged => this.PreviousTagName != this.NewTagName;
+        /// <summary>変更があった場合、適用する</summary>
+        public void ApplyChange() {
+            if (!HasChanged) return;
+            TagInfo.EditTagName(this.Model, this.NewTagName);
+            //ここで保存
+        }
 
         ViewModelCommand _editCmd;
+        /// <summary>編集を開始するためのコマンド</summary>
         public ViewModelCommand EditCmd =>
             _editCmd = _editCmd ?? new ViewModelCommand(() => {
                 _vm.EditOrder(this);
             });
 
         ViewModelCommand _executeCmd;
+        /// <summary>編集を完了するためのコマンド</summary>
         public ViewModelCommand ExecuteCmd =>
             _executeCmd = _executeCmd ?? new ViewModelCommand(() => {
                 this.NewTagName = this.EdittingTagName;
@@ -74,10 +102,11 @@ namespace PortFolion.ViewModels{
             }, () => !this.HasErrors);
 
         ViewModelCommand _cancelCmd;
+        /// <summary>編集をキャンセルするためのコマンド</summary>
         public ViewModelCommand CancelCmd =>
             _cancelCmd = _cancelCmd ?? new ViewModelCommand(() => {
                 _vm.QuitOrder();
-                this.NewTagName = this.PresentTagName;
+                this.EdittingTagName = this.NewTagName;
             });
         /// <summary>編集されたタグ名</summary>
         public string NewTagName { get; private set; }
@@ -88,11 +117,13 @@ namespace PortFolion.ViewModels{
             get { return _edittingTagName; }
             set {
                 SetProperty(ref _edittingTagName, value, _ => isAllowName());
+                this.ExecuteCmd.RaiseCanExecuteChanged();
             }
         }
-        string _presentTagName;
-        public string PresentTagName {
-            get { return _presentTagName; }
+        string _previousTagName;
+        /// <summary>非編集用、変更前のタグ名</summary>
+        public string PreviousTagName {
+            get { return _previousTagName; }
         }
     }
     

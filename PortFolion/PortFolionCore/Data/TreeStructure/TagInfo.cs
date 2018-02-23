@@ -76,6 +76,17 @@ namespace PortFolion.Core {
 			tgt.TagName = newName;
 			return true;
 		}
+        /// <summary>タグ名を変更する</summary>
+        /// <param name="target">変更するインスタンス</param>
+        /// <param name="newName">新しいタグ名</param>
+        public static void EditTagName(TagInfo target, string newName) {
+            target.TagName = newName;
+        }
+        /// <summary>各ノードに対するタグを付け替える</summary>
+        /// <param name="node">起点となるノード</param>
+        /// <param name="tag">タグ</param>
+        /// <param name="option">変更オプション</param>
+        /// <returns>変更された日付</returns>
         public static IEnumerable<DateTime> Apply(CommonNode node,TagInfo tag, TagEditParam option) {
             if (node == null) throw new ArgumentNullException("node");
             if (tag == null) throw new ArgumentNullException("tag");
