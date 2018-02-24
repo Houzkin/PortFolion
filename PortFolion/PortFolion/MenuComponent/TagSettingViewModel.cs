@@ -29,7 +29,9 @@ namespace PortFolion.ViewModels{
             _cancel = _cancel ?? new ViewModelCommand(_closeWindow);
 
         void _executeFunc() {
-            Tags.ForEach(a => a.ApplyChange());
+            //ここで保存
+            var t = Tags.Select(a => a.ApplyChange()).Where(a => a != null);
+
             _closeWindow();
         }
         bool _canExecuteFunc() =>
@@ -80,10 +82,10 @@ namespace PortFolion.ViewModels{
         /// <summary>変更がある場合はtrueを返す</summary>
         public bool HasChanged => this.PreviousTagName != this.NewTagName;
         /// <summary>変更があった場合、適用する</summary>
-        public void ApplyChange() {
-            if (!HasChanged) return;
+        public TagInfo ApplyChange() {
+            if (!HasChanged) return null;
             TagInfo.EditTagName(this.Model, this.NewTagName);
-            //ここで保存
+            return this.Model;
         }
 
         ViewModelCommand _editCmd;
