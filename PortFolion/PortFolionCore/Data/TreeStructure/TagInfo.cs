@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Houzkin.Tree;
 using System.Text;
 using System.Threading.Tasks;
+using PortFolion.IO;
 
 namespace PortFolion.Core {
     /// <summary>タグ編集オプション</summary>
@@ -81,6 +82,19 @@ namespace PortFolion.Core {
         /// <param name="newName">新しいタグ名</param>
         public static void EditTagName(TagInfo target, string newName) {
             target.TagName = newName;
+        }
+        public static void EditTagName(IDictionary<TagInfo,string> dictionary) {
+            foreach (var dic in dictionary)
+                dic.Key.TagName = dic.Value;
+			
+			var roots = RootCollection.Instance.Where(a => {
+				var nodes = a.Preorder().Select(b => b.Tag).Distinct();
+				foreach (var d in dictionary.Keys)
+					if (nodes.Contains(d))
+						return true;
+				return false;
+			});
+			HistoryIO.SaveRoots(roots);
         }
         /// <summary>各ノードに対するタグを付け替える</summary>
         /// <param name="node">起点となるノード</param>

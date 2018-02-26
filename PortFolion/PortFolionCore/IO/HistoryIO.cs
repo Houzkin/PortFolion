@@ -13,13 +13,18 @@ using Houzkin;
 
 namespace PortFolion.IO {
 	public static class HistoryIO {
-
+        /// <summary>指定したルートのみを出力する。</summary>
+        /// <param name="roots">ルート</param>
+        public static void SaveRoots(IEnumerable<TotalRiskFundNode> roots) {
+            _saveRoots(roots);
+        }
 		public static void SaveRoots() {
 			SaveRoots(DateTime.MinValue, DateTime.MaxValue);
 		}
 		public static void SaveRoots(DateTime date) {
 			SaveRoots(date, date);
 		}
+        /// <summary>指定期間内のデータ(削除を含む)を出力する。</summary>
 		public static void SaveRoots(DateTime since,DateTime until) {
 			saveRoots(RootCollection.Instance.Where(a => since <= a.CurrentDate && a.CurrentDate <= until), since, until);
 		}
