@@ -54,9 +54,9 @@
                     <converter:BoolToEnumConverter x:Key="BtoE"/>
                 </GroupBox.Resources>
                 <StackPanel Orientation="Vertical">
-                    <RadioButton Content="現在の項目のみ" Margin="3"
+                    <RadioButton Content="現在以降の項目" Margin="3"
                                  IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE}, Mode=TwoWay,
-                                 ConverterParameter=CurrentOnly}"/>
+                                 ConverterParameter=FromCurrent}"/>
                     <RadioButton Content="現在のポジションから連続する項目" Margin="3"
                                  IsChecked="{Binding TagEditOption,Converter={StaticResource BtoE},Mode=TwoWay,
                                  ConverterParameter=Position}"/>

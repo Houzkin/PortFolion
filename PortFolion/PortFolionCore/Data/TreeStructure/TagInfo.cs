@@ -12,8 +12,8 @@ using PortFolion.IO;
 namespace PortFolion.Core {
     /// <summary>タグ編集オプション</summary>
     public enum TagEditParam {
-        /// <summary>現在のノードのみ</summary>
-        CurrentOnly,
+        /// <summary>現在のノード以降</summary>
+        FromCurrent,
         /// <summary>現在のノードから連続するポジション</summary>
         Position,
         /// <summary>現在のパスにおいて該当する全てのノード</summary>
@@ -34,9 +34,9 @@ namespace PortFolion.Core {
 				raisePropertyChanged();
 			}
 		}
-		public void EditTagName(string newTagName) {
-			EditTagName(this.TagName, newTagName);
-		}
+		//public void EditTagName(string newTagName) {
+		//	EditTagName(this.TagName, newTagName);
+		//}
 		public bool CanEdit {
 			get { return TagName != _defaultStr; }
 		}
@@ -70,19 +70,15 @@ namespace PortFolion.Core {
 			if (!tagList.Any(a => a.TagName == newTag.TagName)) tagList.Add(newTag);
 			return tagList.First(a => a.TagName == newTag.TagName);
 		}
-		public static bool EditTagName(string oldName,string newName) {
-			var tgt = tagList.FirstOrDefault(a => a.TagName == oldName);
-			if (tgt == null) return false;
-			if (tagList.Any(a => a.TagName == newName)) return false;
-			tgt.TagName = newName;
-			return true;
-		}
-        /// <summary>タグ名を変更する</summary>
-        /// <param name="target">変更するインスタンス</param>
-        /// <param name="newName">新しいタグ名</param>
-        public static void EditTagName(TagInfo target, string newName) {
-            target.TagName = newName;
-        }
+		//public static bool EditTagName(string oldName,string newName) {
+		//	var tgt = tagList.FirstOrDefault(a => a.TagName == oldName);
+		//	if (tgt == null) return false;
+		//	if (tagList.Any(a => a.TagName == newName)) return false;
+		//	tgt.TagName = newName;
+		//	return true;
+		//}
+		/// <summary>タグ名を変更して出力する</summary>
+		/// <param name="dictionary">変更する対象をkey、新しいタグ名をvalueとするDictionary</param>
         public static void EditTagName(IDictionary<TagInfo,string> dictionary) {
             foreach (var dic in dictionary)
                 dic.Key.TagName = dic.Value;
@@ -112,9 +108,12 @@ namespace PortFolion.Core {
                 return lst;
             } else {
                 switch (option) {
-                case TagEditParam.CurrentOnly:
-                    node.Tag = tag;
-                    lst.Add(root.CurrentDate);
+                case TagEditParam.FromCurrent:
+					var dc = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
+					foreach(var d in dc.SkipWhile(p=>p.Key < root.CurrentDate)){
+						d.Value.Tag = tag;
+						lst.Add(d.Key);
+					}
                     break;
                 case TagEditParam.Position:
                     var dd = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
@@ -124,7 +123,7 @@ namespace PortFolion.Core {
                     }
                     break;
                 case TagEditParam.AllHistory:
-                    var ddd = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
+                    var ddd = RootCollection.GetNodeLine(node.Path);
                     foreach(var d in ddd) {
                         d.Value.Tag = tag;
                         lst.Add(d.Key);

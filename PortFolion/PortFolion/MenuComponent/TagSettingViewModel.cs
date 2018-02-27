@@ -29,9 +29,10 @@ namespace PortFolion.ViewModels{
             _cancel = _cancel ?? new ViewModelCommand(_closeWindow);
 
         void _executeFunc() {
-            //ここで保存
-            var t = Tags.Select(a => a.ApplyChange()).Where(a => a != null);
-
+			var dic = new Dictionary<TagInfo, string>();
+			foreach (var a in Tags.Select(a => a.GetChangeOrder()).Where(b => b != null))
+				dic[a.Item1] = a.Item2;
+			TagInfo.EditTagName(dic);
             _closeWindow();
         }
         bool _canExecuteFunc() =>
@@ -62,7 +63,7 @@ namespace PortFolion.ViewModels{
             this.ExecuteCmd.RaiseCanExecuteChanged();
         }
     }
-
+	/// <summary>タグデータのViewModel</summary>
     public class TagItem : DynamicViewModel<TagInfo> {
         TagSettingViewModel _vm;
         public TagItem(TagSettingViewModel vm, TagInfo tag): base(tag) {
@@ -81,11 +82,10 @@ namespace PortFolion.ViewModels{
         }
         /// <summary>変更がある場合はtrueを返す</summary>
         public bool HasChanged => this.PreviousTagName != this.NewTagName;
-        /// <summary>変更があった場合、適用する</summary>
-        public TagInfo ApplyChange() {
+        /// <summary>変更があった場合、対象と変更先タグ名のペアを返す</summary>
+        public Tuple<TagInfo,string> GetChangeOrder() {
             if (!HasChanged) return null;
-            TagInfo.EditTagName(this.Model, this.NewTagName);
-            return this.Model;
+			return new Tuple<TagInfo, string>(this.Model, this.NewTagName);
         }
 
         ViewModelCommand _editCmd;
