@@ -53,6 +53,10 @@ namespace PortFolion.ViewModels{
         /// <summary>個別編集の開始</summary>
         /// <param name="ti">編集する対象</param>
         public void EditOrder(TagItem ti) {
+			if (this.EdittingItem == ti)
+				return;
+			if (this.EdittingItem != null)
+				this.Messenger.Raise(new InteractionMessage("QuitOrder"));
             this.EdittingItem = ti;
             this.Messenger.Raise(new InteractionMessage("EditOrder"));
         }
