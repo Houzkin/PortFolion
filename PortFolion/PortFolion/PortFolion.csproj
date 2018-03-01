@@ -151,6 +151,7 @@
     <Compile Include="ViewModels\MenuItemViewModel.cs" />
     <Compile Include="MenuComponent\TagSettingViewModel.cs" />
     <Compile Include="Views\Controls\CustomDropDown.cs" />
+    <Compile Include="Views\Converter\DividePatternToStringConverter.cs" />
     <Compile Include="Views\Converter\PeriodToStringConverter.cs" />
     <Compile Include="GraphComponent\GraphBullets.xaml.cs">
       <DependentUpon>GraphBullets.xaml</DependentUpon>

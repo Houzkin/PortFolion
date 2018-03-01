@@ -32,6 +32,7 @@ namespace PortFolion.ViewModels {
 	public enum DividePattern {
 		Location,
 		Tag,
+		LocationAndTag,
 	}
 	/// <summary>残高に対するキャッシュフローの扱い方</summary>
 	public enum BalanceCashFlow {
@@ -263,13 +264,27 @@ namespace PortFolion.ViewModels {
 			public int CashCount { get; set; }
 		}
 		public static IEnumerable<SeriesValue> MargeNodes(this IEnumerable<CommonNode> collection, DividePattern div) {
+			if(div == DividePattern.Location || div == DividePattern.Tag){
+				return _margeNodes(collection, div);
+			}
+			return _margeNodes(collection, DividePattern.Tag)
+				.Select(t =>
+					collection.ToLookup(a => a.Tag.TagName)
+						.Where(a => a.Key == t.Title)
+						.Select(a => _margeNodes(a, DividePattern.Location)))
+				.SelectMany(b => b.SelectMany(c => c));
+		}
+		private static IEnumerable<SeriesValue> _margeNodes(IEnumerable<CommonNode> collection,DividePattern div){ 
 			Func<CommonNode, string> DivFunc;
 			switch (div) {
-			case DividePattern.Location:
-				DivFunc = c => c.Name;
+			//case DividePattern.Location:
+			//	DivFunc = c => c.Name;
+			//	break;
+			case DividePattern.Tag:
+				DivFunc = c => c.Tag.TagName;
 				break;
 			default:
-				DivFunc = c => c.Tag.TagName;
+				DivFunc = c => c.Name;
 				break;
 			}
 			var ttl = (double)(collection.Sum(a => (a.Amount)));
@@ -287,8 +302,8 @@ namespace PortFolion.ViewModels {
 				.GroupBy(a => a.CashCount)
 				.OrderBy(a => a.Key)
 				.SelectMany(a => a.OrderByDescending(b => b.Amount));
-
 		}
+
 		static Random rdm = new Random();
 		static int rdmIdx = -1;
 		public static void ResetColorIndex() {

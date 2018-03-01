@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 namespace PortFolion.Views.Converter {
     /// <summary>
-    /// 列挙対とBool値のコンバータ
+    /// 列挙対とBool値のコンバータ。ラジオボタンと列挙体を繋げる。
     /// </summary>
     class BoolToEnumConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {

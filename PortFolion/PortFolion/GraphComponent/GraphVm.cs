@@ -43,6 +43,7 @@ namespace PortFolion.ViewModels {
 				|| e.PropertyName == nameof(this.Divide) || e.PropertyName == nameof(this.TimePeriod)
 				|| e.PropertyName == nameof(this.TargetLevel)) {
 					var t = _mng.Update();
+					this.BrakeDownInner.Update();
 					this.BrakeDown.Update();
 					t.Wait();
 					foreach (var g in this.Graphs) {
@@ -61,6 +62,7 @@ namespace PortFolion.ViewModels {
 
 			_mng = new gvMng(this);
 			BrakeDown = new BrakeDownChart(this);
+			BrakeDownInner = new BrakeDownInnerChart(this);
 			this.CurrentNode = RootCollection.Instance.LastOrDefault(a => a.CurrentDate <= DateTime.Today)
 							?? RootCollection.Instance.FirstOrDefault(a => DateTime.Today <= a.CurrentDate);
 			if (this.CurrentNode != null)
@@ -75,6 +77,7 @@ namespace PortFolion.ViewModels {
 				return;
 			}
 			var t = _mng.Refresh();
+			BrakeDownInner.Refresh();
 			BrakeDown.Refresh();
 			Ext.ResetColorIndex();
 			t.Wait();
@@ -190,6 +193,7 @@ namespace PortFolion.ViewModels {
 		#endregion
 
 		public BrakeDownChart BrakeDown { get; }
+		public BrakeDownInnerChart BrakeDownInner{ get; }
 
 		public ObservableCollection<GraphVmBase> Graphs { get; } = new ObservableCollection<GraphVmBase>();
 
@@ -314,11 +318,11 @@ namespace PortFolion.ViewModels {
     /// <summary>内訳チャートのVM</summary>
 	public class BrakeDownChart : SeriesCollection {
 		
+		GraphTabViewModel _vm;
+
 		int _targetLv;
 		DividePattern _divide;
 		CommonNode _curNode;
-
-		GraphTabViewModel _vm;
 
 		public BrakeDownChart(GraphTabViewModel viewModel):base(Mappers.Pie<SeriesValue>().Value(tv=>tv.Amount)) {
 			_vm = viewModel;
@@ -343,8 +347,12 @@ namespace PortFolion.ViewModels {
 				this.RemoveAt(cnt);
 			}
 			if (_curNode == null) return;
-			var tgnss = _curNode.MargeNodes(_targetLv, _divide).ToArray();
-			tgnss.Zip(Ext.PieBrushColors(tgnss.Length), (a, b) => new { Data = a, Brush = b })
+			SetSeriesAndLegend(_targetLv,_divide,_curNode);
+		}
+		protected virtual void SetSeriesAndLegend(int tgtLv, DividePattern div, CommonNode con,bool colorRv = false){
+			var tgnss = con.MargeNodes(tgtLv, div).ToArray();
+			var colors = colorRv ? Ext.PieBrushColors(tgnss.Length).AsEnumerable().Reverse() : Ext.PieBrushColors(tgnss.Length);
+			tgnss.Zip(colors, (a, b) => new { Data = a, Brush = b })
 				.ForEach((a,i) => {
 					a.Data.Fill = new SolidColorBrush(a.Brush);
 					a.Data.Stroke = new SolidColorBrush(Color.Multiply(a.Brush, 0.5f));
@@ -368,11 +376,24 @@ namespace PortFolion.ViewModels {
 		IEnumerable<SeriesValue> _legend;
 		public IEnumerable<SeriesValue> BrakeDownLegend {
 			get { return _legend; }
-			private set {
+			protected set {
 				if (_legend == value) return;
 				_legend = value;
 				OnPropertyChanged(new PropertyChangedEventArgs(nameof(BrakeDownLegend)));
 			}
+		}
+	}
+	/// <summary>
+	/// 内訳チャートの内部を担うVM
+	/// tagのみの表示を想定
+	/// </summary>
+	public class BrakeDownInnerChart:BrakeDownChart{
+		public BrakeDownInnerChart(GraphTabViewModel viewModel) : base(viewModel){ }
+		protected override void SetSeriesAndLegend(int tgtLv, DividePattern div, CommonNode con,bool colorRv = false) {
+			if (div != DividePattern.LocationAndTag)
+				return;
+			base.SetSeriesAndLegend(tgtLv, DividePattern.Tag, con, true);
+			this.OfType<PieSeries>().ForEach(a => a.LabelPosition = PieLabelPosition.InsideSlice);
 		}
 	}
 
