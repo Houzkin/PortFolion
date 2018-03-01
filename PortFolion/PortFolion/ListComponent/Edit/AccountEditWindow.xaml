@@ -164,7 +164,15 @@
             <DataGrid.Resources>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="銘柄" >
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="銘柄" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                                <TextBlock Text="(タグ)" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
