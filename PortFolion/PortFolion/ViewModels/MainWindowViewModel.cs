@@ -68,7 +68,7 @@ namespace PortFolion.ViewModels {
                     var tsw = new Views.TagSettingWindow();
                     tsw.ShowDialog();
                 }) { Header = "タグを編集" },
-                new MenuItemVm() { Header = "Item two" }
+                //new MenuItemVm() { Header = "Item two" }
             };
         }
 		/// <summary>選択可能なメニュー</summary>

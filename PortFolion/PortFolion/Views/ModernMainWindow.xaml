@@ -42,9 +42,18 @@
     </i:Interaction.Triggers>
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <!--<Button Content="settings"/>
-            <Button Content="options"  Command="{Binding ShowLisence}"/>-->
-            <mah:DropDownButton Content="Menu" Background="{x:Null}" BorderBrush="{x:Null}" ItemsSource="{Binding MenuCollection}">
+            <mah:WindowCommands.Resources>
+                <!--<Style TargetType="mah:DropDownButton">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Setter Property="Opacity" Value="1.0"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>-->
+            </mah:WindowCommands.Resources>
+           
+            <mah:DropDownButton Content="Menu" Background="{x:Null}" BorderBrush="{x:Null}" ItemsSource="{Binding MenuCollection}" Opacity="0.5">
                 <mah:DropDownButton.ItemContainerStyle>
                     <Style TargetType="MenuItem">
                         <Setter Property="Header" Value="{Binding Header}"/>
