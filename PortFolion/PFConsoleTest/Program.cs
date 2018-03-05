@@ -4,30 +4,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PortFolion.Core;
+using System.Net;
+using System.Net.Http;
 
 namespace PFConsoleTest {
 	public class Program {
+	/*
+	 * html解析
+	 * HtmlAgilityPack
+	 * AngleSharp
+	 * */
+		static string url = "https://www.sbisec.co.jp/ETGate/";
+		static string id;
+		static string userPass;
+
 		static void Main(string[] args) {
 
-			//var ins = RootCollection.Instance;
-
-			//var b = new BrokerNode();
-			//b.Name = "Broker01";
-			//Console.WriteLine(b.Name);
-			//var n = new AccountNode(AccountClass.General);
-			//b.AddChild(n);
-			//var r = RootCollection.GetOrCreate(new DateTime(2017, 1, 1));
-			//r.Name = "総リスクファンド";
-			//r.AddChild(b);
-			//var rr = RootCollection.GetOrCreate(new DateTime(2017, 2, 1));
-
-			//Console.WriteLine(rr.Name);
-
-			//var d = PortFolion.Web.KdbDataClient.AcqireStockInfo(DateTime.Today.AddDays(-1));
-			//foreach (var dd in d) {
-			//	Console.WriteLine(dd.Symbol);
-			//}
+			
 			Console.ReadLine();
+		}
+		static async Task<CookieContainer> LoginAsync(){
+			CookieContainer cc;
+			using (var handler = new HttpClientHandler())
+			using(var client = new HttpClient(handler)){
+				var content = new FormUrlEncodedContent(new Dictionary<string, string> {
+					{"user_id", id },
+					{"user_password",userPass },
+				});
+				await client.PostAsync(url, content);
+				cc = handler.CookieContainer;
+			}
+			CookieCollection cookies = cc.GetCookies(new Uri(url));
+			return cc;
 		}
 	}
 }
