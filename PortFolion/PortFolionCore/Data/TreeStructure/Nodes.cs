@@ -194,19 +194,21 @@ namespace PortFolion.Core {
 				RaisePropertyChanged();
 			}
 		}
-		public FinancialValue GetOrCreateNuetral() {
-			var nd = ChildNodes.SingleOrDefault(a => a.GetNodeType() == NodeType.Cash) as FinancialValue;//.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
-			if (nd != null) return nd;
+		//public FinancialValue GetOrCreateNuetral() {
+		//	var nd = ChildNodes.SingleOrDefault(a => a.GetNodeType() == NodeType.Cash) as FinancialValue;//.SingleOrDefault(a => a.GetType() == typeof(FinancialValue)) as FinancialValue;
+		//	if (nd != null) return nd;
 			
-			var n = new FinancialValue() { Name = "余力" };
-			this.AddChild(n);
-			return n;
-		}
-		public override long InvestmentValue 
-			=> GetOrCreateNuetral().InvestmentValue;
+		//	var n = new FinancialValue() { Name = "余力" };
+		//	this.AddChild(n);
+		//	return n;
+		//}
+		public override long InvestmentValue
+			=> ChildNodes.Sum(a => a.InvestmentValue);
+			//=> GetOrCreateNuetral().InvestmentValue;
 		public override void SetInvestmentValue(long value) {
-			var ntr = GetOrCreateNuetral();
-			ntr.SetInvestmentValue(value);
+			throw new NotSupportedException();
+			//var ntr = GetOrCreateNuetral();
+			//ntr.SetInvestmentValue(value);
 		}
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			base.ChildrenPropertyChanged(sender, e);
@@ -238,17 +240,31 @@ namespace PortFolion.Core {
 		public BrokerNode() : base() { }
 		internal BrokerNode(CushionNode cushion) : base(cushion) { }
 
+		public FinancialValue GetOrCreateNuetral(){
+			var nd = ChildNodes.SingleOrDefault(a => a.GetNodeType() == NodeType.Cash) as FinancialValue;
+			if (nd != null)
+				return nd;
+			var n = new FinancialValue() { Name = "余力" };
+			this.AddChild(n);
+			return n;
+		}
+		
+
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			base.ChildrenPropertyChanged(sender, e);
 			if (e.PropertyName == nameof(InvestmentValue))
 				RaisePropertyChanged(nameof(InvestmentValue));
 		}
-		public override void SetInvestmentValue(long value) {
-			throw new NotSupportedException();
+		public override void SetInvestmentValue(long value){
+			GetOrCreateNuetral().SetInvestmentValue(value);
 		}
-		public override long InvestmentValue {
-			get { return ChildNodes.Sum(a => a.InvestmentValue); }
-		}
+		//{
+		//	throw new NotSupportedException();
+		//}
+		public override long InvestmentValue
+			=> GetOrCreateNuetral().InvestmentValue;
+			//get { return ChildNodes.Sum(a => a.InvestmentValue); }
+			
 		
 		public override CommonNode Clone() {
 			return Clone(new BrokerNode());

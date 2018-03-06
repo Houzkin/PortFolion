@@ -45,7 +45,7 @@ namespace PortFolion.ViewModels {
 			set { _messenger = value; }
 		}
 		public AccountEditVM(AccountNode an) : base(an) {
-			var cash = Model.GetOrCreateNuetral();
+			var cash = (Model.Parent as BrokerNode).GetOrCreateNuetral();
 			resetElements();
 			Elements.CollectionChanged += (s, e) => ChangedTemporaryAmount();
 			DummyStock = new StockEditVM(this);
@@ -176,7 +176,8 @@ namespace PortFolion.ViewModels {
 			var stc = elems.Where(a => a.IsStock).OfType<StockEditVM>().OrderBy(a => a.Code);
 			var prd = elems.Where(a => a.IsProduct).OrderBy(a => a.Name);
 
-			var ary = stc.Concat(prd).Concat(csh).ToArray();
+			//var ary = stc.Concat(prd).Concat(csh).ToArray();
+			var ary = stc.Concat(prd).ToArray();
 			var rmv = Model.Children.Except(ary.Select(a => a.Model)).ToArray();
 
 			rmv.ForEach(a => Model.Children.Remove(a));
@@ -189,7 +190,8 @@ namespace PortFolion.ViewModels {
 					Model.Children.Insert(idx, ele.Model);
 				}
 			});
-			ary.ForEach(e => e.Apply());
+			//ary.ForEach(e => e.Apply());
+			ary.Concat(csh).ForEach(e => e.Apply());
 			this.EdittingList.Add(CurrentDate);
 			this.Messenger.Raise(new InteractionMessage("CloseAsTrue"));
 		}
@@ -222,7 +224,8 @@ namespace PortFolion.ViewModels {
 		public ICommand Reset => resetCmd = resetCmd ?? new ViewModelCommand(resetElements);
 		void resetElements() {
 			Elements.Clear();
-			Model.Children.Select(a => {
+			Model.Preorder().Where(a=>!a.Children.Any()).Select(a=>{ 
+			//Model.Children.Select(a => {
 				var t = a.GetType();
 				if (t == typeof(StockValue)) return new StockEditVM(this, a as StockValue);
 				else if (t == typeof(FinancialProduct)) return new ProductEditVM(this, a as FinancialProduct);
@@ -301,7 +304,6 @@ namespace PortFolion.ViewModels {
 		void editTag() {
             var tedi = new FromAccountNodeTagEditerVM(AccountVM, this);
             AccountVM.NodeTagEditer = tedi;
-            //throw new NotImplementedException("まだ実装していない");
         }
 		void del2() {
 			if (IsCash) {

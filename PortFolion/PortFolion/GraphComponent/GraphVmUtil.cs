@@ -249,12 +249,21 @@ namespace PortFolion.ViewModels {
 		#endregion
 		/// <summary>現在のノードから指定した階層だけ下位のノードを返す。</summary>
 		public static IEnumerable<CommonNode> TargetLevels(this CommonNode cur, int tgtLv) {
-			var cd = cur.NodeIndex().CurrentDepth;
-			var ch = cur.Height();
-			var tg = Math.Min(ch, tgtLv) + cd;
-			return cur.Levelorder()
-				.SkipWhile(a => a.NodeIndex().CurrentDepth < tg)
-				.TakeWhile(a => a.NodeIndex().CurrentDepth == tg);
+		//	var cd = cur.NodeIndex().CurrentDepth;
+		//	var ch = cur.Height();
+		//	var tg = Math.Min(ch, tgtLv) + cd;
+		//	return cur.Levelorder()
+		//		.SkipWhile(a => a.NodeIndex().CurrentDepth < tg)
+		//		.TakeWhile(a => a.NodeIndex().CurrentDepth == tg);
+		//}
+		//public static IEnumerable<CommonNode> MargeTargetLevels(this CommonNode cur, int tgtLv){
+			IEnumerable<CommonNode> lst = new CommonNode[] { cur };
+			IEnumerable<CommonNode> fn(CommonNode a) =>
+				a.Children.Any() ? a.Children.AsEnumerable() : new CommonNode[] { a };
+			for (int i=0;i<tgtLv;i++){
+				lst = lst.SelectMany(a => fn(a)).ToArray();
+			}
+			return lst;
 		}
 		/// <summary>指定した項目種別で括る。</summary>
 		public static IEnumerable<SeriesValue> MargeNodes(this CommonNode current, int tgtLv, DividePattern div) {
@@ -268,11 +277,10 @@ namespace PortFolion.ViewModels {
 				return _margeNodes(collection, div);
 			}
 			return _margeNodes(collection, DividePattern.Tag)
-				.Select(t =>
+				.SelectMany(t =>
 					collection.ToLookup(a => a.Tag.TagName)
 						.Where(a => a.Key == t.Title)
-						.Select(a => _margeNodes(a, DividePattern.Location)))
-				.SelectMany(b => b.SelectMany(c => c));
+						.SelectMany(a => _margeNodes(a, DividePattern.Location)));
 		}
 		private static IEnumerable<SeriesValue> _margeNodes(IEnumerable<CommonNode> collection,DividePattern div){ 
 			Func<CommonNode, string> DivFunc;
