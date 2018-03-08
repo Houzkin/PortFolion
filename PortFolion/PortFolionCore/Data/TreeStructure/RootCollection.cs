@@ -107,6 +107,23 @@ namespace PortFolion.Core {
 			}
 			return lst;
 		}
+		
+		static ResultWithValue<IEnumerable<DateTime>> _canChangeNodeName(CommonNode node,string name, TagEditParam param){
+			IEnumerable<CommonNode> lst;
+			switch (param) {
+			case TagEditParam.AllHistory:
+				break;
+			case TagEditParam.FromCurrent:
+				break;
+			case TagEditParam.Position:
+				break;
+			}
+			throw new NotImplementedException();
+		}
+		static Tuple<string,Action> _changeNodeName(CommonNode node, string newName,TagEditParam param){
+			throw new NotImplementedException();
+		}
+
 		internal static void ChangeNodeTag(NodePath<string> path,string newTag) {
 			var tg = TagInfo.GetWithAdd(newTag);
 			foreach (var t in GetNodeLine(path).Values) t.Tag = tg;

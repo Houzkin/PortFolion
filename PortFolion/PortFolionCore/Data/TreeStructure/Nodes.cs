@@ -212,7 +212,7 @@ namespace PortFolion.Core {
 		}
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			base.ChildrenPropertyChanged(sender, e);
-			if(e.PropertyName == nameof(InvestmentValue) && sender.GetType() == typeof(FinancialValue)) {
+			if(e.PropertyName == nameof(InvestmentValue)) {
 				RaisePropertyChanged(nameof(InvestmentValue));
 			}
 		}
@@ -252,7 +252,7 @@ namespace PortFolion.Core {
 
 		protected override void ChildrenPropertyChanged(object sender, PropertyChangedEventArgs e) {
 			base.ChildrenPropertyChanged(sender, e);
-			if (e.PropertyName == nameof(InvestmentValue))
+			if (e.PropertyName == nameof(InvestmentValue) && sender.GetType()==typeof(FinancialValue))
 				RaisePropertyChanged(nameof(InvestmentValue));
 		}
 		public override void SetInvestmentValue(long value){
