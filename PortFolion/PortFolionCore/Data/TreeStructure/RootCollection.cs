@@ -108,8 +108,12 @@ namespace PortFolion.Core {
 			return lst;
 		}
 		
-		static ResultWithValue<IEnumerable<DateTime>> _canChangeNodeName(CommonNode node,string name, TagEditParam param){
-			IEnumerable<CommonNode> lst;
+		static bool _canChangeNodeName(CommonNode node,string name, TagEditParam param){
+			var p = node.Parent.Path.Concat(new string[] { name.Trim() });
+			//変更先のノード名で検索
+			var hst = RootCollection.GetNodeLine(p);
+			//現在(変更前)のノード名で検索
+			var hso = RootCollection.GetNodeLine(node.Path);
 			switch (param) {
 			case TagEditParam.AllHistory:
 				break;
@@ -120,9 +124,10 @@ namespace PortFolion.Core {
 			}
 			throw new NotImplementedException();
 		}
-		static Tuple<string,Action> _changeNodeName(CommonNode node, string newName,TagEditParam param){
+		static void _changeNodeName(CommonNode node, string newName,TagEditParam param){
 			throw new NotImplementedException();
 		}
+		static event Action<string> NodeNameChangeMessage;
 
 		internal static void ChangeNodeTag(NodePath<string> path,string newTag) {
 			var tg = TagInfo.GetWithAdd(newTag);
