@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Houzkin.Tree;
+using Houzkin.Tree.Serialization;
 
 namespace PortFolion.Core {
 	public class EditManager{
@@ -23,8 +24,11 @@ namespace PortFolion.Core {
 		BrokerNode _model;
 		public BrokerEditManager(BrokerNode node){
 			_model = node;
-			Broker = node.Clone() as BrokerNode;
-			editDic = new Dictionary<CommonNode, Action<CommonNode>>();
+			Broker = node.Root().Convert(a => a.Clone(), (a, b) => a.AddChild(b)).Levelorder().First(a=>a.Path == _model.Path) as BrokerNode;
+			map = Broker.Levelorder()
+				.Zip(_model.Levelorder(), (b, m) => Tuple.Create(b, m))
+				.ToDictionary(a => a.Item1, a => a.Item2);
+			editDic = new Dictionary<NodeIndex, Action<CommonNode>>();
 		}
 		public event Action<string> EditerMessage;
 		BrokerNode Broker{ get; }
@@ -34,8 +38,10 @@ namespace PortFolion.Core {
 		public void AddPosition(CommonNode parent,CommonNode node){ }
 		public void MovePositon(CommonNode node, CommonNode moveTo){ }
 		public void Remove(CommonNode node){ }
+		public void Edit(CommonNode node){ }
 
-		Dictionary<CommonNode, Action<CommonNode>> editDic;
+		Dictionary<CommonNode, CommonNode> map;
+		Dictionary<NodeIndex, Action<CommonNode>> editDic;
 
 		public void Execute(){
 			//var idx = _model.BranchIndex();
@@ -45,6 +51,12 @@ namespace PortFolion.Core {
 			//		action(n);
 			//	}
 			//}
+			foreach(var n in Broker.Levelorder()){
+				var ni = n.NodeIndex();
+				if(editDic.TryGetValue(ni, out Action<CommonNode> action)){
+					
+				}
+			}
 		}
 
 	}
