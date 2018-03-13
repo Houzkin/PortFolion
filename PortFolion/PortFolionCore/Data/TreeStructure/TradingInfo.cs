@@ -18,20 +18,20 @@ namespace PortFolion.Core {
 
 	//	public IReadOnlyList<TViewModel> Children => throw new NotImplementedException();
 	//}
-	public class EditManager : TreeNode<EditManager> {
+	public class EditManager  {
 		public EditManager(CommonNode node){
 			Instance = node;
 			Dummy = node.Clone();
 		}
 		#region override
-		protected override void InsertChildNode(int index, EditManager child) {
-			base.InsertChildNode(index, child);
-			this.Dummy.Children.Insert(index, child.Dummy);
-		}
-		protected override void SetChildNode(int index, EditManager child) {
-			base.SetChildNode(index, child);
-			this.Dummy.Children[index] = child.Dummy;
-		}
+		//protected override void InsertChildNode(int index, EditManager child) {
+		//	base.InsertChildNode(index, child);
+		//	this.Dummy.Children.Insert(index, child.Dummy);
+		//}
+		//protected override void SetChildNode(int index, EditManager child) {
+		//	base.SetChildNode(index, child);
+		//	this.Dummy.Children[index] = child.Dummy;
+		//}
 		#endregion
 		public CommonNode Instance{ get; }
 		public CommonNode Dummy { get; }
@@ -58,14 +58,25 @@ namespace PortFolion.Core {
 	}
 	public class BrokerEditManager {
 		BrokerNode _model;
+		BrokerNode _dummy;
 		public BrokerEditManager(BrokerNode node){
 			_model = node;
-			BrokerEditer = (node as CommonNode).Convert(a => new EditManager(a));
-
-			MngList = new List<EditManager>(BrokerEditer.Levelorder());
+			//BrokerEditer = (node as CommonNode).Convert(a => new EditManager(a));
+			MngList = new List<EditManager>();
+			var bl = (node as CommonNode).Convert(a => {
+				var m = new EditManager(a);
+				MngList.Add(m);
+				return m;
+			},(a,b)=> { a.Dummy.AddChild(b.Dummy); });
+			this.BrokerEditer = bl;
+			_dummy = BrokerEditer.Dummy as BrokerNode;
 		}
 		public event Action<string> EditerMessage;
 		EditManager BrokerEditer{ get; }
+
+		private CommonNode ToInstance(CommonNode dummy){
+			return MngList.Single(a => a.Dummy == dummy).Instance;
+		}
 		public void AddAccount(AccountNode account){
 			_setMng(BrokerEditer, new EditManager(account));
 			BrokerEditer.SetCommand(a => {
@@ -73,13 +84,13 @@ namespace PortFolion.Core {
 			});
 		}
 		public void AddPosition(CommonNode parent,CommonNode node){
-			var t = BrokerEditer.Preorder().FirstOrDefault(a => a.Dummy == parent);
-			if (t == null) return;
-			_setMng(t, new EditManager(node));
-			t.SetCommand(a => {
-				a.AddChild(node);//順序
-			});
-			
+			//var t = BrokerEditer.Preorder().FirstOrDefault(a => a.Dummy == parent);
+			//if (t == null) return;
+			//_setMng(t, new EditManager(node));
+			//t.SetCommand(a => {
+			//	a.AddChild(node);//順序
+			//});
+			throw new NotImplementedException();
 		}
 		public void MovePosition(CommonNode node, CommonNode newParent){ }
 		public void Remove(CommonNode node){ }
@@ -87,7 +98,8 @@ namespace PortFolion.Core {
 
 		private void _setMng(EditManager parent, EditManager em){
 			MngList.Add(em);
-			parent.AddChild(em);
+			//parent.AddChild(em);
+			throw new NotImplementedException();
 		}
 		List<EditManager> MngList;
 
