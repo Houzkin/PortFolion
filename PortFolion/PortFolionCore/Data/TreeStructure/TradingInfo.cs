@@ -8,38 +8,21 @@ using Houzkin.Tree;
 using Houzkin.Tree.Serialization;
 
 namespace PortFolion.Core {
-	//public abstract class ReadOnlyTreeNode<TModel, TViewModel> : IReadOnlyTreeNode<TViewModel>
-	//where TViewModel : ReadOnlyTreeNode<TModel, TViewModel>
-	//where TModel : IReadOnlyObservableTreeNode<TModel> {
+	//駄file	
 
-	//	protected abstract TViewModel GenerateChild(TModel modelChildNode);
+	public class EditManager :IDisposable {
+		public EditManager(CommonNode node) 
+			: this(node, new HashSet<CommonNode>()) { }
 
-	//	public TViewModel Parent => throw new NotImplementedException();
-
-	//	public IReadOnlyList<TViewModel> Children => throw new NotImplementedException();
-	//}
-	public class EditManager  {
-		public EditManager(CommonNode node){
+		public EditManager(CommonNode node,HashSet<CommonNode> hash){
 			Instance = node;
-			Dummy = node.Clone();
+			ChangedList = hash;
 		}
-		#region override
-		//protected override void InsertChildNode(int index, EditManager child) {
-		//	base.InsertChildNode(index, child);
-		//	this.Dummy.Children.Insert(index, child.Dummy);
-		//}
-		//protected override void SetChildNode(int index, EditManager child) {
-		//	base.SetChildNode(index, child);
-		//	this.Dummy.Children[index] = child.Dummy;
-		//}
-		#endregion
 		public CommonNode Instance{ get; }
-		public CommonNode Dummy { get; }
-		List<Func<CommonNode,IEnumerable<CommonNode>>> commands;
+		public HashSet<CommonNode> ChangedList { get; } 
 
 		public void SetCommand(Func<CommonNode,IEnumerable<CommonNode>> command){
-			commands.Add(command);
-			command(Dummy);
+			
 		}
 		public void SetCommand(Func<CommonNode,CommonNode> command){
 			this.SetCommand(f => new CommonNode[] { command(f) });
@@ -48,48 +31,36 @@ namespace PortFolion.Core {
 			this.SetCommand(f => { command(f); return f.Root(); });
 		}
 		public IEnumerable<TotalRiskFundNode> Execute(){
-			var r = commands.SelectMany(a => a(Instance)).OfType<TotalRiskFundNode>().ToArray();
-			commands.Clear();
-			return r;
+			throw new NotImplementedException();
 		}
-		public void Cancel(){ commands.Clear(); }
-		/// <summary>Instanceと比較してDummyに変更があった場合true</summary>
-		public bool HasChanged{ get; }
+		public void Cancel(){
+			RootCollection.ReRead(ChangedList.OfType<TotalRiskFundNode>());
+			ChangedList.Clear();
+		}
+		public void Dispose(){
+			Cancel();
+		}
 	}
 	public class BrokerEditManager {
-		BrokerNode _model;
-		BrokerNode _dummy;
-		public BrokerEditManager(BrokerNode node){
+		public BrokerEditManager(CommonNode node){
 			_model = node;
-			//BrokerEditer = (node as CommonNode).Convert(a => new EditManager(a));
 			MngList = new List<EditManager>();
-			var bl = (node as CommonNode).Convert(a => {
-				var m = new EditManager(a);
-				MngList.Add(m);
-				return m;
-			},(a,b)=> { a.Dummy.AddChild(b.Dummy); });
-			this.BrokerEditer = bl;
-			_dummy = BrokerEditer.Dummy as BrokerNode;
+			
+			MngList.AddRange(_model.Preorder().Select(a => new EditManager(a)));
+			CurrentEditer = MngList.First();
 		}
 		public event Action<string> EditerMessage;
-		EditManager BrokerEditer{ get; }
+		CommonNode _model;
+		EditManager CurrentEditer{ get; }
 
-		private CommonNode ToInstance(CommonNode dummy){
-			return MngList.Single(a => a.Dummy == dummy).Instance;
-		}
+		
 		public void AddAccount(AccountNode account){
-			_setMng(BrokerEditer, new EditManager(account));
-			BrokerEditer.SetCommand(a => {
+			_setMng(CurrentEditer, new EditManager(account));
+			CurrentEditer.SetCommand(a => {
 				a.AddChild(account);//順序
 			});
 		}
 		public void AddPosition(CommonNode parent,CommonNode node){
-			//var t = BrokerEditer.Preorder().FirstOrDefault(a => a.Dummy == parent);
-			//if (t == null) return;
-			//_setMng(t, new EditManager(node));
-			//t.SetCommand(a => {
-			//	a.AddChild(node);//順序
-			//});
 			throw new NotImplementedException();
 		}
 		public void MovePosition(CommonNode node, CommonNode newParent){ }

@@ -77,14 +77,21 @@ namespace PortFolion.IO {
 				return Enumerable.Empty<FileInfo>();
 			}
 		}
-		internal static IEnumerable<TotalRiskFundNode> ReadRoots() {
+		internal static IEnumerable<TotalRiskFundNode> ReadRoots(IEnumerable<DateTime> date){
+			return _ReadRoots(a => date.Contains(a));
+		}
+		internal static IEnumerable<TotalRiskFundNode> ReadRoots(){
+			return _ReadRoots(a => true);
+		}
+		static IEnumerable<TotalRiskFundNode> _ReadRoots(Func<DateTime,bool> prd) {
 			var d = new DirectoryInfo(currentPath);
 			if (!d.Exists) d.Create();
 			try {
 				var dd = d.GetDirectories("*", SearchOption.AllDirectories)
 					.Where(a => ResultWithValue.Of<int>(int.TryParse, a.Name))
 					.SelectMany(a => a.GetFiles("*.xml", SearchOption.TopDirectoryOnly))
-					.Where(a => ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name.Replace(a.Extension,string.Empty)))
+					.Where(a => ResultWithValue.Of<DateTime>(DateTime.TryParse, a.Name.Replace(a.Extension, string.Empty))
+						.TrueOrNot(prd, x => false))
 					.Select(a => readRoot(a.FullName))
 					.Where(a => a != null);
 				return dd;

@@ -17,6 +17,11 @@ namespace PortFolion.Core {
 
 		public static RootCollection Instance { get; } = new RootCollection();
 
+		public static void ReRead(IEnumerable<TotalRiskFundNode> roots){
+			var ds = roots.Select(a => a.CurrentDate).ToArray();
+			foreach (var n in roots) Instance.Remove(n);
+			foreach(var n in HistoryIO.ReadRoots(ds)) Instance.Add(n);
+		}
 		public static TotalRiskFundNode GetOrCreate(DateTime date) {
 			date = new DateTime(date.Year, date.Month, date.Day);
 			if (!Instance.Keys.Contains(date)) {
@@ -174,7 +179,7 @@ namespace PortFolion.Core {
 			if (ContainsKey(item.CurrentDate)) return;
 			var hs = new HashSet<DateTime>(this.Keys);
 			hs.Add(item.CurrentDate);
-			var idx = new List<DateTime>(hs.OrderBy(a => a)).IndexOf(item.CurrentDate);
+			var idx = hs.OrderBy(a => a).Select((d, i) => new { d, i }).First(a => a.d == item.CurrentDate).i;// new List<DateTime>(hs.OrderBy(a => a)).IndexOf(item.CurrentDate);
 			base.InsertItem(idx, item);
 		}
 		protected override void SetItem(int index, TotalRiskFundNode item) {
