@@ -133,6 +133,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ListComponent\BrokerEdit\Class1.cs" />
     <Compile Include="ListComponent\Edit\NodeTagEdit.cs" />
     <Compile Include="ListComponent\Edit\NodeTagEditWindow.xaml.cs">
       <DependentUpon>NodeTagEditWindow.xaml</DependentUpon>
@@ -308,9 +309,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ListComponent\BrokerEdit\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
