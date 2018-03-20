@@ -23,17 +23,24 @@ namespace PortFolion.ViewModels {
 
 		}
 		protected override BasketTree GenerateChild(CommonNode modelChildNode) {
-			if (modelChildNode is FinancialBasket m) return new BasketTree(m);
-			else return null;
+			return new BasketTree(modelChildNode);
 		}
 	}
 	public class EditPresenter : ViewModel{
-		//public EditPresenter(BrokerNode broker){
-		//	Broker = new BrokerEditVm(broker) {
-		//		Messenger = this.Messenger
-		//	};
-		//}
-		//public BrokerEditVm Broker { get; } 
-		public EditPresenter(TotalRiskFundNode root){ }
+		static EditPresenter _instance;
+		public static EditPresenter Instance{ get => _instance; }
+		public static EditPresenter Create(TotalRiskFundNode root){
+			_instance = new EditPresenter(root);
+			return _instance;
+		}
+
+		EditPresenter(TotalRiskFundNode root){
+			Baskets.Add(new BasketTree(root));
+			var b = root.Preorder().OfType<BrokerNode>().FirstOrDefault();
+			if (b != null) EditTree.Add(new BrokerEditVm(b));
+		}
+
+		public ObservableCollection<BasketTree> Baskets { get; } = new ObservableCollection<BasketTree>();
+		public ObservableCollection<CommonEditVm> EditTree { get; } = new ObservableCollection<CommonEditVm>();
 	}
 }
