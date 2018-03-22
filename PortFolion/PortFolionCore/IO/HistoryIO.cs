@@ -109,9 +109,32 @@ namespace PortFolion.IO {
 			} catch {
 				nodes = null;
 			}
-			return nodes?.AssembleTree(a => a.ToInstance())
+			var v = nodes?.AssembleTree(a => a.ToInstance())
 				.RemoveDescendant(a => (a as AnonymousNode) != null) as TotalRiskFundNode;
+			return _adjust14(v);
 		}
 
+		static TotalRiskFundNode _adjust14(TotalRiskFundNode root){
+			if (root == null) return root;
+			foreach(var brk in root.Levelorder().Where(a=>a.GetNodeType() == NodeType.Broker)){
+				var bkCash = brk.Children
+					.Where(a => a.GetNodeType() == NodeType.Cash)
+					.OfType<FinancialValue>().ToArray();
+				var acCash = brk.Children.Where(a => a.GetNodeType() == NodeType.Account)
+					.SelectMany(a => a.Preorder().Where(b => b.GetNodeType() == NodeType.Cash))
+					.OfType<FinancialValue>().ToArray();
+				if (bkCash.Count() == 1 && !acCash.Any()) continue;
+				
+				foreach (var n in acCash) n.Parent.RemoveChild(n);
+				if (!bkCash.Any() && acCash.Any()){
+					brk.AddChild(acCash.Aggregate((a, b) => {
+						a.SetAmount(a.Amount + b.Amount);
+						a.SetInvestmentValue(a.InvestmentValue + b.InvestmentValue);
+						return a;
+					}));
+				}
+			}
+			return root;
+		}
 	}
 }
