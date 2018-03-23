@@ -133,6 +133,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EditComponent\EditViewModel.cs" />
+    <Compile Include="EditComponent\EditWindow.xaml.cs">
+      <DependentUpon>EditWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ListComponent\BrokerEdit\Class1.cs" />
     <Compile Include="ListComponent\BrokerEdit\Class2.cs" />
     <Compile Include="ListComponent\Edit\NodeTagEdit.cs" />
@@ -191,6 +195,10 @@
     <Compile Include="MenuComponent\TagSettingFlyout.xaml.cs">
       <DependentUpon>TagSettingFlyout.xaml</DependentUpon>
     </Compile>
+    <Page Include="EditComponent\EditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ListComponent\Edit\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

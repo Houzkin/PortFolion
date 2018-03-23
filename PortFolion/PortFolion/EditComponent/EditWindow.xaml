@@ -1,21 +1,59 @@
-﻿<UserControl x:Class="PortFolion.Views.ListTab"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
-             xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:PortFolion.Views"
-             xmlns:vm ="clr-namespace:PortFolion.ViewModels"
-             xmlns:model="clr-namespace:PortFolion.Models"
-             xmlns:selector ="clr-namespace:PortFolion.Views.Selector"
-             xmlns:converter="clr-namespace:PortFolion.Views.Converter"
-             xmlns:tree="clr-namespace:System.Windows.Controls;assembly=TreeListView"
-             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="1100">
+﻿<mah:MetroWindow x:Class="PortFolion.Views.EditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+        xmlns:v="clr-namespace:PortFolion.Views"
+        xmlns:vm="clr-namespace:PortFolion.ViewModels"
+        xmlns:model="clr-namespace:PortFolion.Models"
+        xmlns:converter="clr-namespace:PortFolion.Views.Converter"
+        xmlns:selector ="clr-namespace:PortFolion.Views.Selector"
+        xmlns:tree="clr-namespace:System.Windows.Controls;assembly=TreeListView"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        x:Name="editWindow"
+        mc:Ignorable="d" SaveWindowPosition="True"
+        GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
+        TitleCaps="False"
+        Icon="/Portfolion;component/PortFolion.ico"
+        Title="PortFolion＠編集中" Height="300" Width="300">
+    <i:Interaction.Triggers>
+        <!--WindowのClose時、Disposeメソッドを呼び出す-->
+        <i:EventTrigger EventName="Closed">
+            <l:DataContextDisposeAction/>
+        </i:EventTrigger>
+        
+        <!--メッセンジャー経由によってWindowを終了する-->
+        <l:InteractionMessageTrigger MessageKey="CloseWindow" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="editWindow" PropertyName="DialogResult" Value="true"/>
+        </l:InteractionMessageTrigger>
+
+        <!--履歴表示Flyoutの開閉-->
+        <l:InteractionMessageTrigger MessageKey="OpenHistoryFlyout" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="HistoryFlyout" PropertyName="IsOpen" Value="true"/>
+        </l:InteractionMessageTrigger>
+        <l:InteractionMessageTrigger MessageKey="CloseHistoryFlyout" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="HistoryFlyout" PropertyName="IsOpen" Value="false"/>
+        </l:InteractionMessageTrigger>
+        
+        <!--編集Flyoutの開閉-->
+        
+    </i:Interaction.Triggers>
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl>
+            <mah:Flyout x:Name="HistoryFlyout" Header="履歴"
+                        Position="Right" AnimateOpacity="True">
+                
+            </mah:Flyout>
+            <mah:Flyout x:Name="EditFlyout" Header="編集"
+                        Position="Bottom" AnimateOpacity="True">
+                
+            </mah:Flyout>
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
     <Grid>
         <Grid.Resources>
             <converter:PathToStringConverter x:Key="PathToString"/>
@@ -80,7 +118,8 @@
                             Command="{Binding AddNewRootCommand}"/>
                 </StackPanel>
             </Grid>
-        </Expander><!--{Binding IsTreeLoading, Converter={StaticResource BooleanToVisibilityConverter}}-->
+        </Expander>
+        <!--{Binding IsTreeLoading, Converter={StaticResource BooleanToVisibilityConverter}}-->
 
         <ContentControl d:IsHidden="True" Grid.Column="1" Panel.ZIndex="1"
                         Visibility="{Binding IsTreeLoading,Converter={StaticResource BtoVConverter}}"
@@ -187,8 +226,8 @@
                         </Setter>
                     </Style>
                     <Style TargetType="TreeViewItem" BasedOn="{StaticResource MetroTreeViewItem}">
-                       <Setter Property="IsExpanded" Value="{Binding Path=IsExpand, Mode=TwoWay}" />
-                       <Setter Property="Template">
+                        <Setter Property="IsExpanded" Value="{Binding Path=IsExpand, Mode=TwoWay}" />
+                        <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TreeViewItem">
                                     <!--Grid containing the current information and the subnodes.-->
@@ -209,7 +248,7 @@
                                         <Trigger Property="IsExpanded" Value="True">
                                             <Setter TargetName="ItemsPresenter" Property="Visibility" Value="Visible"/>
                                         </Trigger>
-                                        
+
                                         <Trigger SourceName="Bd" Property="IsMouseOver" Value="True">
                                             <Setter Property="Foreground" Value="{DynamicResource BlackColorBrush}" />
                                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentColorBrush3}" />
@@ -238,13 +277,13 @@
                                             </MultiTrigger.Conditions>
                                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentColorBrush2}" />
                                         </MultiTrigger>
-                                        
+
                                     </ControlTemplate.Triggers>
-                                </ControlTemplate>                                
+                                </ControlTemplate>
                             </Setter.Value>
                         </Setter>
                     </Style>
-                    
+
                     <selector:NodeTemplateSelector x:Key="NodeTemplateSelector"/>
                     <DataTemplate x:Key="NodeTemplate" DataType="{x:Type vm:CommonNodeVM}">
                         <StackPanel Orientation="Horizontal" >
@@ -254,13 +293,13 @@
                             <!--Content="{iconPacks:PackIconMaterial Kind=LeadPencil,Width=13,Height=13}" -->
                             <mah:DropDownButton VerticalContentAlignment="Center" Content=""
                                                 ItemsSource="{Binding MenuList}" >
-                                    <mah:DropDownButton.ItemContainerStyle>
-                                        <Style TargetType="MenuItem">
-                                            <Setter Property="Icon" Value="{Binding Icon}"/>
-                                            <Setter Property="Header" Value="{Binding Header}"/>
-                                            <Setter Property="Command" Value="{Binding MenuCommand}"/>
-                                        </Style>
-                                    </mah:DropDownButton.ItemContainerStyle>
+                                <mah:DropDownButton.ItemContainerStyle>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Icon" Value="{Binding Icon}"/>
+                                        <Setter Property="Header" Value="{Binding Header}"/>
+                                        <Setter Property="Command" Value="{Binding MenuCommand}"/>
+                                    </Style>
+                                </mah:DropDownButton.ItemContainerStyle>
                             </mah:DropDownButton>
                             <StackPanel.ContextMenu>
                                 <ContextMenu ItemsSource="{Binding MenuList}">
@@ -352,82 +391,6 @@
                 </tree:TreeListView.Columns>
             </tree:TreeListView>
         </Grid>
-        
-        <GridSplitter Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="5"/>
 
-        <ContentControl d:IsHidden="True" Grid.Column="3" Panel.ZIndex="1"
-                        Visibility="{Binding IsHistoryLoading,Converter={StaticResource BtoVConverter}}"
-                        ContentTemplate="{StaticResource nowLoading}"/>
-        <Grid Grid.Column="3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="{Binding Path,Converter={StaticResource PathToString}}" Margin="5"/>
-
-            <DataGrid Grid.Row="1" MinWidth="100" Margin="5" ItemsSource="{Binding History}"
-                      IsReadOnly="True" HorizontalScrollBarVisibility="Auto" AutoGenerateColumns="False">
-                <DataGrid.Resources>
-                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MetroDataGridCell}">
-                        <Setter Property="HorizontalAlignment" Value="Right"/>
-                    </Style>
-                    <RoutedCommand x:Key="MyCommand"/>
-                </DataGrid.Resources>
-                <DataGrid.CommandBindings>
-                    <CommandBinding Command="{StaticResource MyCommand}" Executed="CommandBinding_Executed"/>
-                </DataGrid.CommandBindings>
-                <DataGrid.Columns>
-                    <!--<DataGridTextColumn Header="日付" Binding="{Binding CurrentDate,StringFormat=yyyy/M/d}"
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>-->
-
-                    <DataGridTemplateColumn Header="日付" CanUserReorder="True" CanUserResize="True" CanUserSort="False" IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}" VerticalAlignment="Center"/>
-                                    <Button Width="22" Height="22" Margin="3,0"
-                                            Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}"
-                                            Content="{iconPacks:PackIconMaterial Kind=FileTree, Width=12,Height=12}"
-                                            Command="{StaticResource MyCommand}" CommandParameter="{Binding}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="単価" Binding="{Binding PerPrice,StringFormat={}{0:N0}}" 
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="平均取得単価" Binding="{Binding PerBuyPriceAverage,StringFormat={}{0:N0}}" 
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Binding="{Binding TradeQuantity}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
-                        <DataGridTextColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="取引数量" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="(+)買付 / (-)売却" FontSize="8" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTextColumn.HeaderTemplate>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding InvestmentValue,StringFormat={}{0:N0}}" CanUserReorder="True" CanUserResize="True" CanUserSort="False">
-                        <DataGridTextColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="取引額" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="(+)買付・入金" FontSize="8" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="(-)売却・出金" FontSize="8" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTextColumn.HeaderTemplate>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="保有数量" Binding="{Binding Quantity,StringFormat={}{0:N0}}" 
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="時価評価額" Binding="{Binding Amount,StringFormat={}{0:N0}}" CanUserReorder="True"
-                                        CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="含損益" Binding="{Binding UnrealizedProfitLoss,StringFormat={}{0:N0}}"
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                    <DataGridTextColumn Header="タグ" Binding="{Binding Tag.TagName}"
-                                        CanUserReorder="True" CanUserResize="True" CanUserSort="False"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
     </Grid>
-</UserControl>
+</mah:MetroWindow>
