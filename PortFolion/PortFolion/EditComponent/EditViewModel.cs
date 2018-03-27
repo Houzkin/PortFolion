@@ -79,7 +79,7 @@ namespace PortFolion.ViewModels {
 		/// <summary>ロケーションツリーのルートを示す。</summary>
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 
-		IEnumerable<string> _path;
+		IEnumerable<string> _path = Enumerable.Empty<string>();
 		/// <summary>現在の日付</summary>
 		public IEnumerable<string> Path {
 			get{ return _path; }
@@ -94,33 +94,10 @@ namespace PortFolion.ViewModels {
 			_path = path;
 			RaisePropertyChanged(nameof(Path));
 		}
-		/// <summary>履歴データを更新する。</summary>
-		/// <param name="path">履歴データのパス</param>
-		//public void RefreshHistory(IEnumerable<string> path) {
-		//	IsHistoryLoading = true;
-		//	_history = CommonNodeVM.ReCalcHistory(path);
-		//	IsHistoryLoading = false;
-		//	this.RaisePropertyChanged(nameof(History));
-		//}
-		/// <summary>
-		/// イベントハンドラ登録用の履歴データ更新メソッド。
-		/// 現在のロケーションツリーを再計算した後、履歴を更新する。
-		/// </summary>
-		//void refreshHistory(CommonNodeVM src) {
-		//	IsTreeLoading = true;
-		//	if (this.CurrentDate != null) {
-		//		CommonNodeVM.ReCalcurate(src);
-		//	}
-		//	IsTreeLoading = false;
-		//	IsHistoryLoading = true;
-		//	_history = CommonNodeVM.ReCalcHistory(this.Path);
-		//	IsHistoryLoading = false;
-		//	this.RaisePropertyChanged(nameof(History));
-		//}
 
-		public IEnumerable<VmCoreBase> History{ get; private set; }
-		private void setHistory(IEnumerable<VmCoreBase> his){
-			History = his;
+		public HistoryViewModel History { get; } = new HistoryViewModel(); 
+		private void setHistory(IEnumerable<string> path,bool open = false){
+			History.Refresh(path, open);
 			RaisePropertyChanged(nameof(History));
 		}
 
@@ -172,13 +149,13 @@ namespace PortFolion.ViewModels {
 			//}
 			IO.HistoryIO.SaveRoots((DateTime)this.CurrentDate);
 			CommonNodeVM.ReCalcurate(this.Root.First());
+			controler.RefreshHistory(this.Path);
 			IsTreeLoading = false;
 			if (lstLg.Any()) {
 				string msg = "以下の銘柄は値を更新できませんでした。";
 				var m = lstLg.Distinct().Aggregate(msg, (seed, ele) => seed + "\n" + ele);
 				MessageBox.Show(m, "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
-			}
-			else {
+			} else {
 				MessageBox.Show("株価単価を更新しました。", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
 			}
 			//acse.ForEach(a => a.Dispose());
@@ -297,14 +274,14 @@ namespace PortFolion.ViewModels {
 				if (lvm.Root.Any(a => a.Model == root)) return;
 				lvm.Root.ForEach(r => {
 					r.ReCalcurated -= RefreshHistory;
-					r.SetPath -= SetPath;
+					r.SetPath -= setPath;
 				});
 				var expns = lvm.Root.FirstOrDefault()?.Preorder().Where(a => a.IsExpand).Select(a => a.Path).ToArray() ?? Enumerable.Empty<NodePath<string>>();
 				lvm.Root.Clear();
 				if (root == null) return;
 				var rt = CommonNodeVM.Create(root);
 				rt.ReCalcurated += RefreshHistory;
-				rt.SetPath += SetPath;
+				rt.SetPath += setPath;
 				if(rt.CurrentDate != null){
 					lvm.IsTreeLoading = true;
 					CommonNodeVM.ReCalcurate(rt);
@@ -315,18 +292,20 @@ namespace PortFolion.ViewModels {
 					.Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
 					.ForEach(a => a.IsExpand = true);
 			}
-			public void SetPath(IEnumerable<string> path){
+			private void setPath(IEnumerable<string> path){ this.SetPath(path, true); }
+			public void SetPath(IEnumerable<string> path,bool open = false){
 				path = path?.ToArray() ?? Enumerable.Empty<string>();
 				if (lvm.Path.SequenceEqual(path)) return;
 				lvm.setPath(path);
-				if (lvm.Path.Any()) RefreshHistory(lvm.Path);
+				if (lvm.Path.Any()) RefreshHistory(lvm.Path,open);
 			}
 			/// <summary>履歴データを更新する。</summary>
 			/// <param name="path">履歴データのパス</param>
-			public void RefreshHistory(IEnumerable<string> path){
-				lvm.IsHistoryLoading = true;
-				lvm.setHistory(CommonNodeVM.ReCalcHistory(path));
-				lvm.IsHistoryLoading = false;
+			public void RefreshHistory(IEnumerable<string> path,bool open = false){
+				//lvm.IsHistoryLoading = true;
+				//lvm.setHistory(CommonNodeVM.ReCalcHistory(path));
+				//lvm.IsHistoryLoading = false;
+				lvm.setHistory(path,open);
 			}
 			/// <summary>
 			/// イベントハンドラ登録用の履歴データ更新メソッド。
@@ -649,5 +628,71 @@ namespace PortFolion.ViewModels {
 		//}
 		//#endregion
 		#endregion
+	}
+	public class HistoryViewModel:ViewModel{
+		public HistoryViewModel(){
+			dpc = new DisposeCounter(() => IsHistoryLoading = true, () => IsHistoryLoading = false);
+		}
+		DisposeCounter dpc;
+		bool _isHistoryLoading = false;
+		public bool IsHistoryLoading {
+			get { return _isHistoryLoading; }
+			private set {
+				if (_isHistoryLoading == value) return;
+				_isHistoryLoading = value;
+				RaisePropertyChanged();
+				App.DoEvent();
+			}
+		}
+		bool _isOpen = false;
+		public bool IsOpen{
+			get => _isOpen;
+			set{
+				if (_isOpen == value) return;
+				_isOpen = value;
+				RaisePropertyChanged();
+			}
+		}
+		public void Refresh(IEnumerable<string> path,bool open = false){
+			
+			if(!IsOpen){
+				if (open) IsOpen = true;
+				else return;
+			}
+			using (dpc.Seald()){
+				History = CommonNodeVM.ReCalcHistory(path);
+			}
+		}
+		IEnumerable<VmCoreBase> _history;
+		public IEnumerable<VmCoreBase> History{
+			get => _history ?? Enumerable.Empty<VmCoreBase>();
+			private set{
+				_history = value;
+				this.RaisePropertyChanged();
+			}
+		}
+	}
+	public class DisposeCounter {
+		private class Counter : IDisposable {
+			public Counter(Action end){_end = end; }
+			Action _end;
+			public void Dispose() {
+				_end?.Invoke(); _end = null;
+			}
+		}
+		Action _start;
+		Action _end;
+		public DisposeCounter(Action start,Action end){
+			_start = start; _end = end;
+		}
+		public IDisposable Seald(){
+			count++;
+			if (count == 1) _start?.Invoke();
+			return new Counter(() => {
+				count--;
+				if (count == 0) _end?.Invoke();
+			});
+		}
+		int count = 0;
 	}
 }
