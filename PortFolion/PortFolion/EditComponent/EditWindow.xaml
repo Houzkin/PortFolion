@@ -40,11 +40,17 @@
         </l:InteractionMessageTrigger>
         
         <!--編集Flyoutの開閉-->
-        
+        <l:InteractionMessageTrigger MessageKey="OpenEditFlyout" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="EditFlyout" PropertyName="IsOpen" Value="true"/>
+        </l:InteractionMessageTrigger>
+        <l:InteractionMessageTrigger MessageKey="CloseEditFlyout" Messenger="{Binding Messenger}">
+            <ei:ChangePropertyAction TargetName="EditFlyout" PropertyName="IsOpen" Value="false"/>
+        </l:InteractionMessageTrigger>
+
     </i:Interaction.Triggers>
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
-            <mah:Flyout x:Name="HistoryFlyout" Header="履歴"
+            <mah:Flyout x:Name="HistoryFlyout" Header="履歴" 
                         Position="Right" AnimateOpacity="True">
                 
             </mah:Flyout>

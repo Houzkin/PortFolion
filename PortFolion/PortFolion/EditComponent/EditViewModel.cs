@@ -15,6 +15,7 @@ using System.Windows.Input;
 using Livet.EventListeners.WeakEvents;
 using Houzkin;
 using System.Windows;
+using Livet.Messaging;
 
 namespace PortFolion.ViewModels {
 	
@@ -39,6 +40,15 @@ namespace PortFolion.ViewModels {
 				h => dtr.DateTimeSelected -= h,
 				(s, e) => this.CurrentDate = e.SelectedDateTime);
 			this.CompositeDisposable.Add(d);
+			this.History = new HistoryViewModel();
+			//this.History.OpenCloseOrder += isOpen => {
+			//	if (isOpen)
+			//		this.Messenger.Raise(
+			//			new InteractionMessage("OpenHistoryFlyout"));
+			//	else
+			//		this.Messenger.Raise(
+			//			new InteractionMessage("CloseHistoryFlyout"));
+			//};
 		}
 		/// <summary>現在の日付</summary>
 		DateTime? _currentDate;
@@ -87,15 +97,17 @@ namespace PortFolion.ViewModels {
 				if (_path.SequenceEqual(value)) return;
 				_path = value;
 				this.RaisePropertyChanged();
-				controler.SetPath(value);
+				controler.RefreshHistory(value,false);
 			}
 		}
-		void setPath(IEnumerable<string> path){
+		bool setPath(IEnumerable<string> path){
+			if (_path.SequenceEqual(path)) return false;
 			_path = path;
 			RaisePropertyChanged(nameof(Path));
+			return true;
 		}
 
-		public HistoryViewModel History { get; } = new HistoryViewModel(); 
+		public HistoryViewModel History { get; }
 		private void setHistory(IEnumerable<string> path,bool open = false){
 			History.Refresh(path, open);
 			RaisePropertyChanged(nameof(History));
@@ -149,7 +161,7 @@ namespace PortFolion.ViewModels {
 			//}
 			IO.HistoryIO.SaveRoots((DateTime)this.CurrentDate);
 			CommonNodeVM.ReCalcurate(this.Root.First());
-			controler.RefreshHistory(this.Path);
+			controler.RefreshHistory(this.Path,false);
 			IsTreeLoading = false;
 			if (lstLg.Any()) {
 				string msg = "以下の銘柄は値を更新できませんでした。";
@@ -249,7 +261,7 @@ namespace PortFolion.ViewModels {
 				}
 				if (rt == null) SetCurrentDate(null);
 				else SetCurrentDate(rt.CurrentDate);
-				RefreshHistory(lvm.Path);
+				RefreshHistory(lvm.Path,false);
 			}
 			public void SetCurrentDate(DateTime? date){
 				if(date == null){ 
@@ -265,23 +277,25 @@ namespace PortFolion.ViewModels {
 				}
 				this.SetRoot(r);
 				lvm.dtr.SelectAt(r.CurrentDate);
-				if(lvm.Path.Any())
-					lvm.setPath(r.SearchNodeOf(lvm.Path).Path);
-				else 
-					lvm.setPath(r.Path); 
+				//if(lvm.Path.Any())
+				//	lvm.setPath(r.SearchNodeOf(lvm.Path).Path);
+				//else 
+				//	lvm.setPath(r.Path); 
+				var p = lvm.Path.Any() ? r.SearchNodeOf(lvm.Path).Path : r.Path;
+				if (lvm.setPath(p)) lvm.History.Refresh(p, false);
 			}
 			public void SetRoot(TotalRiskFundNode root){
 				if (lvm.Root.Any(a => a.Model == root)) return;
 				lvm.Root.ForEach(r => {
 					r.ReCalcurated -= RefreshHistory;
-					r.SetPath -= setPath;
+					r.SetPath -= DisplayHistory;
 				});
 				var expns = lvm.Root.FirstOrDefault()?.Preorder().Where(a => a.IsExpand).Select(a => a.Path).ToArray() ?? Enumerable.Empty<NodePath<string>>();
 				lvm.Root.Clear();
 				if (root == null) return;
 				var rt = CommonNodeVM.Create(root);
 				rt.ReCalcurated += RefreshHistory;
-				rt.SetPath += setPath;
+				rt.SetPath += DisplayHistory;
 				if(rt.CurrentDate != null){
 					lvm.IsTreeLoading = true;
 					CommonNodeVM.ReCalcurate(rt);
@@ -292,20 +306,18 @@ namespace PortFolion.ViewModels {
 					.Where(a => expns.Any(b => b.SequenceEqual(a.Path)))
 					.ForEach(a => a.IsExpand = true);
 			}
-			private void setPath(IEnumerable<string> path){ this.SetPath(path, true); }
-			public void SetPath(IEnumerable<string> path,bool open = false){
-				path = path?.ToArray() ?? Enumerable.Empty<string>();
-				if (lvm.Path.SequenceEqual(path)) return;
-				lvm.setPath(path);
-				if (lvm.Path.Any()) RefreshHistory(lvm.Path,open);
+			/// <summary>履歴を表示させる</summary>
+			private void DisplayHistory(IEnumerable<string> path){ 
+				if(lvm.setPath(path))
+					this.RefreshHistory(path, true);
 			}
 			/// <summary>履歴データを更新する。</summary>
 			/// <param name="path">履歴データのパス</param>
+			/// <param name="open">openでなかった場合openするかどうか</param>
 			public void RefreshHistory(IEnumerable<string> path,bool open = false){
-				//lvm.IsHistoryLoading = true;
-				//lvm.setHistory(CommonNodeVM.ReCalcHistory(path));
-				//lvm.IsHistoryLoading = false;
-				lvm.setHistory(path,open);
+				//lvm.setHistory(path,open);
+				lvm.setPath(path);
+				lvm.History.Refresh(path,open);
 			}
 			/// <summary>
 			/// イベントハンドラ登録用の履歴データ更新メソッド。
@@ -651,21 +663,26 @@ namespace PortFolion.ViewModels {
 				if (_isOpen == value) return;
 				_isOpen = value;
 				RaisePropertyChanged();
+				if (_isOpen)
+					EditPresenter.Instance.Messenger.Raise(new InteractionMessage("OpenHistoryFlyout"));
+				else
+					EditPresenter.Instance.Messenger.Raise(new InteractionMessage("CloseHistoryFlyout"));
 			}
 		}
+		ViewModelCommand _CloseCmd;
+		public ViewModelCommand CloseCmd{ get; }//書きかけ
 		public void Refresh(IEnumerable<string> path,bool open = false){
-			
 			if(!IsOpen){
 				if (open) IsOpen = true;
 				else return;
 			}
 			using (dpc.Seald()){
-				History = CommonNodeVM.ReCalcHistory(path);
+				Collection = CommonNodeVM.ReCalcHistory(path);
 			}
 		}
-		IEnumerable<VmCoreBase> _history;
-		public IEnumerable<VmCoreBase> History{
-			get => _history ?? Enumerable.Empty<VmCoreBase>();
+		IEnumerable<VmCoreBase> _history = Enumerable.Empty<VmCoreBase>();
+		public IEnumerable<VmCoreBase> Collection{
+			get => _history;
 			private set{
 				_history = value;
 				this.RaisePropertyChanged();
@@ -673,8 +690,8 @@ namespace PortFolion.ViewModels {
 		}
 	}
 	public class DisposeCounter {
-		private class Counter : IDisposable {
-			public Counter(Action end){_end = end; }
+		private class DelayFunc : IDisposable {
+			public DelayFunc(Action end){_end = end; }
 			Action _end;
 			public void Dispose() {
 				_end?.Invoke(); _end = null;
@@ -688,7 +705,7 @@ namespace PortFolion.ViewModels {
 		public IDisposable Seald(){
 			count++;
 			if (count == 1) _start?.Invoke();
-			return new Counter(() => {
+			return new DelayFunc(() => {
 				count--;
 				if (count == 0) _end?.Invoke();
 			});
