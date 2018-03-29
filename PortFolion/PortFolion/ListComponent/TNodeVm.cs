@@ -40,6 +40,11 @@ namespace PortFolion.ViewModels {
 				return this.MaybeModelAs<CommonNode>().TrueOrNot(o => (o.Root() as TotalRiskFundNode)?.CurrentDate, x => null);
 			}
 		}
+		ViewModelCommand _displayViewModelCmd;
+		public virtual ViewModelCommand DisplayTreeCmd 
+			=> _displayViewModelCmd = _displayViewModelCmd ?? new ViewModelCommand(
+				() => { EditViewModel.Instance.CurrentDate = this.CurrentDate; }
+		);
 		#region common
 		double _invTtl;
 		public double InvestmentTotal {
@@ -312,7 +317,15 @@ namespace PortFolion.ViewModels {
 		public NodePath<string> Path => Model.Path;
 		//public bool IsModelEquals(CommonNode node) => this.Model == node;
 		public new CommonNode Model => base.Model;
-		public ObservableCollection<MenuItemVm> MenuList { get; } = new ObservableCollection<MenuItemVm>();
+
+		protected virtual List<MenuItemVm> SetMenuList(){
+			var menus = new List<MenuItemVm>();
+			menus.Add(new MenuItemVm(new ViewModelCommand(() => { })) { Header = "移動" });
+			menus.Add(new MenuItemVm(new ViewModelCommand(() => { })) { Header = "" });
+			return menus;
+		}
+		ObservableCollection<MenuItemVm> _MenuList;
+		public ObservableCollection<MenuItemVm> MenuList => _MenuList = _MenuList ?? new ObservableCollection<MenuItemVm>(SetMenuList());
 
 		public event Action<CommonNodeVM> ReCalcurated;
 		private void RaiseReCalcurated(CommonNodeVM src) => ReCalcurated?.Invoke(src);
@@ -323,6 +336,9 @@ namespace PortFolion.ViewModels {
 		private void RaiseSetPath(IEnumerable<string> path) => SetPath?.Invoke(path);
 		public void DisplayHistory() {
 			this.Root().RaiseSetPath(this.Path);
+		}
+		public void DisplayEditFlyout(){
+			throw new NotImplementedException();
 		}
 		public DateTime? CurrentDate =>
 			(Model.Root() as TotalRiskFundNode)?.CurrentDate;

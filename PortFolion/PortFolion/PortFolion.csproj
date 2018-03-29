@@ -175,6 +175,9 @@
     <Compile Include="ListComponent\ListTab.xaml.cs">
       <DependentUpon>ListTab.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EditComponent\HistoryView.xaml.cs">
+      <DependentUpon>HistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LicenseView.xaml.cs">
       <DependentUpon>LicenseView.xaml</DependentUpon>
     </Compile>
@@ -220,6 +223,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ListComponent\ListTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditComponent\HistoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -41,14 +41,6 @@ namespace PortFolion.ViewModels {
 				(s, e) => this.CurrentDate = e.SelectedDateTime);
 			this.CompositeDisposable.Add(d);
 			this.History = new HistoryViewModel();
-			//this.History.OpenCloseOrder += isOpen => {
-			//	if (isOpen)
-			//		this.Messenger.Raise(
-			//			new InteractionMessage("OpenHistoryFlyout"));
-			//	else
-			//		this.Messenger.Raise(
-			//			new InteractionMessage("CloseHistoryFlyout"));
-			//};
 		}
 		/// <summary>現在の日付</summary>
 		DateTime? _currentDate;
@@ -86,31 +78,16 @@ namespace PortFolion.ViewModels {
 				App.DoEvent();
 			}
 		}
+
 		/// <summary>ロケーションツリーのルートを示す。</summary>
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 
-		IEnumerable<string> _path = Enumerable.Empty<string>();
-		/// <summary>現在の日付</summary>
-		public IEnumerable<string> Path {
-			get{ return _path; }
-			set{
-				if (_path.SequenceEqual(value)) return;
-				_path = value;
-				this.RaisePropertyChanged();
-				controler.RefreshHistory(value,false);
-			}
-		}
-		bool setPath(IEnumerable<string> path){
-			if (_path.SequenceEqual(path)) return false;
-			_path = path;
-			RaisePropertyChanged(nameof(Path));
-			return true;
-		}
+		private IEnumerable<string> Path => History.Path;
 
 		public HistoryViewModel History { get; }
 		private void setHistory(IEnumerable<string> path,bool open = false){
 			History.Refresh(path, open);
-			RaisePropertyChanged(nameof(History));
+			//RaisePropertyChanged(nameof(History));
 		}
 
 		#region 現在の日付が変更された時の挙動
@@ -282,7 +259,7 @@ namespace PortFolion.ViewModels {
 				//else 
 				//	lvm.setPath(r.Path); 
 				var p = lvm.Path.Any() ? r.SearchNodeOf(lvm.Path).Path : r.Path;
-				if (lvm.setPath(p)) lvm.History.Refresh(p, false);
+				if (lvm.History.SetPath(p)) lvm.History.Refresh(p, false);
 			}
 			public void SetRoot(TotalRiskFundNode root){
 				if (lvm.Root.Any(a => a.Model == root)) return;
@@ -308,15 +285,14 @@ namespace PortFolion.ViewModels {
 			}
 			/// <summary>履歴を表示させる</summary>
 			private void DisplayHistory(IEnumerable<string> path){ 
-				if(lvm.setPath(path))
+				if(lvm.History.SetPath(path))
 					this.RefreshHistory(path, true);
 			}
 			/// <summary>履歴データを更新する。</summary>
 			/// <param name="path">履歴データのパス</param>
 			/// <param name="open">openでなかった場合openするかどうか</param>
 			public void RefreshHistory(IEnumerable<string> path,bool open = false){
-				//lvm.setHistory(path,open);
-				lvm.setPath(path);
+				lvm.History.SetPath(path);
 				lvm.History.Refresh(path,open);
 			}
 			/// <summary>
@@ -643,9 +619,9 @@ namespace PortFolion.ViewModels {
 	}
 	public class HistoryViewModel:ViewModel{
 		public HistoryViewModel(){
-			dpc = new DisposeCounter(() => IsHistoryLoading = true, () => IsHistoryLoading = false);
+			dpc = new DisposableBlock(() => IsHistoryLoading = true, () => IsHistoryLoading = false);
 		}
-		DisposeCounter dpc;
+		DisposableBlock dpc;
 		bool _isHistoryLoading = false;
 		public bool IsHistoryLoading {
 			get { return _isHistoryLoading; }
@@ -670,15 +646,24 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		ViewModelCommand _CloseCmd;
-		public ViewModelCommand CloseCmd{ get; }//書きかけ
+		public ViewModelCommand ClosedCmd => 
+			_CloseCmd = _CloseCmd ?? new ViewModelCommand(() => this.IsOpen = false);
+
 		public void Refresh(IEnumerable<string> path,bool open = false){
 			if(!IsOpen){
 				if (open) IsOpen = true;
 				else return;
 			}
-			using (dpc.Seald()){
+			using (dpc.Block()){
 				Collection = CommonNodeVM.ReCalcHistory(path);
 			}
+		}
+		public IEnumerable<string> Path { get; private set; } = Enumerable.Empty<string>();
+		public bool SetPath(IEnumerable<string> path){
+			if (Path.SequenceEqual(path)) return false;
+			Path = path;
+			RaisePropertyChanged(nameof(Path));
+			return true;
 		}
 		IEnumerable<VmCoreBase> _history = Enumerable.Empty<VmCoreBase>();
 		public IEnumerable<VmCoreBase> Collection{
@@ -689,9 +674,9 @@ namespace PortFolion.ViewModels {
 			}
 		}
 	}
-	public class DisposeCounter {
-		private class DelayFunc : IDisposable {
-			public DelayFunc(Action end){_end = end; }
+	public class DisposableBlock {
+		private class DispAction : IDisposable {
+			public DispAction(Action end){_end = end; }
 			Action _end;
 			public void Dispose() {
 				_end?.Invoke(); _end = null;
@@ -699,13 +684,13 @@ namespace PortFolion.ViewModels {
 		}
 		Action _start;
 		Action _end;
-		public DisposeCounter(Action start,Action end){
+		public DisposableBlock(Action start,Action end){
 			_start = start; _end = end;
 		}
-		public IDisposable Seald(){
+		public IDisposable Block(){
 			count++;
 			if (count == 1) _start?.Invoke();
-			return new DelayFunc(() => {
+			return new DispAction(() => {
 				count--;
 				if (count == 0) _end?.Invoke();
 			});

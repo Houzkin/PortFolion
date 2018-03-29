@@ -19,7 +19,7 @@
         GlowBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"
         TitleCaps="False"
         Icon="/Portfolion;component/PortFolion.ico"
-        Title="PortFolion＠編集中" Height="300" Width="300">
+        Title="PortFolion＠編集中" Height="300" Width="700">
     <i:Interaction.Triggers>
         <!--WindowのClose時、Disposeメソッドを呼び出す-->
         <i:EventTrigger EventName="Closed">
@@ -51,11 +51,12 @@
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
             <mah:Flyout x:Name="HistoryFlyout" Header="履歴" 
-                        Position="Right" AnimateOpacity="True">
-                
+                        Position="Right" AnimateOpacity="True"
+                        CloseCommand="{Binding History.ClosedCmd}">
+                <v:HistoryView DataContext="{Binding History}"/>
             </mah:Flyout>
             <mah:Flyout x:Name="EditFlyout" Header="編集"
-                        Position="Bottom" AnimateOpacity="True">
+                        Position="Top" AnimateOpacity="True">
                 
             </mah:Flyout>
         </mah:FlyoutsControl>
