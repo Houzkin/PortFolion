@@ -16,6 +16,7 @@ using Livet.EventListeners.WeakEvents;
 using Houzkin;
 using System.Windows;
 using Livet.Messaging;
+using Reactive.Bindings;
 
 namespace PortFolion.ViewModels {
 	
@@ -40,7 +41,6 @@ namespace PortFolion.ViewModels {
 				h => dtr.DateTimeSelected -= h,
 				(s, e) => this.CurrentDate = e.SelectedDateTime);
 			this.CompositeDisposable.Add(d);
-			this.History = new HistoryViewModel();
 		}
 		/// <summary>現在の日付</summary>
 		DateTime? _currentDate;
@@ -68,28 +68,29 @@ namespace PortFolion.ViewModels {
 				App.DoEvent();
 			}
 		}
-		bool _isHistoryLoading = false;
-		public bool IsHistoryLoading {
-			get { return _isHistoryLoading; }
-			set {
-				if (_isHistoryLoading == value) return;
-				_isHistoryLoading = value;
-				RaisePropertyChanged();
-				App.DoEvent();
-			}
-		}
+		//bool _isHistoryLoading = false;
+		//public bool IsHistoryLoading {
+		//	get { return _isHistoryLoading; }
+		//	set {
+		//		if (_isHistoryLoading == value) return;
+		//		_isHistoryLoading = value;
+		//		RaisePropertyChanged();
+		//		App.DoEvent();
+		//	}
+		//}
 
 		/// <summary>ロケーションツリーのルートを示す。</summary>
 		public ObservableCollection<CommonNodeVM> Root { get; } = new ObservableCollection<CommonNodeVM>();
 
 		private IEnumerable<string> Path => History.Path;
 
-		public HistoryViewModel History { get; }
+		public HistoryViewModel History { get; } = new HistoryViewModel();
 		private void setHistory(IEnumerable<string> path,bool open = false){
 			History.Refresh(path, open);
 			//RaisePropertyChanged(nameof(History));
 		}
-
+		public EditFlyoutVm EditFlyout = new EditFlyoutVm();
+		
 		#region 現在の日付が変更された時の挙動
 		string _selectedDateText = DateTime.Today.ToShortDateString();
 		public string SelectedDateText {
@@ -220,7 +221,6 @@ namespace PortFolion.ViewModels {
 			public VmControler(EditViewModel vm) {
 				lvm = vm;
 			}
-
 			public void RootCollectionChanged(object s, NotifyCollectionChangedEventArgs e) {
 				lvm.dtr.Refresh();
 				TotalRiskFundNode rt;
@@ -254,10 +254,7 @@ namespace PortFolion.ViewModels {
 				}
 				this.SetRoot(r);
 				lvm.dtr.SelectAt(r.CurrentDate);
-				//if(lvm.Path.Any())
-				//	lvm.setPath(r.SearchNodeOf(lvm.Path).Path);
-				//else 
-				//	lvm.setPath(r.Path); 
+				
 				var p = lvm.Path.Any() ? r.SearchNodeOf(lvm.Path).Path : r.Path;
 				if (lvm.History.SetPath(p)) lvm.History.Refresh(p, false);
 			}
@@ -616,6 +613,26 @@ namespace PortFolion.ViewModels {
 		//}
 		//#endregion
 		#endregion
+	}
+	public class EditFlyoutVm : ViewModel{
+		public void Open(CommonNode model){
+			_model = model;
+			EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
+		}
+		CommonNode _model;
+		ListenerCommand<bool> _closeCmd;
+		public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(apply => {
+			if(apply){
+				//ここでApply
+				EditViewModel.Instance.AddEditList(_model);
+			}
+			EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseEditFlyout"));
+		});
+		public ReactiveProperty<double> PerPrice;
+		public ReactiveProperty<double> TradeQuantity;
+		public ReactiveProperty<double> InvestmentValue;
+		public ReactiveProperty<double> Quantity;
+		public ReactiveProperty<double> Amount;
 	}
 	public class HistoryViewModel:ViewModel{
 		public HistoryViewModel(){

@@ -320,13 +320,17 @@ namespace PortFolion.ViewModels {
 
 		protected virtual List<MenuItemVm> SetMenuList(){
 			var menus = new List<MenuItemVm>();
-			menus.Add(new MenuItemVm(new ViewModelCommand(() => { })) { Header = "移動" });
-			menus.Add(new MenuItemVm(new ViewModelCommand(() => { })) { Header = "" });
+			if (this.Model is FinancialValue)
+				menus.Add(new MenuItemVm(() => EditViewModel.Instance.EditFlyout.Open(this.Model)) { Header = "編集" });
+			menus.Add(new MenuItemVm(() => { }) { Header = "名前を変更" });
+			menus.Add(new MenuItemVm(() => { }) { Header = "タグを変更" });
+			menus.Add(new MenuItemVm(() => { }) { Header = "移動" });
+			menus.Add(new MenuItemVm(() => { }) { Header = "削除" });
 			return menus;
 		}
 		ObservableCollection<MenuItemVm> _MenuList;
 		public ObservableCollection<MenuItemVm> MenuList => _MenuList = _MenuList ?? new ObservableCollection<MenuItemVm>(SetMenuList());
-
+		
 		public event Action<CommonNodeVM> ReCalcurated;
 		private void RaiseReCalcurated(CommonNodeVM src) => ReCalcurated?.Invoke(src);
 		public void ReCalcurate() {
@@ -336,9 +340,6 @@ namespace PortFolion.ViewModels {
 		private void RaiseSetPath(IEnumerable<string> path) => SetPath?.Invoke(path);
 		public void DisplayHistory() {
 			this.Root().RaiseSetPath(this.Path);
-		}
-		public void DisplayEditFlyout(){
-			throw new NotImplementedException();
 		}
 		public DateTime? CurrentDate =>
 			(Model.Root() as TotalRiskFundNode)?.CurrentDate;
