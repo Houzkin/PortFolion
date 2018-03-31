@@ -258,22 +258,17 @@ namespace PortFolion.ViewModels {
 				});
 			return nd;
 		}
-		static async Task<Dictionary<NodePath<string>,CommonNodeVM>[]> _com(IEnumerable<CommonNodeVM> nodes) {
-			var t = await Task.Run(() => {
-				return nodes
-					.Select(a => a.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
-					.Scan(new Dictionary<NodePath<string>, CommonNodeVM>(),
-					(prv, cur) => {
-						foreach (var c in cur) {
-							var rst = ResultWithValue.Of<NodePath<string>, CommonNodeVM>(prv.TryGetValue, c.Key);
-							_setTotal(rst.Result, rst.Value, c.Value);
-							_setPer(rst.Result, rst.Value, c.Value);
-						}
-						return cur;
-					}).ToArray();
-			});
-			return t;
-		}
+		//static IEnumerable<Dictionary<NodePath<string>, Tuple<CommonNode, VmCoreBase>>> s_com1(IEnumerable<Tuple<CommonNode, VmCoreBase>> nodes) {
+		//	var nd = nodes
+		//		.Select(a => a.Item1.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
+		//		.Scan(new Dictionary<NodePath<string>, Tuple<CommonNode, VmCoreBase>>(),
+		//			(prv, cur) => {
+		//				foreach (var c in cur) {
+
+		//				}
+		//				return cur;
+		//			};
+		//}
 
 		class keyselector : IEqualityComparer<NodePath<string>> {
 			public bool Equals(NodePath<string> x, NodePath<string> y) {
@@ -320,8 +315,8 @@ namespace PortFolion.ViewModels {
 
 		protected virtual List<MenuItemVm> SetMenuList(){
 			var menus = new List<MenuItemVm>();
-			if (this.Model is FinancialValue)
-				menus.Add(new MenuItemVm(() => EditViewModel.Instance.EditFlyout.Open(this.Model)) { Header = "編集" });
+			//if (this.Model is FinancialValue)
+			//	menus.Add(new MenuItemVm(() => EditViewModel.Instance.EditFlyout.Open(this.Model)) { Header = "編集" });
 			menus.Add(new MenuItemVm(() => { }) { Header = "名前を変更" });
 			menus.Add(new MenuItemVm(() => { }) { Header = "タグを変更" });
 			menus.Add(new MenuItemVm(() => { }) { Header = "移動" });

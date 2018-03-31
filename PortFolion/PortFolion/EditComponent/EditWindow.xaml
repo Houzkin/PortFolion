@@ -61,8 +61,8 @@
                 <v:HistoryView DataContext="{Binding History}"/>
             </mah:Flyout>
             <mah:Flyout x:Name="EditFlyout" Header="編集"
-                        Position="Top" AnimateOpacity="True"
-                        CloseCommand="{Binding EditFlyout.}" CloseCommandParameter="{StaticResource False}">
+                        Position="Right" AnimateOpacity="True"
+                         CloseCommandParameter="{StaticResource False}">
                 
             </mah:Flyout>
         </mah:FlyoutsControl>

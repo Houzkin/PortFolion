@@ -161,8 +161,6 @@
     <Compile Include="EditComponent\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ListComponent\BrokerEdit\Class1.cs" />
-    <Compile Include="ListComponent\BrokerEdit\Class2.cs" />
     <Compile Include="ListComponent\Edit\NodeTagEdit.cs" />
     <Compile Include="ListComponent\Edit\NodeTagEditWindow.xaml.cs">
       <DependentUpon>NodeTagEditWindow.xaml</DependentUpon>

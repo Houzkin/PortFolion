@@ -17,6 +17,7 @@ using Houzkin;
 using System.Windows;
 using Livet.Messaging;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 
 namespace PortFolion.ViewModels {
 	
@@ -89,7 +90,6 @@ namespace PortFolion.ViewModels {
 			History.Refresh(path, open);
 			//RaisePropertyChanged(nameof(History));
 		}
-		public EditFlyoutVm EditFlyout = new EditFlyoutVm();
 		
 		#region 現在の日付が変更された時の挙動
 		string _selectedDateText = DateTime.Today.ToShortDateString();
@@ -614,26 +614,30 @@ namespace PortFolion.ViewModels {
 		//#endregion
 		#endregion
 	}
-	public class EditFlyoutVm : ViewModel{
-		public void Open(CommonNode model){
-			_model = model;
-			EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
-		}
-		CommonNode _model;
-		ListenerCommand<bool> _closeCmd;
-		public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(apply => {
-			if(apply){
-				//ここでApply
-				EditViewModel.Instance.AddEditList(_model);
-			}
-			EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseEditFlyout"));
-		});
-		public ReactiveProperty<double> PerPrice;
-		public ReactiveProperty<double> TradeQuantity;
-		public ReactiveProperty<double> InvestmentValue;
-		public ReactiveProperty<double> Quantity;
-		public ReactiveProperty<double> Amount;
-	}
+	//public class EditFlyoutVm : ViewModel{
+	//	public void Open(CommonNode model){
+	//		model = model.Upstream().OfType<BrokerNode>().First();
+	//		if(_model != null && _model != model){
+	//			CloseCmd.Execute(true);
+	//		}
+	//		_initialize(model);
+	//		EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
+	//	}
+	//	void _initialize(CommonNode model){
+			
+	//	}
+	//	CommonNode _model;
+	//	ListenerCommand<bool> _closeCmd;
+	//	public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(apply => {
+	//		if(apply){
+	//			//ここでApply
+	//			EditViewModel.Instance.AddEditList(_model);
+	//		}
+	//		EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseEditFlyout"));
+	//		this.CompositeDisposable.Dispose();
+	//	});
+		
+	//}
 	public class HistoryViewModel:ViewModel{
 		public HistoryViewModel(){
 			dpc = new DisposableBlock(() => IsHistoryLoading = true, () => IsHistoryLoading = false);
@@ -657,9 +661,9 @@ namespace PortFolion.ViewModels {
 				_isOpen = value;
 				RaisePropertyChanged();
 				if (_isOpen)
-					EditPresenter.Instance.Messenger.Raise(new InteractionMessage("OpenHistoryFlyout"));
+					EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenHistoryFlyout"));
 				else
-					EditPresenter.Instance.Messenger.Raise(new InteractionMessage("CloseHistoryFlyout"));
+					EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseHistoryFlyout"));
 			}
 		}
 		ViewModelCommand _CloseCmd;
