@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Livet;
 using Livet.Commands;
 using PortFolion.Core;
+using PortFolion.IO;
 using Houzkin.Tree;
 using Houzkin.Architecture;
 using System.Collections.ObjectModel;
@@ -614,6 +615,42 @@ namespace PortFolion.ViewModels {
 		//#endregion
 		#endregion
 	}
+	/// <summary>
+	/// 表示用TreeのVM部品
+	/// </summary>
+	public class TreeNodeProps : ViewModel {
+		#region static
+		public static TreeNodeProps CreateTreeVmComponent(CommonNode model, CommonNodeVM vm){
+			var tnv = new TreeNodeProps();
+			switch(model.GetNodeType()){
+			case NodeType.OtherProduct: case NodeType.Stock: case NodeType.Forex:
+				break;
+			case NodeType.Account:
+				break;
+			case NodeType.Broker:
+				break;
+			case NodeType.Total:
+				break;
+			}
+			return tnv;
+		}
+		#region menu functions
+		static MenuItemVm editfunc(CommonNode model,CommonNodeVM vm){
+			return new MenuItemVm() { Header = "編集" };
+		}
+		static MenuItemVm addAccount(CommonNode model, CommonNodeVM vm){
+			return new MenuItemVm() { Header = "口座を追加" };
+		}
+		static MenuItemVm addBroker(CommonNode model, CommonNodeVM vm){
+			return new MenuItemVm() { Header = "証券会社を追加" };
+		}
+		#endregion
+		#endregion
+		protected TreeNodeProps(){ }
+		ObservableCollection<MenuItemVm> _menus;
+		public ObservableCollection<MenuItemVm> MenuList => _menus = _menus ?? new ObservableCollection<MenuItemVm>();
+
+	}
 	//public class EditFlyoutVm : ViewModel{
 	//	public void Open(CommonNode model){
 	//		model = model.Upstream().OfType<BrokerNode>().First();
@@ -624,7 +661,6 @@ namespace PortFolion.ViewModels {
 	//		EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
 	//	}
 	//	void _initialize(CommonNode model){
-			
 	//	}
 	//	CommonNode _model;
 	//	ListenerCommand<bool> _closeCmd;
@@ -636,7 +672,6 @@ namespace PortFolion.ViewModels {
 	//		EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseEditFlyout"));
 	//		this.CompositeDisposable.Dispose();
 	//	});
-		
 	//}
 	public class HistoryViewModel:ViewModel{
 		public HistoryViewModel(){

@@ -65,11 +65,11 @@ namespace PortFolion.ViewModels {
 			}
 		}
 		#endregion
-
+		
 	}
-    /// <summary>
-    /// 履歴表示時にブローカーまたはアカウントのVM
-    /// </summary>
+	/// <summary>
+	/// 履歴表示時にブローカーまたはアカウントのVM
+	/// </summary>
 	public class VmCoreBasket : VmCoreBase {
 		protected VmCoreBasket() { }
 		public VmCoreBasket(CommonNode node) : base(node) { }
@@ -258,16 +258,25 @@ namespace PortFolion.ViewModels {
 				});
 			return nd;
 		}
+
+		//static void s_setPer(bool r,Tuple<CommonNode,VmCoreBase> pr,Tuple<CommonNode,VmCoreBase> cu){
+		//	var cuu = cu.Item2 as VmCoreGeneral;
+		//	if(cuu != null){
+		//		cuu.UnrealizedProfitLoss = 
+		//	}
+		//}
 		//static IEnumerable<Dictionary<NodePath<string>, Tuple<CommonNode, VmCoreBase>>> s_com1(IEnumerable<Tuple<CommonNode, VmCoreBase>> nodes) {
 		//	var nd = nodes
-		//		.Select(a => a.Item1.Levelorder().Reverse().ToDictionary(b => b.Path, new keyselector()))
+		//		.Select(a => a.Item1.Levelorder().Reverse().ToDictionary(b => b.Path, c => Tuple.Create(c, VmCoreBase.Create(c)), new keyselector()))
 		//		.Scan(new Dictionary<NodePath<string>, Tuple<CommonNode, VmCoreBase>>(),
 		//			(prv, cur) => {
 		//				foreach (var c in cur) {
+		//					var rst = ResultWithValue.Of<NodePath<string>, Tuple<CommonNode, VmCoreBase>>(prv.TryGetValue, c.Key);
 
 		//				}
 		//				return cur;
-		//			};
+		//			});
+		//	return nd;
 		//}
 
 		class keyselector : IEqualityComparer<NodePath<string>> {
@@ -325,7 +334,10 @@ namespace PortFolion.ViewModels {
 		}
 		ObservableCollection<MenuItemVm> _MenuList;
 		public ObservableCollection<MenuItemVm> MenuList => _MenuList = _MenuList ?? new ObservableCollection<MenuItemVm>(SetMenuList());
-		
+
+		TreeNodeProps _Component;
+		public TreeNodeProps Component => _Component = _Component ?? TreeNodeProps.CreateTreeVmComponent(Model, this);
+
 		public event Action<CommonNodeVM> ReCalcurated;
 		private void RaiseReCalcurated(CommonNodeVM src) => ReCalcurated?.Invoke(src);
 		public void ReCalcurate() {
