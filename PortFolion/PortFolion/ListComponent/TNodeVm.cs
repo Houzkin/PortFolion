@@ -336,7 +336,7 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList => _MenuList = _MenuList ?? new ObservableCollection<MenuItemVm>(SetMenuList());
 
 		TreeNodeProps _Component;
-		public TreeNodeProps Component => _Component = _Component ?? TreeNodeProps.CreateTreeVmComponent(Model, this);
+		public TreeNodeProps Component => _Component = _Component ?? TreeNodeProps.CreateTreeVmComponent(this);
 
 		public event Action<CommonNodeVM> ReCalcurated;
 		private void RaiseReCalcurated(CommonNodeVM src) => ReCalcurated?.Invoke(src);

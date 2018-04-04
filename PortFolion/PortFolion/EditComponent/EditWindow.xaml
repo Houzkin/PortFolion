@@ -65,6 +65,10 @@
                          CloseCommandParameter="{StaticResource False}">
                 
             </mah:Flyout>
+            <mah:Flyout x:Name="NameEditFlyout" 
+                        Position="Top" AnimateOpacity="True">
+                
+            </mah:Flyout>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
     <Grid>

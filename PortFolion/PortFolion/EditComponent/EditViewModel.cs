@@ -91,6 +91,13 @@ namespace PortFolion.ViewModels {
 			History.Refresh(path, open);
 			//RaisePropertyChanged(nameof(History));
 		}
+		public EditFlyoutVm EditFlyoutVm{ get; private set; }
+		public void SetEditFlyoutVm(EditFlyoutVm vm){
+			this.EditFlyoutVm?.CloseCmd.Execute(false);
+			this.EditFlyoutVm = vm;
+			this.RaisePropertyChanged(nameof(EditFlyoutVm));
+			EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
+		}
 		
 		#region 現在の日付が変更された時の挙動
 		string _selectedDateText = DateTime.Today.ToShortDateString();
@@ -620,9 +627,9 @@ namespace PortFolion.ViewModels {
 	/// </summary>
 	public class TreeNodeProps : ViewModel {
 		#region static
-		public static TreeNodeProps CreateTreeVmComponent(CommonNode model, CommonNodeVM vm){
+		public static TreeNodeProps CreateTreeVmComponent(CommonNodeVM vm){
 			var tnv = new TreeNodeProps();
-			switch(model.GetNodeType()){
+			switch(vm.Model.GetNodeType()){
 			case NodeType.OtherProduct: case NodeType.Stock: case NodeType.Forex:
 				break;
 			case NodeType.Account:
@@ -635,14 +642,23 @@ namespace PortFolion.ViewModels {
 			return tnv;
 		}
 		#region menu functions
-		static MenuItemVm editfunc(CommonNode model,CommonNodeVM vm){
+		static MenuItemVm _editfunc(CommonNode model,CommonNodeVM vm){
 			return new MenuItemVm() { Header = "編集" };
 		}
-		static MenuItemVm addAccount(CommonNode model, CommonNodeVM vm){
+		static MenuItemVm _editTag(CommonNode model, CommonNodeVM vm){
+			return new MenuItemVm() { Header = "タグを変更" };
+		}
+		static MenuItemVm _addAccount(CommonNode model, CommonNodeVM vm){
 			return new MenuItemVm() { Header = "口座を追加" };
 		}
-		static MenuItemVm addBroker(CommonNode model, CommonNodeVM vm){
+		static MenuItemVm _addBroker(CommonNode model, CommonNodeVM vm){
 			return new MenuItemVm() { Header = "証券会社を追加" };
+		}
+		static MenuItemVm _addPosition(CommonNode model, CommonNodeVM vm){
+			return new MenuItemVm() { Header = "ポジションを追加" };
+		}
+		static MenuItemVm _delete(CommonNode model,CommonNodeVM vm){
+			return new MenuItemVm() { Header = "削除" };
 		}
 		#endregion
 		#endregion
@@ -651,28 +667,27 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList => _menus = _menus ?? new ObservableCollection<MenuItemVm>();
 
 	}
-	//public class EditFlyoutVm : ViewModel{
-	//	public void Open(CommonNode model){
-	//		model = model.Upstream().OfType<BrokerNode>().First();
-	//		if(_model != null && _model != model){
-	//			CloseCmd.Execute(true);
-	//		}
-	//		_initialize(model);
-	//		EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
-	//	}
-	//	void _initialize(CommonNode model){
-	//	}
-	//	CommonNode _model;
-	//	ListenerCommand<bool> _closeCmd;
-	//	public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(apply => {
-	//		if(apply){
-	//			//ここでApply
-	//			EditViewModel.Instance.AddEditList(_model);
-	//		}
-	//		EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseEditFlyout"));
-	//		this.CompositeDisposable.Dispose();
-	//	});
-	//}
+	public class EditFlyoutVm : ViewModel {
+		public EditFlyoutVm(CommonNode model) {
+			Model = model;
+		}
+		protected CommonNode Model{ get; private set; }
+		ListenerCommand<bool> _closeCmd;
+		public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(
+			b=> {
+				if (b) {
+					var nd = this.Execute();
+					EditViewModel.Instance.AddEditList(nd);
+				}
+				this.CompositeDisposable.Dispose();
+			}, CanExecute);
+		protected virtual IEnumerable<CommonNode> Execute(){
+			//ここでApply
+			//EditViewModel.Instance.AddEditList(Model);
+			return new CommonNode[] { Model };
+		}
+		protected virtual bool CanExecute() => true;
+	}
 	public class HistoryViewModel:ViewModel{
 		public HistoryViewModel(){
 			dpc = new DisposableBlock(() => IsHistoryLoading = true, () => IsHistoryLoading = false);
