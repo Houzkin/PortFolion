@@ -87,6 +87,7 @@ namespace PortFolion.Core {
 		/// <param name="path">変更対象を示すパス</param>
 		/// <param name="name">新しい名前</param>
 		/// <returns>重複があった日付</returns>
+		[Obsolete]
 		public static ResultWithValue<IEnumerable<DateTime>> CanChangeNodeName(IEnumerable<string> path,string name) {
 			var src = GetNodeLine(path)
 				.Select(a => new { Date = a.Key, Sigls = a.Value.Siblings().Except(new CommonNode[] { a.Value }) })
@@ -102,6 +103,7 @@ namespace PortFolion.Core {
 		/// <param name="path">変更対象を示すパス</param>
 		/// <param name="newName">新しい名前</param>
 		/// <returns>変更を行った日付</returns>
+		[Obsolete]
 		public static IEnumerable<DateTime> ChangeNodeName(IEnumerable<string> path,string newName) {
 			List<DateTime> lst = new List<DateTime>();
 			foreach (var t in GetNodeLine(path)) {
@@ -113,40 +115,61 @@ namespace PortFolion.Core {
 			return lst;
 		}
 		
-		static bool _canChangeNodeName(CommonNode node,string name, TagEditParam param){
-			var p = node.Parent.Path.Concat(new string[] { name.Trim() });
-			//変更先のノード名で検索
-			var hst = RootCollection.GetNodeLine(p);
+		public static ResultWithValue<IEnumerable<KeyValuePair<DateTime,CommonNode>>> CanChangeNodeName(CommonNode node,string name, TagEditParam param){
+			name = name.Trim();
+			var dt = (node.Root() as TotalRiskFundNode).CurrentDate;
 			//現在(変更前)のノード名で検索
 			var hso = RootCollection.GetNodeLine(node.Path);
 			switch (param) {
 			case TagEditParam.AllHistory:
-				break;
+				var lh = hso.Where(a => !a.Value.CanChangeName(name));
+				if (lh.Any()) return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(false, lh);
+				else return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(true, hso);// Enumerable.Empty<KeyValuePair<DateTime,CommonNode>>());
 			case TagEditParam.FromCurrent:
-				break;
+				var fc = hso.SkipWhile(a => a.Key < dt);
+				var fcc = fc.Where(a => !a.Value.CanChangeName(name));
+				if (fcc.Any()) return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(false, fcc.ToArray());
+				else return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(true, fc.ToArray());// Enumerable.Empty<KeyValuePair<DateTime, CommonNode>>());
 			case TagEditParam.Position:
-				break;
+				var ps = RootCollection.GetNodeLine(node.Path, dt);
+				var pss = ps.Where(a => !a.Value.CanChangeName(name));
+				if (pss.Any()) return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(false, pss.ToArray());
+				else return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(true, ps.ToArray());// Enumerable.Empty<KeyValuePair<DateTime, CommonNode>>());
+			default:
+				throw new ArgumentException();
 			}
-			throw new NotImplementedException();
 		}
-		static void _changeNodeName(CommonNode node, string newName,TagEditParam param){
-			throw new NotImplementedException();
+		public static IEnumerable<CommonNode> ChangeNodeName(CommonNode node, string newName,TagEditParam param){
+			newName = newName.Trim();
+			var dt = (node.Root() as TotalRiskFundNode).CurrentDate;
+			return CanChangeNodeName(node, newName, param).TrueOrNot(
+				o => {
+					foreach (var p in o.Select(a => a.Value)) p.ChangeName(newName);
+					return o.Select(a => a.Value);
+				}, x => Enumerable.Empty<CommonNode>());
 		}
-		static event Action<string> NodeNameChangeMessage;
 
-		internal static void ChangeNodeTag(NodePath<string> path,string newTag) {
-			var tg = TagInfo.GetWithAdd(newTag);
-			foreach (var t in GetNodeLine(path).Values) t.Tag = tg;
-		}
-		internal static void ChangeNodeTag(NodePath<string> path,string newTag,DateTime current) {
-			var tg = TagInfo.GetWithAdd(newTag);
-			foreach (var t in GetNodeLine(path, current).Values) t.Tag = tg;
-		}
-		internal static void RemoveNodeTag(NodePath<string> path) {
-			foreach (var t in GetNodeLine(path).Values) t.Tag = null;
-		}
-		internal static void RemoveNodeTag(NodePath<string> path,DateTime current) {
-			foreach (var t in GetNodeLine(path, current).Values) t.Tag = null;
+		public static IEnumerable<CommonNode> ChangeTag(CommonNode node,string tagName, TagEditParam param){
+			var lst = new List<CommonNode>();
+			var tg = TagInfo.GetWithAdd(tagName);
+			IEnumerable<KeyValuePair<DateTime, CommonNode>> func() {
+				switch (param) {
+				case TagEditParam.AllHistory:
+					return RootCollection.GetNodeLine(node.Path);
+				case TagEditParam.Position:
+					return RootCollection.GetNodeLine(node.Path, (node.Root() as TotalRiskFundNode).CurrentDate);
+				case TagEditParam.FromCurrent:
+					return RootCollection.GetNodeLine(node.Path)
+						.SkipWhile(a => a.Key < (node.Root() as TotalRiskFundNode).CurrentDate);
+				default:
+					throw new ArgumentException();
+				}
+			}
+			foreach (var d in func()){
+				d.Value.Tag = tg;
+				lst.Add(d.Value);
+			}
+			return lst;
 		}
 
 		#region インスタンス

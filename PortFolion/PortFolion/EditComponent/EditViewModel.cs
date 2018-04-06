@@ -19,6 +19,8 @@ using System.Windows;
 using Livet.Messaging;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
+using System.Reactive;
+using System.Reactive.Linq;
 
 namespace PortFolion.ViewModels {
 	
@@ -91,12 +93,19 @@ namespace PortFolion.ViewModels {
 			History.Refresh(path, open);
 			//RaisePropertyChanged(nameof(History));
 		}
-		public EditFlyoutVm EditFlyoutVm{ get; private set; }
-		public void SetEditFlyoutVm(EditFlyoutVm vm){
+		public EditFlyoutVmBase EditFlyoutVm{ get; private set; }
+		public void SetEditFlyoutVm(EditFlyoutVmBase vm){
 			this.EditFlyoutVm?.CloseCmd.Execute(false);
 			this.EditFlyoutVm = vm;
 			this.RaisePropertyChanged(nameof(EditFlyoutVm));
-			EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
+			if (this.EditFlyoutVm != null) {
+				this.EditFlyoutVm.FlyoutClosed += _ => {
+					EditViewModel.Instance.Messenger.Raise(new InteractionMessage("CloseEditFlyout"));
+					EditFlyoutVm.Dispose();
+					EditFlyoutVm = null;
+				};
+				EditViewModel.Instance.Messenger.Raise(new InteractionMessage("OpenEditFlyout"));
+			}
 		}
 		
 		#region 現在の日付が変更された時の挙動
@@ -667,11 +676,14 @@ namespace PortFolion.ViewModels {
 		public ObservableCollection<MenuItemVm> MenuList => _menus = _menus ?? new ObservableCollection<MenuItemVm>();
 
 	}
-	public class EditFlyoutVm : ViewModel {
-		public EditFlyoutVm(CommonNode model) {
+	/// <summary>編集用FlyoutのVM</summary>
+	public abstract class EditFlyoutVmBase : ViewModel {
+		public EditFlyoutVmBase(CommonNode model) {
 			Model = model;
 		}
 		protected CommonNode Model{ get; private set; }
+		public event Action<bool> FlyoutClosed;
+		public virtual string Title => "編集";
 		ListenerCommand<bool> _closeCmd;
 		public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(
 			b=> {
@@ -679,14 +691,147 @@ namespace PortFolion.ViewModels {
 					var nd = this.Execute();
 					EditViewModel.Instance.AddEditList(nd);
 				}
-				this.CompositeDisposable.Dispose();
+				FlyoutClosed?.Invoke(b);
+				FlyoutClosed = null;
 			}, CanExecute);
-		protected virtual IEnumerable<CommonNode> Execute(){
-			//ここでApply
-			//EditViewModel.Instance.AddEditList(Model);
-			return new CommonNode[] { Model };
-		}
+		protected abstract ISet<CommonNode> Execute();
 		protected virtual bool CanExecute() => true;
+	}
+
+	/// <summary>ノードの名前またはタグを変更する場合のVM</summary>
+	public class NodeEditFlyoutVm : EditFlyoutVmBase{
+		public NodeEditFlyoutVm(CommonNode model):base(model){
+			this.CurrentName = Model.Name;
+			this.Name = new ReactiveProperty<string>(Model.Name)
+				.SetValidateNotifyError(a => vali(a.Trim()))
+				.AddTo(this.CompositeDisposable);
+			this.Name.Subscribe(a => this.CloseCmd.RaiseCanExecuteChanged());
+			this.NameEditParam = new ReactiveProperty<Core.TagEditParam>()
+				.AddTo(this.CompositeDisposable);
+			this.NameEditParam.Subscribe(a => {
+				this.Name.ForceValidate();
+				this.CloseCmd.RaiseCanExecuteChanged();
+			});
+			this.MessageComment = new ReactiveProperty<string>();
+
+			this.CurrentTag = Model.Tag.TagName;
+			this.Tag = new ReactiveProperty<string>(Model.Tag.TagName)
+				.AddTo(this.CompositeDisposable);
+			this.TagEditParam = new ReactiveProperty<Core.TagEditParam>()
+				.AddTo(this.CompositeDisposable);
+		}
+		public string CurrentName;
+		public ReactiveProperty<string> Name;
+		public ReactiveProperty<TagEditParam> NameEditParam;
+		Task<string> vali(string name){
+			return new Task<string>(() => {
+				if (CurrentName == name){
+					MessageComment.Value = "";
+					return null;
+				}
+				var r = RootCollection.CanChangeNodeName(Model, Name.Value, NameEditParam.Value);
+				if (!r.Result) {
+					MessageComment.Value = "";
+					if (1 == r.Value.Count())
+						return $"[{name}]は{r.Value.First().Key:yyyy-M-d}において重複が存在します。";
+					else
+						return $"[{name}]は{r.Value.First().Key:yyyy-M-d}から{r.Value.Last().Key:yyyy-M-d}の期間で重複が存在します。";
+				}
+				var p = Model.Parent.Path.Concat(new string[] { name });
+				if (RootCollection.GetNodeLine(p).Any())
+					MessageComment.Value = $"[{name}]は別の時系列に存在します。\n変更後、既存の[{name}]と同一のものとして扱われます。";
+				else MessageComment.Value = "";
+				return null;
+			});
+		}
+		public ReactiveProperty<string> MessageComment;
+		public string CurrentTag;
+		public ReactiveProperty<string> Tag;
+		public ReactiveProperty<TagEditParam> TagEditParam;
+		protected override ISet<CommonNode> Execute() {
+			var lst = new HashSet<CommonNode>();
+			var nm = this.Name.Value.Trim();
+			if(CurrentName != nm){
+				RootCollection.ChangeNodeName(this.Model, nm, this.NameEditParam.Value)
+				   .ForEach(a => lst.Add(a));
+			}
+			var ntg = this.Tag.Value.Trim();
+			if(CurrentTag != ntg){
+				RootCollection.ChangeTag(this.Model, ntg, this.TagEditParam.Value)
+					.ForEach(a => lst.Add(a));
+			}
+			return lst;
+		}
+	}
+	public class CashEditFlyout : NodeEditFlyoutVm{
+		public CashEditFlyout(FinancialValue model) : base(model) {
+			this.InvestmentValue = new ReactiveProperty<string>(Model.InvestmentValue.ToString());
+			this.DisplayInvestmentValue = InvestmentValue
+				.Select(a => ExpParse.Try(a)).ToReadOnlyReactiveProperty();
+			this.Amount = new ReactiveProperty<string>(Model.Amount.ToString());
+			this.DisplayAmount = Amount
+				.Select(a => ExpParse.Try(a)).ToReadOnlyReactiveProperty();
+		}
+		protected new FinancialValue Model => base.Model as FinancialValue;
+		public ReactiveProperty<string> InvestmentValue;
+		public ReadOnlyReactiveProperty<double> DisplayInvestmentValue;
+		public ReactiveProperty<string> Amount;
+		public ReadOnlyReactiveProperty<double> DisplayAmount;
+		protected override ISet<CommonNode> Execute() {
+			Model.SetAmount((long)DisplayAmount.Value);
+			Model.SetInvestmentValue((long)DisplayInvestmentValue.Value);
+			var set = base.Execute();
+			set.Add(Model);
+			return set;
+		}
+	}
+	public class ProductEditFlyoutVm : CashEditFlyout{
+		public ProductEditFlyoutVm(FinancialProduct model) : base(model){
+			PerPrice = new ReactiveProperty<string>(Model.Quantity != 0 ? (Model.Amount / Model.Quantity).ToString("#.##") : "0");
+			DisplayPerPrice = PerPrice.Select(a=>ExpParse.Try(a)).ToReadOnlyReactiveProperty();
+
+			TradeQuantity = new ReactiveProperty<string>(Model.TradeQuantity.ToString());
+			DisplayTradeQuantity = TradeQuantity.Select(a => ExpParse.Try(a)).ToReadOnlyReactiveProperty();
+
+			Quantity = new ReactiveProperty<string>(Model.TradeQuantity.ToString());
+			DisplayQuantity = Quantity.Select(a => ExpParse.Try(a)).ToReadOnlyReactiveProperty();
+
+			DisplayPerPrice
+				.Subscribe(a=> this.Amount.Value = (DisplayQuantity.Value * DisplayPerPrice.Value).ToString());
+			DisplayTradeQuantity
+				.Subscribe(a => Quantity.Value = (Model.Quantity + a).ToString());
+			DisplayQuantity
+				.Subscribe(a => this.Amount.Value = (a * DisplayPerPrice.Value).ToString());
+			DisplayInvestmentValue = DisplayInvestmentValue
+				.Select(a => DisplayTradeQuantity.Value < 0 ? Math.Abs(a) * -1
+					: 0 < DisplayTradeQuantity.Value ? Math.Abs(a) : a)
+				.ToReadOnlyReactiveProperty();
+		}
+		protected new FinancialProduct Model => base.Model as FinancialProduct;
+		public ReactiveProperty<string> PerPrice;
+		public ReadOnlyReactiveProperty<double> DisplayPerPrice;
+
+		public ReactiveProperty<string> TradeQuantity;
+		public ReadOnlyReactiveProperty<double> DisplayTradeQuantity;
+
+		public ReactiveProperty<string> Quantity;
+		public ReadOnlyReactiveProperty<double> DisplayQuantity;
+
+	}
+	public class StockEditFlyoutVm : ProductEditFlyoutVm {
+		public StockEditFlyoutVm(StockValue model) : base(model) {
+			this.Code = new ReactiveProperty<string>(Model.Code.ToString())
+				.SetValidateNotifyError(a=>_codeVali(a));
+			
+		}
+		protected new StockValue Model => base.Model as StockValue;
+		public ReactiveProperty<string> Code;
+		string _codeVali(string value){
+			var r = ResultWithValue.Of<int>(int.TryParse, value);
+			if (!r) return "コードを入力してください";
+			if (value.Count() != 4) return "4桁";
+			return null;
+		}
 	}
 	public class HistoryViewModel:ViewModel{
 		public HistoryViewModel(){

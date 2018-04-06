@@ -41,10 +41,12 @@ namespace PortFolion.Core {
 			}
 		}
 		public bool CanChangeName(string name) {
-			return RootCollection.CanChangeNodeName(this.Path, name);
+			return this.Siblings().All(a => a.Name != name);
+			//return RootCollection.CanChangeNodeName(this.Path, name);
 		}
 		public void ChangeName(string name) {
-			RootCollection.ChangeNodeName(Path, name);
+			if (CanChangeName(name)) this.Name = name;
+			//RootCollection.ChangeNodeName(Path, name);
 		}
 		TagInfo _tag;
 		public TagInfo Tag {
@@ -55,12 +57,7 @@ namespace PortFolion.Core {
 				RaisePropertyChanged();
 			}
 		}
-		public void SetTag(string tagName) {
-			RootCollection.ChangeNodeTag(Path, tagName);
-		}
-		public void RemoveTag() {
-			RootCollection.RemoveNodeTag(Path);
-		}
+		
 		long _investmentValue;
 		/// <summary>投資</summary>
 		public virtual void SetInvestmentValue(long value) {

@@ -97,6 +97,7 @@ namespace PortFolion.Core {
         /// <param name="tag">タグ</param>
         /// <param name="option">変更オプション</param>
         /// <returns>変更された日付</returns>
+		[Obsolete]
         public static IEnumerable<DateTime> Apply(CommonNode node,TagInfo tag, TagEditParam option) {
             if (node == null) throw new ArgumentNullException("node");
             if (tag == null) throw new ArgumentNullException("tag");
