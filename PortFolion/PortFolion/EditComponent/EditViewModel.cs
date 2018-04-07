@@ -95,7 +95,7 @@ namespace PortFolion.ViewModels {
 		}
 		public EditFlyoutVmBase EditFlyoutVm{ get; private set; }
 		public void SetEditFlyoutVm(EditFlyoutVmBase vm){
-			this.EditFlyoutVm?.CloseCmd.Execute(false);
+			this.EditFlyoutVm?.CancelCmd.Execute();
 			this.EditFlyoutVm = vm;
 			this.RaisePropertyChanged(nameof(EditFlyoutVm));
 			if (this.EditFlyoutVm != null) {
@@ -684,18 +684,34 @@ namespace PortFolion.ViewModels {
 		protected CommonNode Model{ get; private set; }
 		public event Action<bool> FlyoutClosed;
 		public virtual string Title => "編集";
-		ListenerCommand<bool> _closeCmd;
-		public ListenerCommand<bool> CloseCmd => _closeCmd = _closeCmd ?? new ListenerCommand<bool>(
-			b=> {
-				if (b) {
-					var nd = this.Execute();
-					EditViewModel.Instance.AddEditList(nd);
-				}
-				FlyoutClosed?.Invoke(b);
-				FlyoutClosed = null;
-			}, CanExecute);
+		
+		void _execute(bool isApply){
+			if(isApply){
+				var nd = this.Execute();
+				EditViewModel.Instance.AddEditList(nd);
+			}
+			FlyoutClosed?.Invoke(isApply);
+			FlyoutClosed = null;
+		}
+		ViewModelCommand _ExecuteCmd;
+		public ViewModelCommand ExecuteCmd => _ExecuteCmd = _ExecuteCmd ?? new ViewModelCommand(
+			() => _execute(true), CanExecute);
+		ViewModelCommand _CancelCmd;
+		public ViewModelCommand CancelCmd => _CancelCmd = _CancelCmd ?? new ViewModelCommand(
+			() => _execute(false));
 		protected abstract ISet<CommonNode> Execute();
 		protected virtual bool CanExecute() => true;
+
+		bool _isLoading = false;
+		public bool IsLoading {
+			get { return _isLoading; }
+			set {
+				if (_isLoading == value) return;
+				_isLoading = value;
+				RaisePropertyChanged();
+				App.DoEvent();
+			}
+		}
 	}
 
 	/// <summary>ノードの名前またはタグを変更する場合のVM</summary>
@@ -705,12 +721,12 @@ namespace PortFolion.ViewModels {
 			this.Name = new ReactiveProperty<string>(Model.Name)
 				.SetValidateNotifyError(a => vali(a.Trim()))
 				.AddTo(this.CompositeDisposable);
-			this.Name.Subscribe(a => this.CloseCmd.RaiseCanExecuteChanged());
+			this.Name.Subscribe(a => this.ExecuteCmd.RaiseCanExecuteChanged());
 			this.NameEditParam = new ReactiveProperty<Core.TagEditParam>()
 				.AddTo(this.CompositeDisposable);
 			this.NameEditParam.Subscribe(a => {
 				this.Name.ForceValidate();
-				this.CloseCmd.RaiseCanExecuteChanged();
+				this.ExecuteCmd.RaiseCanExecuteChanged();
 			});
 			this.MessageComment = new ReactiveProperty<string>();
 
@@ -816,13 +832,18 @@ namespace PortFolion.ViewModels {
 
 		public ReactiveProperty<string> Quantity;
 		public ReadOnlyReactiveProperty<double> DisplayQuantity;
-
+		protected override ISet<CommonNode> Execute() {
+			var bs = base.Execute();
+			Model.SetQuantity((long)this.DisplayQuantity.Value);
+			Model.SetTradeQuantity((long)this.DisplayTradeQuantity.Value);
+			return bs;
+		}
 	}
 	public class StockEditFlyoutVm : ProductEditFlyoutVm {
 		public StockEditFlyoutVm(StockValue model) : base(model) {
 			this.Code = new ReactiveProperty<string>(Model.Code.ToString())
 				.SetValidateNotifyError(a=>_codeVali(a));
-			
+			this.Code.Subscribe(_ => ApplySymbol.RaiseCanExecuteChanged());
 		}
 		protected new StockValue Model => base.Model as StockValue;
 		public ReactiveProperty<string> Code;
@@ -831,6 +852,23 @@ namespace PortFolion.ViewModels {
 			if (!r) return "コードを入力してください";
 			if (value.Count() != 4) return "4桁";
 			return null;
+		}
+		ViewModelCommand _ApplySymbol;
+		public ViewModelCommand ApplySymbol
+			=> _ApplySymbol = _ApplySymbol ?? new ViewModelCommand(
+				_applySymbol,
+				() => _codeVali(this.Code.Value) == null);
+		void _applySymbol(){
+			this.IsLoading = true;
+			var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
+			var tt = Web.TickerTable.Create(d);
+			this.PerPrice.Value = tt.FirstOrDefault(a => a.Symbol == this.Code.Value).Close.ToString();
+			this.IsLoading = false;
+		}
+		protected override ISet<CommonNode> Execute() {
+			var bs = base.Execute();
+			Model.Code = ResultWithValue.Of<int>(int.TryParse, this.Code.Value).Value;
+			return bs;
 		}
 	}
 	public class HistoryViewModel:ViewModel{

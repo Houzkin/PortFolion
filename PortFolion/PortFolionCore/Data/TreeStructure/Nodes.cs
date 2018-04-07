@@ -162,6 +162,14 @@ namespace PortFolion.Core {
 			(node as FinancialBasket)._amount = _amount;
 			return base.Clone(node);
 		}
+		public void SortChildren(){
+			this.ChildNodes.Sort((a,b) => {
+				var nt = a.GetNodeType() - b.GetNodeType();
+				if (nt != 0) return nt;
+				//書きかけ
+				return 0;
+			});
+		}
 
 	}
 	public enum AccountClass {

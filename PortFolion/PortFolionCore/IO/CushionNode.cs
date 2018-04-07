@@ -10,14 +10,14 @@ using Houzkin;
 
 namespace PortFolion.IO {
 	public enum NodeType {
-		Unknown,
-		Total,
+		Total = 0,
 		Broker,
 		Account,
-		Cash,
 		Stock,
-		Forex,
 		OtherProduct,
+		Forex,
+		Cash,
+		Unknown,
 	}
 	public class CushionNode : TreeNode<CushionNode> {
 		/// <summary>デシリアライズ時に呼び出されるコンストラクタ</summary>
