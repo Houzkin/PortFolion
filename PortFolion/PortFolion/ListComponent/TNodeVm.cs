@@ -322,19 +322,6 @@ namespace PortFolion.ViewModels {
 		//public bool IsModelEquals(CommonNode node) => this.Model == node;
 		public new CommonNode Model => base.Model;
 
-		protected virtual List<MenuItemVm> SetMenuList(){
-			var menus = new List<MenuItemVm>();
-			//if (this.Model is FinancialValue)
-			//	menus.Add(new MenuItemVm(() => EditViewModel.Instance.EditFlyout.Open(this.Model)) { Header = "編集" });
-			menus.Add(new MenuItemVm(() => { }) { Header = "名前を変更" });
-			menus.Add(new MenuItemVm(() => { }) { Header = "タグを変更" });
-			menus.Add(new MenuItemVm(() => { }) { Header = "移動" });
-			menus.Add(new MenuItemVm(() => { }) { Header = "削除" });
-			return menus;
-		}
-		ObservableCollection<MenuItemVm> _MenuList;
-		public ObservableCollection<MenuItemVm> MenuList => _MenuList = _MenuList ?? new ObservableCollection<MenuItemVm>(SetMenuList());
-
 		TreeNodeProps _Component;
 		public TreeNodeProps Component => _Component = _Component ?? TreeNodeProps.CreateTreeVmComponent(this);
 
@@ -367,98 +354,8 @@ namespace PortFolion.ViewModels {
 	}
     /// <summary>非ポジション</summary>
 	public class FinancialBasketVM : CommonNodeVM {
-		public FinancialBasketVM(CommonNode model) : base(model) {
-			var sp = new ViewModelCommand(() => DisplayHistory());
-			
-			MenuList.Add(new MenuItemVm(sp) { Header = "履歴を表示",
-		});
+		public FinancialBasketVM(CommonNode model) : base(model) { }
 
-			var ty = model.GetNodeType();
-			if(ty == NodeType.Account) {
-				var vc = new ViewModelCommand(() => {
-					var vm = new AccountEditVM(model as AccountNode);
-					var w = new Views.AccountEditWindow();
-					w.DataContext = vm;
-					var r = w.ShowDialog();
-					if (vm.EdittingList.Any()) {
-						//save or not
-						if (r == true) {
-							HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
-						} else {
-							RootCollection.Instance.Refresh();
-						}
-						this.ReCalcurate();
-					}
-				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "編集" });
-			}else if (ty == NodeType.Broker) {
-				var vc = new ViewModelCommand(() => {
-					var vm = new NodeNameEditerVM(model, new AccountNode(AccountClass.General));
-					var w = new Views.NodeNameEditWindow();
-					w.DataContext = vm;
-					if(w.ShowDialog() == true && vm.EdittingList.Any()) {
-						//save
-						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
-					}
-				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "口座を追加" });
-			}else if(ty == NodeType.Total) {
-				var vc = new ViewModelCommand(() => {
-					var vm = new NodeNameEditerVM(model, new BrokerNode());
-					var w = new Views.NodeNameEditWindow();
-					w.DataContext = vm;
-					if(w.ShowDialog() == true && vm.EdittingList.Any()) {
-						//save
-						HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
-					}
-				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "証券会社を追加" });
-			}
-
-			var vmc = new ViewModelCommand(() => {
-				var vm = new NodeNameEditerVM(model.Parent, model);
-				var w = new Views.NodeNameEditWindow();
-				w.DataContext = vm;
-				if(w.ShowDialog()==true && vm.EdittingList.Any()) {
-					//save
-					HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
-				}
-			}, () => model.Parent != null);
-			MenuList.Add(new MenuItemVm(vmc) { Header = "名前の変更" });
-
-            var vmt = new ViewModelCommand(() => {
-                var vm = new NodeTagEditerVM(model);
-                var w = new Views.NodeTagEditWindow();
-                w.DataContext = vm;
-                if(w.ShowDialog()==true && vm.EdittingList.Any()) {
-                    HistoryIO.SaveRoots(vm.EdittingList.Min(), vm.EdittingList.Max());
-                }
-            });
-            MenuList.Add(new MenuItemVm(vmt) { Header = "タグを変更" });
-			
-			if(ty == NodeType.Broker || ty == NodeType.Account) {
-				var vc = new ViewModelCommand(() => {
-					Action delete = () => {
-						var d = this.Model.Upstream().OfType<TotalRiskFundNode>().LastOrDefault()?.CurrentDate;
-						this.Model.Parent.RemoveChild(this.Model);
-						HistoryIO.SaveRoots((DateTime)d);
-					};
-					if ((!this.Model.HasTrading && !this.Model.HasPosition)) {
-						delete();
-					} else {
-						if (RootCollection.GetNodeLine(this.Model.Path).Values.Count == 1) {
-							if (MessageBoxResult.OK == MessageBox.Show("ポジションまたは取引に関するデータを保持しています。削除しますか？", "Notice", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation, MessageBoxResult.Cancel)) {
-								delete();
-							}
-						} else {
-							MessageBox.Show("ポジションまたは取引に関するデータを保持しているため削除できません", "Notice", MessageBoxButton.OK, MessageBoxImage.Information);
-						}
-					}
-
-				});
-				MenuList.Add(new MenuItemVm(vc) { Header = "削除" });
-			}
-		}
 		public override VmCoreBase ToHistoryVm() {
 			return new VmCoreBasket(this.Model, CoreData);
 		}

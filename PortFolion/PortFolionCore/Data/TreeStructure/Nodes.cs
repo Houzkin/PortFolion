@@ -166,8 +166,12 @@ namespace PortFolion.Core {
 			this.ChildNodes.Sort((a,b) => {
 				var nt = a.GetNodeType() - b.GetNodeType();
 				if (nt != 0) return nt;
-				//書きかけ
-				return 0;
+				string toStr(CommonNode n) {
+					if (n is StockValue nn) return nn.Code.ToString() + nn.Name;
+					return n.Name;
+				}
+				var ci = System.Globalization.CultureInfo.CurrentCulture.CompareInfo;
+				return ci.Compare(toStr(a),toStr(b));
 			});
 		}
 

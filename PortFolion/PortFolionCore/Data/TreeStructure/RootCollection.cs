@@ -144,7 +144,10 @@ namespace PortFolion.Core {
 			var dt = (node.Root() as TotalRiskFundNode).CurrentDate;
 			return CanChangeNodeName(node, newName, param).TrueOrNot(
 				o => {
-					foreach (var p in o.Select(a => a.Value)) p.ChangeName(newName);
+					foreach (var p in o.Select(a => a.Value)) {
+						p.ChangeName(newName);
+						(p.Parent as FinancialBasket)?.SortChildren();
+					}
 					return o.Select(a => a.Value);
 				}, x => Enumerable.Empty<CommonNode>());
 		}
