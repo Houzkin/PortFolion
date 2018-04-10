@@ -20,10 +20,11 @@ namespace PortFolion.Core {
 		protected override bool CanAddChild(CommonNode child) => false;
 
 		long _amount;
-		public void SetAmount(long amount) {
-			if (_amount == amount) return;
+		public bool SetAmount(long amount) {
+			if (_amount == amount) return false;
 			_amount = amount;
 			RaisePropertyChanged(nameof(Amount));
+			return true;
 		}
 		public override long Amount {
 			get { return _amount; }
@@ -57,10 +58,11 @@ namespace PortFolion.Core {
 			_tradeQuantity = cushion.TradeQuantity;
 		}
 		long _quantity;
-		public void SetQuantity(long quantity) {
-			if (_quantity == quantity) return;
+		public bool SetQuantity(long quantity) {
+			if (_quantity == quantity) return false;
 			_quantity = quantity;
 			RaisePropertyChanged(nameof(Quantity));
+			return true;
 		}
 		public long Quantity {
 			get { return _quantity; }
@@ -71,10 +73,11 @@ namespace PortFolion.Core {
 			=> base.HasTrading || TradeQuantity != 0;
 
 		long _tradeQuantity;
-		public void SetTradeQuantity(long tradeQuantity) {
-			if (_tradeQuantity == tradeQuantity) return;
+		public bool SetTradeQuantity(long tradeQuantity) {
+			if (_tradeQuantity == tradeQuantity) return false;
 			_tradeQuantity = tradeQuantity;
 			RaisePropertyChanged(nameof(TradeQuantity));
+			return true;
 		}
 		public long TradeQuantity => _tradeQuantity;
 		protected override CommonNode Clone(CommonNode node) {

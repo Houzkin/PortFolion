@@ -60,10 +60,11 @@ namespace PortFolion.Core {
 		
 		long _investmentValue;
 		/// <summary>投資</summary>
-		public virtual void SetInvestmentValue(long value) {
-			if (_investmentValue == value) return;
+		public virtual bool SetInvestmentValue(long value) {
+			if (_investmentValue == value) return false;
 			_investmentValue = value;
 			RaisePropertyChanged(nameof(InvestmentValue));
+			return true;
 		}
 		/// <summary>投資(入金)額</summary>
 		public virtual long InvestmentValue {
@@ -214,7 +215,7 @@ namespace PortFolion.Core {
 		public override long InvestmentValue
 			=> ChildNodes.Sum(a => a.InvestmentValue);
 			//=> GetOrCreateNuetral().InvestmentValue;
-		public override void SetInvestmentValue(long value) {
+		public override bool SetInvestmentValue(long value) {
 			throw new NotSupportedException();
 			//var ntr = GetOrCreateNuetral();
 			//ntr.SetInvestmentValue(value);
@@ -264,8 +265,8 @@ namespace PortFolion.Core {
 			if (e.PropertyName == nameof(InvestmentValue) && sender.GetType()==typeof(FinancialValue))
 				RaisePropertyChanged(nameof(InvestmentValue));
 		}
-		public override void SetInvestmentValue(long value){
-			GetOrCreateNuetral().SetInvestmentValue(value);
+		public override bool SetInvestmentValue(long value){
+			return GetOrCreateNuetral().SetInvestmentValue(value);
 		}
 		//{
 		//	throw new NotSupportedException();

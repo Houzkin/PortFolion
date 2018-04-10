@@ -794,10 +794,14 @@ namespace PortFolion.ViewModels {
 		public ReactiveProperty<string> Amount;
 		public ReadOnlyReactiveProperty<double> DisplayAmount;
 		protected override ISet<CommonNode> Execute() {
-			Model.SetAmount((long)DisplayAmount.Value);
-			Model.SetInvestmentValue((long)DisplayInvestmentValue.Value);
+			var rslt = new List<bool>(){
+				Model.SetAmount((long)DisplayAmount.Value),
+				Model.SetInvestmentValue((long)DisplayInvestmentValue.Value),
+			};
 			var set = base.Execute();
-			set.Add(Model);
+			if(rslt.Any(_=>_)){
+				set.Add(Model);
+			}
 			return set;
 		}
 	}
@@ -833,9 +837,14 @@ namespace PortFolion.ViewModels {
 		public ReactiveProperty<string> Quantity;
 		public ReadOnlyReactiveProperty<double> DisplayQuantity;
 		protected override ISet<CommonNode> Execute() {
+			var rslt = new List<bool>(){
+				Model.SetQuantity((long)this.DisplayQuantity.Value),
+				Model.SetTradeQuantity((long)this.DisplayTradeQuantity.Value)
+			};
 			var bs = base.Execute();
-			Model.SetQuantity((long)this.DisplayQuantity.Value);
-			Model.SetTradeQuantity((long)this.DisplayTradeQuantity.Value);
+			if(rslt.Any(_=>_)){
+				bs.Add(Model);
+			}
 			return bs;
 		}
 	}
@@ -848,10 +857,10 @@ namespace PortFolion.ViewModels {
 		protected new StockValue Model => base.Model as StockValue;
 		public ReactiveProperty<string> Code;
 		string _codeVali(string value){
-			var r = ResultWithValue.Of<int>(int.TryParse, value);
-			if (!r) return "コードを入力してください";
-			if (value.Count() != 4) return "4桁";
-			return null;
+			return ResultWithValue.Of<int>(int.TryParse, value)
+				.TrueOrNot(
+					o => value.Count() == 4 ? null : "4桁",
+					x => "コードを入力してください");
 		}
 		ViewModelCommand _ApplySymbol;
 		public ViewModelCommand ApplySymbol
@@ -862,12 +871,16 @@ namespace PortFolion.ViewModels {
 			this.IsLoading = true;
 			var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
 			var tt = Web.TickerTable.Create(d);
-			this.PerPrice.Value = tt.FirstOrDefault(a => a.Symbol == this.Code.Value).Close.ToString();
+			this.PerPrice.Value = tt.FirstOrDefault(a => a.Symbol == this.Code.Value)?.Close.ToString();
 			this.IsLoading = false;
 		}
 		protected override ISet<CommonNode> Execute() {
 			var bs = base.Execute();
-			Model.Code = ResultWithValue.Of<int>(int.TryParse, this.Code.Value).Value;
+			ResultWithValue.Of<int>(int.TryParse, this.Code.Value)
+				.TrueOrNot(a => {
+					Model.Code = a;
+					bs.Add(Model);
+				});
 			return bs;
 		}
 	}
