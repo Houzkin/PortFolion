@@ -113,10 +113,10 @@ namespace PortFolion.ViewModels {
 		void EditExecute() {
 			var name = this.Name.Trim();
 			//変更先のノード名で検索
-			var hst = RootCollection.GetNodeLine(new NodePath<string>(Parent.Path.Concat(new string[] { name })));
+			var hst = RootCollection._GetNodeLine(new NodePath<string>(Parent.Path.Concat(new string[] { name })));
 			var s = new NodePath<string>(Parent.Path.Concat(new string[] { this.PresentName }));
 			//現在(変更前)のノード名で検索
-			var hso = RootCollection.GetNodeLine(s);
+			var hso = RootCollection._GetNodeLine(s);
 			//重複する日付
 			var isc = hst.Keys.Intersect(hso.Keys);
 

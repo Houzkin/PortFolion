@@ -110,21 +110,21 @@ namespace PortFolion.Core {
             } else {
                 switch (option) {
                 case TagEditParam.FromCurrent:
-					var dc = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
+					var dc = RootCollection._GetNodePosition(node.Path, root.CurrentDate);
 					foreach(var d in dc.SkipWhile(p=>p.Key < root.CurrentDate)){
 						d.Value.Tag = tag;
 						lst.Add(d.Key);
 					}
                     break;
                 case TagEditParam.Position:
-                    var dd = RootCollection.GetNodeLine(node.Path, root.CurrentDate);
+                    var dd = RootCollection._GetNodePosition(node.Path, root.CurrentDate);
                     foreach(var d in dd) {
                         d.Value.Tag = tag;
                         lst.Add(d.Key);
                     }
                     break;
                 case TagEditParam.AllHistory:
-                    var ddd = RootCollection.GetNodeLine(node.Path);
+                    var ddd = RootCollection._GetNodeLine(node.Path);
                     foreach(var d in ddd) {
                         d.Value.Tag = tag;
                         lst.Add(d.Key);

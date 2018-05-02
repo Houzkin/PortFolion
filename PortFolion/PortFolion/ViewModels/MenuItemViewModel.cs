@@ -15,14 +15,13 @@ namespace PortFolion.ViewModels {
 		public string Header { get; set; }
 		public MenuItemVm() : this(() => { }) { }
 		public MenuItemVm(ICommand command) {
-			menuCommand = command;
+			MenuCommand = command;
 		}
 		public MenuItemVm(Action execute) : this(execute, () => true) { }
 		public MenuItemVm(Action execute, Func<bool> canExecute) {
-			menuCommand = new ViewModelCommand(execute, canExecute);
+			MenuCommand = new ViewModelCommand(execute, canExecute);
 		}
-		ICommand menuCommand;
-		public ICommand MenuCommand => menuCommand;
+		public ICommand MenuCommand { get; protected set; }
 		ObservableCollection<MenuItemVm> children;
 
 		public ObservableCollection<MenuItemVm> Children

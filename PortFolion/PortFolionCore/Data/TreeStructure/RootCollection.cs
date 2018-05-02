@@ -56,24 +56,35 @@ namespace PortFolion.Core {
 		}
 		/// <summary>指定した位置に存在するノードを全て取得する。</summary>
 		/// <param name="path">位置を示すパス</param>
-		public static Dictionary<DateTime,CommonNode> GetNodeLine(IEnumerable<string> path) {
+		public static Dictionary<DateTime,CommonNode> _GetNodeLine(IEnumerable<string> path) {
+			return GetNodeLine(path, a => a);
+		}
+		public static Dictionary<DateTime,T> GetNodeLine<T>(IEnumerable<string> path,Func<CommonNode,T> elementSelector){
+			/*未テスト
 			return Instance
 				.SelectMany(
+					a => a.Evolve(
+						b => b.IsRoot() ? b.Name == path.ElementAtOrDefault(0) ? b.Children : null : b.Children,
+						(b, c) => b.Concat(c.Where(d => d.Name == path.ElementAtOrDefault(d.Upstream().Count() - 1))))
+					.Where(b=>b.Path.SequenceEqual(path)))//Rootを除けない
+				.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate);
+			*/
+			return Instance.SelectMany(
 					a => a.Evolve(
 						b => b.Path.Except(path).Any() ? null : b.Children,
 						(c, d) => c.Concat(d)))
 				.Where(e => e.Path.SequenceEqual(path))
-				.ToDictionary(b => (b.Root() as TotalRiskFundNode).CurrentDate);
+				.ToDictionary(b => (b.Root() as TotalRiskFundNode).CurrentDate, b => elementSelector(b));
 		}
 		/// <summary>指定した時間において、指定した位置に存在するノードを取得する</summary>
 		public static CommonNode GetNode(IEnumerable<string> path, DateTime date) {
-			var nn = GetNodeLine(path);//.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate);
+			var nn = _GetNodeLine(path);//.ToDictionary(a => (a.Root() as TotalRiskFundNode).CurrentDate);
 			return nn.LastOrDefault(a => a.Key <= date).Value;
 		}
 		
 		/// <summary>指定した時間を含む指定位置のポジション単位のノードを取得する</summary>
-		public static Dictionary<DateTime,CommonNode> GetNodeLine(IEnumerable<string> path, DateTime currentTenure) {
-			var lne = GetNodeLine(path);
+		public static Dictionary<DateTime,CommonNode> _GetNodePosition(IEnumerable<string> path, DateTime currentTenure) {
+			var lne = _GetNodeLine(path);
 			//指定した日付を含んだノードを取得
 			var curNd = lne.LastOrDefault(a => currentTenure <= a.Key);
 			if (curNd.Value == null) return new Dictionary<DateTime, CommonNode>();
@@ -83,13 +94,30 @@ namespace PortFolion.Core {
 
 			return bef.Concat(aft).OrderBy(a => a.Key).ToDictionary(a => a.Key, b => b.Value);
 		}
+		/// <summary>各ルートごとに指定した条件を満たすノードを取得する</summary>
+		/// <typeparam name="T">取得する型</typeparam>
+		/// <param name="pred">条件</param>
+		public static Dictionary<DateTime,IEnumerable<CommonNode>> _GetAllPositions<T>(Func<T,bool> pred) where T : CommonNode{
+			var dic = new Dictionary<DateTime, IEnumerable<CommonNode>>();
+			foreach(var n in RootCollection.Instance){
+				var ns = n.Preorder().OfType<T>().Where(a => pred(a));
+				if (ns.Any()) dic.Add(n.CurrentDate, ns);
+			}
+			return dic;
+		}
+		/// <summary>各ルートごとにノードを取得する</summary>
+		/// <param name="name">ノード名</param>
+		/// <param name="type">ノードの型</param>
+		public static Dictionary<DateTime,IEnumerable<CommonNode>> _GetAllPositions(string name,NodeType type){
+			return _GetAllPositions<CommonNode>(a => a.GetNodeType() == type && a.Name == name);
+		}
 		/// <summary>指定したパスに該当する全てのノードの名前を変更可能かどうか示す値を取得する。</summary>
 		/// <param name="path">変更対象を示すパス</param>
 		/// <param name="name">新しい名前</param>
 		/// <returns>重複があった日付</returns>
 		[Obsolete]
 		public static ResultWithValue<IEnumerable<DateTime>> CanChangeNodeName(IEnumerable<string> path,string name) {
-			var src = GetNodeLine(path)
+			var src = _GetNodeLine(path)
 				.Select(a => new { Date = a.Key, Sigls = a.Value.Siblings().Except(new CommonNode[] { a.Value }) })
 				.Select(a => new { Date = a.Date, Rst = a.Sigls.All(b => b.Name != name) })
 				.ToArray();
@@ -106,7 +134,7 @@ namespace PortFolion.Core {
 		[Obsolete]
 		public static IEnumerable<DateTime> ChangeNodeName(IEnumerable<string> path,string newName) {
 			List<DateTime> lst = new List<DateTime>();
-			foreach (var t in GetNodeLine(path)) {
+			foreach (var t in _GetNodeLine(path)) {
 				if (t.Value.Siblings().All(a => a.Name != newName)) {
 					t.Value.Name = newName;
 					lst.Add(t.Key);
@@ -119,7 +147,7 @@ namespace PortFolion.Core {
 			name = name.Trim();
 			var dt = (node.Root() as TotalRiskFundNode).CurrentDate;
 			//現在(変更前)のノード名で検索
-			var hso = RootCollection.GetNodeLine(node.Path);
+			var hso = RootCollection._GetNodeLine(node.Path);
 			switch (param) {
 			case TagEditParam.AllHistory:
 				var lh = hso.Where(a => !a.Value.CanChangeName(name));
@@ -131,7 +159,7 @@ namespace PortFolion.Core {
 				if (fcc.Any()) return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(false, fcc.ToArray());
 				else return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(true, fc.ToArray());// Enumerable.Empty<KeyValuePair<DateTime, CommonNode>>());
 			case TagEditParam.Position:
-				var ps = RootCollection.GetNodeLine(node.Path, dt);
+				var ps = RootCollection._GetNodePosition(node.Path, dt);
 				var pss = ps.Where(a => !a.Value.CanChangeName(name));
 				if (pss.Any()) return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(false, pss.ToArray());
 				else return new ResultWithValue<IEnumerable<KeyValuePair<DateTime, CommonNode>>>(true, ps.ToArray());// Enumerable.Empty<KeyValuePair<DateTime, CommonNode>>());
@@ -158,11 +186,11 @@ namespace PortFolion.Core {
 			IEnumerable<KeyValuePair<DateTime, CommonNode>> func() {
 				switch (param) {
 				case TagEditParam.AllHistory:
-					return RootCollection.GetNodeLine(node.Path);
+					return RootCollection._GetNodeLine(node.Path);
 				case TagEditParam.Position:
-					return RootCollection.GetNodeLine(node.Path, (node.Root() as TotalRiskFundNode).CurrentDate);
+					return RootCollection._GetNodePosition(node.Path, (node.Root() as TotalRiskFundNode).CurrentDate);
 				case TagEditParam.FromCurrent:
-					return RootCollection.GetNodeLine(node.Path)
+					return RootCollection._GetNodeLine(node.Path)
 						.SkipWhile(a => a.Key < (node.Root() as TotalRiskFundNode).CurrentDate);
 				default:
 					throw new ArgumentException();

@@ -161,16 +161,17 @@
     <Compile Include="EditComponent\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ListComponent\Edit\NodeTagEdit.cs" />
-    <Compile Include="ListComponent\Edit\NodeTagEditWindow.xaml.cs">
+    <Compile Include="ListComponent\Aggregater.cs" />
+    <Compile Include="ListComponent\Edit-obs\NodeTagEdit.cs" />
+    <Compile Include="ListComponent\Edit-obs\NodeTagEditWindow.xaml.cs">
       <DependentUpon>NodeTagEditWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ListComponent\TNodeVm.cs" />
+    <Compile Include="EditComponent\TNodeVm.cs" />
     <Compile Include="ViewModels\DateTree.cs" />
     <Compile Include="ListComponent\ListViewModelMain.cs" />
-    <Compile Include="ListComponent\Edit\AccountEditVM.cs" />
-    <Compile Include="ListComponent\Edit\NodeNameEdit.cs" />
-    <Compile Include="ListComponent\Edit\AccountEditWindow.xaml.cs">
+    <Compile Include="ListComponent\Edit-obs\AccountEditVM.cs" />
+    <Compile Include="ListComponent\Edit-obs\NodeNameEdit.cs" />
+    <Compile Include="ListComponent\Edit-obs\AccountEditWindow.xaml.cs">
       <DependentUpon>AccountEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GraphComponent\GraphVm.cs" />
@@ -206,12 +207,12 @@
     <Compile Include="Views\ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ListComponent\Edit\NodeNameEditWindow.xaml.cs">
+    <Compile Include="ListComponent\Edit-obs\NodeNameEditWindow.xaml.cs">
       <DependentUpon>NodeNameEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Selector\GraphSelector.cs" />
     <Compile Include="Views\Selector\Selectors.cs" />
-    <Compile Include="ListComponent\Edit\TagEditFlyout.xaml.cs">
+    <Compile Include="ListComponent\Edit-obs\TagEditFlyout.xaml.cs">
       <DependentUpon>TagEditFlyout.xaml</DependentUpon>
     </Compile>
     <Compile Include="MenuComponent\TagSettingWindow.xaml.cs">
@@ -224,11 +225,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ListComponent\Edit\AccountEditWindow.xaml">
+    <Page Include="ListComponent\Edit-obs\AccountEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ListComponent\Edit\NodeTagEditWindow.xaml">
+    <Page Include="ListComponent\Edit-obs\NodeTagEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -274,11 +275,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ListComponent\Edit\NodeNameEditWindow.xaml">
+    <Page Include="ListComponent\Edit-obs\NodeNameEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ListComponent\Edit\TagEditFlyout.xaml">
+    <Page Include="ListComponent\Edit-obs\TagEditFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

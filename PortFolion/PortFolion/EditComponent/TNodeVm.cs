@@ -169,7 +169,7 @@ namespace PortFolion.ViewModels {
         /// <param name="path">再計算するパス</param>
         /// <returns>表示用インスタンス</returns>
 		public static IEnumerable<VmCoreBase> ReCalcHistory(IEnumerable<string> path) {
-			var ps = RootCollection.GetNodeLine(path).Values;
+			var ps = RootCollection._GetNodeLine(path).Values;
 			var ps1 = ps.Select(a=>CommonNodeVM.Create(a));
 			var p = new NodePath<string>(path);
 			var dics = _com1(ps1);
@@ -182,7 +182,7 @@ namespace PortFolion.ViewModels {
 		}
 		public static void ReCalcurate(CommonNodeVM tgt) {
 			DateTime date = (DateTime)tgt.CurrentDate;
-			var dics = _com1(RootCollection.GetNodeLine(tgt.Root().Path, date)
+			var dics = _com1(RootCollection._GetNodePosition(tgt.Root().Path, date)
 				.TakeWhile(a => a.Key <= date)
 				.Select(a => Create(a.Value)).ToArray());
 			var dic = dics.LastOrDefault();

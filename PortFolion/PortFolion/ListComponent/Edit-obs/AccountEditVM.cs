@@ -319,7 +319,7 @@ namespace PortFolion.ViewModels {
 					return Model.Path;
 				}
 			};
-			var preEle = RootCollection.GetNodeLine(new NodePath<string>(getPath()), AccountVM.CurrentDate)
+			var preEle = RootCollection._GetNodePosition(new NodePath<string>(getPath()), AccountVM.CurrentDate)
 				.Select(a => new { Key = a.Key, Value = a.Value as FinancialProduct })
 				.LastOrDefault(a => a.Value != null && a.Key < AccountVM.CurrentDate)?.Value;
 			if (preEle == null || (preEle.Amount == 0 && preEle.Quantity == 0)) {

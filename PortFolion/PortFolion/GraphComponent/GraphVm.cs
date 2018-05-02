@@ -276,7 +276,7 @@ namespace PortFolion.ViewModels {
 				_period = gtvm.TimePeriod;
 				var t = Task.Run(() => {
 					GraphData = RootCollection
-						.GetNodeLine(_curPath)
+						._GetNodeLine(_curPath)
 						.ToGraphValues(_period);
 				});
 				return t;
