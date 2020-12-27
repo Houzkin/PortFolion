@@ -152,7 +152,7 @@ namespace PortFolion.Web {
             try {
                 var ecd = Encoding.GetEncoding("shift_jis");
                 using (StreamReader str = new StreamReader(fi.FullName,ecd))
-                using (var csv = new CsvReader(str)) {
+                using (var csv = new CsvReader((IParser)str)) {
                     csv.Configuration.HasHeaderRecord = false;
                     csv.Configuration.RegisterClassMap<MjzMap>();
                     var c = csv.GetRecords<StockInfo>().ToArray();
