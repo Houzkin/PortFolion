@@ -218,30 +218,36 @@
                     </Grid.RowDefinitions>
                     <DockPanel HorizontalAlignment="Stretch" Grid.Row="0">
                         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left">
-                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"
+                            <Button
                                     IsEnabled="{Binding IndexUpCommand.CanExecute}" ToolTip="上へ移動" VerticalAlignment="Top">
+                                <!-- Content="{iconPacks:PackIconMaterial Kind=ArrowUp,Width=10,Height=10}"-->
+                                <iconPacks:PackIconMaterial Kind="ArrowUp" Width="10" Height="10"/>
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <i:InvokeCommandAction Command="{Binding IndexUpCommand}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Button>
-                            <Button Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}"
+                            <!-- Content="{iconPacks:PackIconMaterial Kind=ArrowDown,Width=10,Height=10}" -->
+                            <Button 
                                     IsEnabled="{Binding IndexDownCommand.CanExecute}" ToolTip="下へ移動" VerticalAlignment="Top">
+                                <iconPacks:PackIconMaterial Kind="ArrowDown" Width="10" Height="10"/>
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <i:InvokeCommandAction Command="{Binding IndexDownCommand}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Button>
-                            <ToggleButton Content="{iconPacks:PackIconMaterial Kind=Settings,Width=10,Height=10}"
+                            <ToggleButton 
                                           Visibility="{Binding VisibilityMenu,Converter={StaticResource BoolToVisibilityConv}}"
                                           IsChecked="{Binding IsMenuOpen,Mode=TwoWay}" Margin="5,0,0,0" ToolTip="表示設定" VerticalAlignment="Top">
+                                <iconPacks:PackIconMaterial Kind="Settings" Width="10" Height="10"/>
                             </ToggleButton>
                         </StackPanel>
 
                         <Button DockPanel.Dock="Right"
-                                Content="{iconPacks:PackIconMaterial Kind=Close,Width= 10,Height=10}" ToolTip="閉じる" VerticalAlignment="Top">
+                                ToolTip="閉じる" VerticalAlignment="Top">
+                            <iconPacks:PackIconMaterial Kind="Close" Width="10" Height="10"/>
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="Click">
                                     <ei:CallMethodAction TargetObject="{Binding}" MethodName="Dispose"/>
@@ -264,8 +270,9 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="推 移" HorizontalAlignment="Center"/>
                 <ToggleButton x:Name="menu" IsChecked="True" Grid.Column="1"  HorizontalAlignment="Right" Background="Transparent"
-                              Style="{StaticResource MetroFlatToggleButton}"
-                              Content="{iconPacks:PackIconMaterial Kind=Menu,Height=10}"/>
+                              Style="{StaticResource MetroFlatToggleButton}">
+                    <iconPacks:PackIconMaterial Kind="Menu" Height="10"/>
+                </ToggleButton>
             </Grid>
         </GroupBox.Header>
         <mah:SplitView Margin="-5" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="120"

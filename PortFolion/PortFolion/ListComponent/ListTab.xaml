@@ -93,7 +93,8 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0">
                 <TextBlock x:Name="Date" Text="{Binding CurrentDate,StringFormat=yyyy年 M月 d日 (ddd)}" FontSize="20" Margin="0,3" VerticalAlignment="Center" />
-                <Button Content="{iconPacks:PackIconMaterial Kind=DeleteForever, Width=15,Height=15}" ToolTip="削除" Margin="10,0,0,0" VerticalAlignment="Center">
+                <Button ToolTip="削除" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <iconPacks:PackIconMaterial Kind="DeleteForever" Width="15" Height="15"/>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="DeleteCurrentDate"/>
@@ -387,8 +388,9 @@
                                     <TextBlock Text="{Binding CurrentDate,StringFormat=yyyy/M/d}" VerticalAlignment="Center"/>
                                     <Button Width="22" Height="22" Margin="3,0"
                                             Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}"
-                                            Content="{iconPacks:PackIconMaterial Kind=FileTree, Width=12,Height=12}"
-                                            Command="{StaticResource MyCommand}" CommandParameter="{Binding}" VerticalAlignment="Center"/>
+                                            Command="{StaticResource MyCommand}" CommandParameter="{Binding}" VerticalAlignment="Center">
+                                        <iconPacks:PackIconMaterial Kind="FileTree" Width="12" Height="12"/>
+                                    </Button>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
