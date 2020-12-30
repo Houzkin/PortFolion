@@ -29,7 +29,10 @@ namespace PortFolion.Web {
         /// <summary>マップ</summary>
         class MjzMap : ClassMap<StockInfo> {
             public MjzMap() {
+                //日付　銘柄コード　市場コード　銘柄コード＋銘柄名　始値　高値　安値　終値　出来高　市場名
+                Map(m => m.Date).Index(0).TypeConverterOption.Format("yyyy/MM/dd");
                 Map(m => m.Symbol).Index(1).Default("0000");
+                
                 Map(m => m.Name).Index(3).TypeConverter<TickerConverter>().Default("unknown");
                 Map(m => m.Open).Index(4).Default(0);
                 Map(m => m.High).Index(5).Default(0);
@@ -119,7 +122,9 @@ namespace PortFolion.Web {
         }
         static WebClient wc = new WebClient() { Encoding = Encoding.Default };
         static IEnumerable<StockInfo> _download(DateTime dt,FileInfo dwnFi,FileInfo acFi) {
-            string url = "http://souba-data.com/k_data/"
+            //無尽蔵URL変更に合わせた調節
+            string baseUrl = dt.Year < 2019 ? "http://souba-data.com/k_data/" : "http://mujinzou.com/k_data/";
+            string url = baseUrl // "http://mujinzou.com/k_data/" //"http://souba-data.com/k_data/"
                 + dt.ToString("yyyy") + "/"
                 + dt.ToString("yy_MM") + "/T"
                 + dt.ToString("yyMMdd") + ".zip";
@@ -152,7 +157,8 @@ namespace PortFolion.Web {
             try {
                 var ecd = Encoding.GetEncoding("shift_jis");
                 using (StreamReader str = new StreamReader(fi.FullName,ecd))
-                using (var csv = new CsvReader(str)) {
+                //using (var csv = new CsvReader(str)) {
+                using(var csv = new CsvReader(str, System.Globalization.CultureInfo.InvariantCulture)){ 
                     csv.Configuration.HasHeaderRecord = false;
                     csv.Configuration.RegisterClassMap<MjzMap>();
                     var c = csv.GetRecords<StockInfo>().ToArray();
