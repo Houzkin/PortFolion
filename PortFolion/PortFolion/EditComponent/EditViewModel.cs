@@ -557,7 +557,8 @@ namespace PortFolion.ViewModels {
 			SetPerPrice = Code.Where(a => a.Count() == 4)
 				.Select(a => ResultWithValue.Of<int>(int.TryParse, a).Result).ToReactiveCommand();
 			SetPerPrice.Subscribe(a => {
-				var tt = Web.TickerTable.Create((Model.Root() as TotalRiskFundNode).CurrentDate).FirstOrDefault(b => b.Symbol == Code.Value);
+				//var tt = Web.TickerTable.Create((Model.Root() as TotalRiskFundNode).CurrentDate).FirstOrDefault(b => b.Symbol == Code.Value);
+				var tt = Web.Kabuoji3.GetInfo((Model.Root() as TotalRiskFundNode).CurrentDate, Code.Value);
 				if(tt != null){
 					this.PerPrice.Value = tt.Close.ToString("#,#.#");
 					this.Comment.Value = $"{Code.Value}の終値を適用しました";
@@ -944,8 +945,9 @@ namespace PortFolion.ViewModels {
 		void _applySymbol(){
 			this.IsLoading = true;
 			var d = (Model.Root() as TotalRiskFundNode).CurrentDate;
-			var tt = Web.TickerTable.Create(d);
-			this.PerPrice.Value = tt.FirstOrDefault(a => a.Symbol == this.Code.Value)?.Close.ToString();
+			//var tt = Web.TickerTable.Create(d);
+			//this.PerPrice.Value = tt.FirstOrDefault(a => a.Symbol == this.Code.Value)?.Close.ToString();
+			this.PerPrice.Value = Web.Kabuoji3.GetInfo(d, this.Code.Value).Close.ToString();
 			this.IsLoading = false;
 		}
 		protected override ISet<CommonNode> Execute() {
