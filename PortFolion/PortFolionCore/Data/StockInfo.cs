@@ -21,5 +21,17 @@ namespace PortFolion.Core {
 		/// <summary>売買代金</summary>
 		public double TradingValue { get; set; }
 		public DateTime Date { get; set; }
+
+		public virtual bool IsAdjustment { get; } = false;
+	}
+	public class AdjStockInfo : StockInfo {
+		/// <summary>調整後終値</summary>
+		public double AdjClose { get; set; }
+		/// <summary>調整後終値/終値。現在の株式数から見て、最新の株式数は何倍(何分割)になっているか。</summary>
+		public double Magnification { get => Close / AdjClose;　}
+		public override bool IsAdjustment { get; } = true;
+		public double AdjOpen { get => base.Open / Magnification; }
+		public double AdjHigh { get => base.High / Magnification; }
+		public double AdjLow { get => base.Low / Magnification; }
 	}
 }

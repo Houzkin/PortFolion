@@ -262,10 +262,10 @@ namespace PortFolion.ViewModels {
 			if (!pfs.Any()) return Enumerable.Empty<string>();
 			var dic = new List<Tuple<string, string>>();
 			
-			StockInfo[] ary; 
+			AdjStockInfo[] ary; 
 			try {
-                //ary = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(this.CurrentDate).ToArray());
-                ary = await Task.Run(() => Web.TickerTable.Create(this.CurrentDate).ToArray());
+                //ary = await Task.Run(() => Web.TickerTable.Create(this.CurrentDate).ToArray());
+				ary = await Task.Run(() => Web.Kabuoji3.GetInfos(this.CurrentDate, pfs.Select(a => a.Code)).ToArray());
 			} catch {
 				return new string[] { "ダウンロードできませんでした。" };
 			}
@@ -488,8 +488,9 @@ namespace PortFolion.ViewModels {
 			//this.AccountVM.SetStatusComment("コード: " + Code + " の銘柄情報を取得開始します");
 			IEnumerable<StockInfo> siis = Enumerable.Empty<StockInfo>();
 			try {
-                //siis = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
-                siis = await Task.Run(() => Web.TickerTable.Create(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+				//siis = await Task.Run(() => Web.DownloadSource.AcqireStockInfo(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+				//siis = await Task.Run(() => Web.TickerTable.Create(d).Where(a => int.Parse(a.Symbol) == r).ToArray());
+				siis = await Task.Run(() => new List<AdjStockInfo>() { Web.Kabuoji3.GetInfo(d, r.ToString()) });
 			} catch {
 				return "ダウンロードできませんでした。";
 			} finally { }
